@@ -59,7 +59,7 @@ export default function SocialSafetyModulePage() {
         </div>
 
         {/* Content Card */}
-        <div className="bg-secondary/40 p-4 relative z-10 flex-1 flex flex-col border border-secondary/50 shadow-sm rounded-lg">
+        <div className="bg-secondary p-4 relative z-10 flex-1 flex flex-col border border-secondary/50 shadow-sm rounded-lg">
           <span className="inline-block bg-primary text-primary-foreground px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider w-max mb-4 shadow-sm rounded-lg">
             Safety
           </span>

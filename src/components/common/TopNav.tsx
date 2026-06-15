@@ -20,7 +20,7 @@ export function TopNav() {
             variant="ghost"
             size="icon"
             onClick={() => router.back()}
-            className="rounded-lg bg-muted/50 text-muted-foreground hover:bg-muted w-10 h-10 flex items-center justify-center transition-colors mr-1"
+            className="rounded-lg bg-muted text-muted-foreground hover:bg-muted w-10 h-10 flex items-center justify-center transition-colors mr-1"
           >
             <ArrowLeft className="w-5 h-5 text-foreground" />
             <span className="sr-only">Go back</span>
