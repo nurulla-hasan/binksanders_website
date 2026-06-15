@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
@@ -5,6 +8,20 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 
 export default function HomePage() {
+  const [isCompleted, setIsCompleted] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const completed = localStorage.getItem("module_social_safety_completed") === "true";
+      setIsCompleted(completed);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const totalModules = 5;
+  const completedCount = isCompleted ? 1 : 0;
+  const overallProgress = (completedCount / totalModules) * 100;
+
   return (
     <>
       {/* Main Dashboard Content */}
@@ -23,17 +40,17 @@ export default function HomePage() {
 
           <div className="space-y-3">
             <div className="flex items-baseline justify-between">
-              <span className="text-5xl font-black font-heading tracking-tight">0%</span>
+              <span className="text-5xl font-black font-heading tracking-tight">{overallProgress}%</span>
               <span className="text-xs font-semibold text-primary-foreground/90 uppercase tracking-wide">
-                0 of 5 modules completed
+                {completedCount} of {totalModules} modules completed
               </span>
             </div>
             
             {/* Custom progress bar with secondary (light blue) indicator */}
             <div className="relative h-2 w-full bg-primary-foreground/20 rounded-lg overflow-hidden">
               <div
-                className="h-full bg-secondary rounded-lg transition-all duration-500"
-                style={{ width: "0%" }}
+                className="h-full bg-secondary rounded-lg transition-all duration-500 ease-out"
+                style={{ width: `${overallProgress}%` }}
               />
             </div>
           </div>
@@ -93,7 +110,7 @@ export default function HomePage() {
                 href="/modules"
                 className="text-xs font-bold text-primary hover:underline flex items-center gap-1 group"
               >
-                Start
+                {isCompleted ? "Review" : "Start"}
                 <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </div>
@@ -110,9 +127,9 @@ export default function HomePage() {
             <div className="space-y-1.5 pt-1">
               <div className="flex justify-between items-center text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                 <span>Progress</span>
-                <span>0%</span>
+                <span>{isCompleted ? "100%" : "0%"}</span>
               </div>
-              <Progress value={0} className="h-1.5" />
+              <Progress value={isCompleted ? 100 : 0} className="h-1.5 transition-all duration-500 ease-out" />
             </div>
           </div>
         </section>

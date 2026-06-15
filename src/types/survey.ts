@@ -36,6 +36,8 @@ export interface TextQuestionData extends BaseQuestion {
 export interface MultipleChoiceQuestionData extends BaseQuestion {
   type: 'multiple-choice';
   options: { id: string; text: string }[];
+  correctOptionId?: string;
+  explanation?: string;
 }
 
 export type SurveyQuestionType = SwipeQuestionData | ChatQuestionData | RearrangeQuestionData | VideoQuestionData | TextQuestionData | MultipleChoiceQuestionData;
