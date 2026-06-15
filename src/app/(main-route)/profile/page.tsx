@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
   const settingsItems = [
@@ -33,6 +34,12 @@ export default function ProfilePage() {
     { id: "privacy", icon: Headset, label: "Privacy Policy", type: "link", href: "/privacy-policy" },
     { id: "terms", icon: Gavel, label: "Terms & Condition", type: "link", href: "/terms-and-condition" },
   ];
+
+  const router = useRouter()
+
+  const handleLogOut = () => {
+    router.push("/auth/login");
+  }
 
   return (
     <div className="flex-1 flex flex-col pb-18 animate-fadeIn -m-4">
@@ -162,6 +169,7 @@ export default function ProfilePage() {
         {/* Log Out Button */}
         <div className="mt-12 px-1">
           <Button
+          onClick={handleLogOut}
             variant="outline"
             className="w-full flex items-center justify-center gap-2 p-3.5 h-auto rounded-sm bg-muted hover:bg-muted/70 border-border/40 text-[#E11D48] hover:text-[#E11D48]"
           >
