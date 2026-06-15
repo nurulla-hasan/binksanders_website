@@ -113,16 +113,21 @@ export default function SocialSafetyModulePage() {
   return (
     <div className="flex-1 flex flex-col animate-fadeIn pb-8 overflow-x-hidden">
       {/* Top Header Information & Progress */}
-      <div className="bg-primary/5 p-4 border border-primary/10 rounded-lg">
-        <div className="flex items-center justify-between mb-3">
+      <div className="bg-secondary p-4 border border-secondary/40 rounded-lg relative overflow-hidden">
+        {/* Decorative corner bubble */}
+        <div className="absolute -top-4 -right-4 w-20 h-20 bg-black/5 rounded-full pointer-events-none" />
+        
+        <div className="relative z-10 flex items-center justify-between mb-3">
           <span className="inline-block bg-primary text-primary-foreground px-3 py-1 text-xs font-bold uppercase tracking-wider shadow-sm rounded-lg">
             Q{currentIndex + 1}/{totalQuestions}
           </span>
-          <span className="text-sm font-bold text-muted-foreground">
+          <span className="text-sm font-bold text-foreground/80">
             {currentQuestion.theme}
           </span>
         </div>
-        <Progress value={progressPercentage} className="h-2 rounded-lg" />
+        <div className="relative z-10">
+          <Progress value={progressPercentage} className="h-2 rounded-lg bg-white/50" />
+        </div>
       </div>
 
       <div className="flex-1 flex flex-col space-y-4">
