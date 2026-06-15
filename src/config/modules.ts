@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { baselineSurveyData } from "@/seed/baseline-survey";
 import { socialSafetySurveyData } from "@/seed/social-safety-survey";
+import { diversityInclusionData } from "@/seed/diversity-inclusion";
 
 export interface ModuleConfig {
   id: string;
@@ -45,6 +46,20 @@ export const modulesRegistry: ModuleConfig[] = [
     },
     surveyData: socialSafetySurveyData,
     storageKey: "module_social_safety_completed",
+  },
+  {
+    id: "diversity",
+    slug: "diversity-inclusion",
+    introData: {
+      title: "Diversity & Inclusion",
+      description: "Evaluate your workplace's commitment to creating an inclusive environment where everyone feels they belong.",
+      badge: "Culture",
+      imageUrl: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=800&auto=format&fit=crop",
+      questionCount: diversityInclusionData.length,
+      format: "Multi",
+    },
+    surveyData: diversityInclusionData,
+    storageKey: "module_diversity_completed",
   }
 ];
 

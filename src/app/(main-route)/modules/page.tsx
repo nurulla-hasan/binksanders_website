@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { modulesRegistry } from "@/config/modules";
 
 export default function ModulesPage() {
   const [isCompleted, setIsCompleted] = useState(false);
@@ -53,41 +54,47 @@ export default function ModulesPage() {
       </section>
 
       {/* Modules List Area */}
+      {/* Modules List Area */}
       <section className="flex-1 p-4 space-y-4">
-        {/* Module Card (Pink Border & Pink Tint Background) */}
-        <div className="bg-primary/5 border border-primary/20 rounded-lg p-5 shadow-sm space-y-4 relative overflow-hidden transition-all hover:shadow-md">
-          <div className="flex items-center justify-between">
-            <span className="inline-block bg-primary text-primary-foreground px-2.5 py-0.5 text-[10px] font-bold rounded-sm uppercase tracking-wider">
-              Safety
-            </span>
-            <Link
-              href="/modules/social-safety"
-              className="text-xs font-bold text-primary hover:underline flex items-center gap-1 group"
-            >
-              Start
-              <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
-            </Link>
-          </div>
+        {modulesRegistry.map((module) => {
+          const isModuleCompleted = typeof window !== "undefined" ? localStorage.getItem(module.storageKey) === "true" : false;
+          
+          return (
+            <div key={module.id} className="bg-primary/5 border border-primary/20 rounded-lg p-5 shadow-sm space-y-4 relative overflow-hidden transition-all hover:shadow-md">
+              <div className="flex items-center justify-between">
+                <span className="inline-block bg-primary text-primary-foreground px-2.5 py-0.5 text-[10px] font-bold rounded-sm uppercase tracking-wider">
+                  {module.introData.badge}
+                </span>
+                <Link
+                  href={`/modules/${module.slug}`}
+                  className="text-xs font-bold text-primary hover:underline flex items-center gap-1 group"
+                >
+                  {isModuleCompleted ? "Review" : "Start"}
+                  <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+              </div>
 
-          <div className="space-y-1">
-            <h3 className="text-lg font-bold font-heading text-foreground leading-tight">
-              Social Safety at Work
-            </h3>
-            <p className="text-xs text-muted-foreground leading-normal">
-              Multiple choice with immediate feedback.
-            </p>
-          </div>
+              <div className="space-y-1">
+                <h3 className="text-lg font-bold font-heading text-foreground leading-tight">
+                  {module.introData.title}
+                </h3>
+                <p className="text-xs text-muted-foreground leading-normal">
+                  {module.introData.description}
+                </p>
+              </div>
 
-          {/* Module Progress Bar */}
-          <div className="space-y-1.5 pt-1.5">
-            <div className="relative h-1.5 w-full bg-background rounded-full overflow-hidden">
-              <div
-                className="h-full bg-primary rounded-full transition-all duration-500 ease-out"
-                style={{ width: isCompleted ? "100%" : "0%" }}
-              />
+              {/* Module Progress Bar */}
+              <div className="space-y-1.5 pt-1.5">
+                <div className="relative h-1.5 w-full bg-background rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-primary rounded-full transition-all duration-500 ease-out"
+                    style={{ width: isModuleCompleted ? "100%" : "0%" }}
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          );
+        })}
       </section>
     </div>
   );
