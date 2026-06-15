@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Mail, Eye, EyeOff, User, Scan } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -124,9 +125,9 @@ export default function LoginPage() {
                   </button>
                 </div>
                 <div className="text-right">
-                  <a href="#" className="text-xs font-semibold text-destructive hover:underline">
+                  <Link href="/auth/forgot-password" className="text-xs font-semibold text-destructive hover:underline">
                     Forgot Password
-                  </a>
+                  </Link>
                 </div>
               </Field>
             </FieldGroup>
