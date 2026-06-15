@@ -87,7 +87,7 @@ export default function HomePage() {
             className="w-full flex items-center justify-center gap-2"
             asChild
           >
-            <Link href="/survey/baseline">
+            <Link href="/modules/baseline-survey">
               START NOW
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Link>
