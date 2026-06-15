@@ -13,7 +13,7 @@ export function TopNav() {
   const isHome = pathname === "/";
 
   return (
-    <header className="flex items-center justify-between px-6 h-16 bg-background border-b border-border/50 sticky top-0 z-30">
+    <header className="flex items-center justify-between px-4 h-16 bg-background border-b border-border/50 sticky top-0 z-30">
       <div className="flex items-center gap-3">
         {!isHome && (
           <Button

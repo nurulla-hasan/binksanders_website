@@ -6,12 +6,12 @@ import { Progress } from "@/components/ui/progress";
 
 export default function HomePage() {
   return (
-    <div>
+    <>
       {/* Main Dashboard Content */}
-      <main className="flex-1 space-y-6 animate-fadeIn">
+      <div className="flex-1 space-y-6 animate-fadeIn">
         
         {/* Welcome Progress Card (Pink) */}
-        <section className="bg-primary text-primary-foreground rounded-2xl p-6 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[160px] gap-6">
+        <section className="bg-primary text-primary-foreground rounded-lg p-6 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[160px] gap-6">
           <div className="space-y-1">
             <h1 className="text-2xl font-bold font-heading tracking-tight">
               Welcome back, Willem!
@@ -30,9 +30,9 @@ export default function HomePage() {
             </div>
             
             {/* Custom progress bar with secondary (light blue) indicator */}
-            <div className="relative h-2 w-full bg-primary-foreground/20 rounded-full overflow-hidden">
+            <div className="relative h-2 w-full bg-primary-foreground/20 rounded-lg overflow-hidden">
               <div
-                className="h-full bg-secondary rounded-full transition-all duration-500"
+                className="h-full bg-secondary rounded-lg transition-all duration-500"
                 style={{ width: "0%" }}
               />
             </div>
@@ -40,10 +40,10 @@ export default function HomePage() {
         </section>
 
         {/* Quick Scan Card (Light Blue) */}
-        <section className="bg-secondary rounded-2xl p-6 shadow-sm border border-secondary/40 flex flex-col justify-between gap-6 relative overflow-hidden">
+        <section className="bg-secondary rounded-lg p-6 shadow-sm border border-secondary/40 flex flex-col justify-between gap-6 relative overflow-hidden">
           <div className="flex justify-between items-start gap-4">
             <div className="space-y-2">
-              <span className="inline-block bg-background text-secondary-foreground px-2.5 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider shadow-sm">
+              <span className="inline-block bg-background text-secondary-foreground px-2.5 py-0.5 text-[10px] font-bold rounded-lg uppercase tracking-wider shadow-sm">
                 Baseline
               </span>
               <h2 className="text-2xl font-bold text-secondary-foreground font-heading leading-tight">
@@ -67,10 +67,10 @@ export default function HomePage() {
 
           <Button
             size="lg"
-            className="w-full font-bold uppercase tracking-wider group bg-primary text-primary-foreground hover:bg-primary/95 flex items-center justify-center gap-2"
+            className="w-full flex items-center justify-center gap-2"
             asChild
           >
-            <Link href="/modules">
+            <Link href="/survey/baseline">
               START NOW
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Link>
@@ -84,9 +84,9 @@ export default function HomePage() {
           </h2>
 
           {/* Course Card (Light Pink) */}
-          <div className="bg-primary/5 border border-primary/10 rounded-2xl p-5 shadow-sm space-y-4">
+          <div className="bg-primary/5 border border-primary/10 rounded-lg p-5 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
-              <span className="inline-block bg-primary/10 text-primary px-2.5 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider">
+              <span className="inline-block bg-primary/10 text-primary px-2.5 py-0.5 text-[10px] font-bold rounded-lg uppercase tracking-wider">
                 Safety
               </span>
               <Link
@@ -117,7 +117,7 @@ export default function HomePage() {
           </div>
         </section>
 
-      </main>
-    </div>
+      </div>
+    </>
   );
 }

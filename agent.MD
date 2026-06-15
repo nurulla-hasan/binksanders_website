@@ -23,8 +23,9 @@ When using shadcn/ui components, always verify the installed version's API and s
    - ALWAYS use semantic Tailwind theme variables (e.g., `bg-primary`, `bg-secondary`, `bg-background`, `text-foreground`, `text-destructive`, `border-border`, etc.) mapped to CSS variables in `src/app/globals.css`.
 
 2. **Respect shadcn Component Styles:**
-   - Do NOT override base styles (like padding `py-6`, borders, custom roundedness `rounded-xl`) on elements like `<Button>` and `<Input>` in individual page templates.
-   - Let shadcn defaults and theme-wide configurations (e.g., `--radius` in `globals.css`) govern the shapes and dimensions.
+   - **FORBIDDEN:** Adding extra styles (typography, colors, padding, borders, custom roundedness) directly to shadcn components like `<Button>` and `<Input>` in individual page templates is strictly forbidden.
+   - **ALLOWED:** You may ONLY apply layout-related utility classes (e.g., `w-full`, `mt-4`, `flex-1`) to shadcn components when necessary for positioning within the container.
+   - Let shadcn defaults and theme-wide configurations (e.g., `--radius` in `globals.css`) govern the internal shapes, typography, and dimensions.
 
 3. **High-Precision Layouts:**
    - Closely match layouts to Figma screenshots (e.g., right-aligned icons in input fields, correct opacity modifiers like `bg-secondary/20` for helper alert cards, and using specific SVG image assets like `acme-logo.svg` or `scan-illustration.svg` instead of generic icon outlines).
