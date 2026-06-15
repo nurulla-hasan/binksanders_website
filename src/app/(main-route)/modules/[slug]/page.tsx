@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, use } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,49 +9,63 @@ import { Progress } from "@/components/ui/progress";
 import { SurveyIntro } from "@/components/survey/SurveyIntro";
 import { SurveyCompletion } from "@/components/survey/SurveyCompletion";
 import { SurveyQuestionCard } from "@/components/survey/SurveyQuestionCard";
-import { baselineSurveyData } from "@/seed/baseline-survey";
+import { getModuleConfig } from "@/config/modules";
 
-export default function BaselineSurveyPage() {
+export default function DynamicModulePage({ params }: { params: Promise<{ slug: string }> }) {
   const router = useRouter();
+  const resolvedParams = use(params);
+  const config = getModuleConfig(resolvedParams.slug);
+
   const [hasStarted, setHasStarted] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answerData, setAnswerData] = useState<any>(null);
   const [answers, setAnswers] = useState<Record<number, any>>({});
   const [isCompleted, setIsCompleted] = useState(false);
 
-  const currentQuestion = baselineSurveyData[currentIndex];
-  const totalQuestions = baselineSurveyData.length;
+  // Auto-advance logic for swipe questions
+  const currentQuestion = config?.surveyData[currentIndex];
+  const totalQuestions = config?.surveyData.length || 0;
   const progressPercentage = ((currentIndex + 1) / totalQuestions) * 100;
 
   const handleNext = useCallback(() => {
-    // Basic validation depending on type, but for now we just require some non-null answerData (or allow it if optional)
-    // Actually, we disable the Next button if answerData is null.
     if (answerData === null) return;
 
     if (currentIndex < totalQuestions - 1) {
       setCurrentIndex(currentIndex + 1);
-      setAnswerData(null); // Reset selection for next question
+      setAnswerData(null);
     } else {
-      // Survey completed
       setIsCompleted(true);
     }
   }, [answerData, currentIndex, totalQuestions]);
 
-  // Auto-advance logic for swipe questions
   useEffect(() => {
     if (currentQuestion?.type === "swipe" && answerData !== null) {
       const timer = setTimeout(() => {
         handleNext();
-      }, 300); // 300ms delay for card swipe animation
+      }, 300);
       return () => clearTimeout(timer);
     }
   }, [answerData, currentQuestion?.type, handleNext]);
 
+  // Handle 404
+  if (!config) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-4">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-2">Module Not Found</h1>
+          <p className="text-muted-foreground mb-4">The module you are looking for does not exist.</p>
+          <Button onClick={() => router.push("/modules")}>Back to Modules</Button>
+        </div>
+      </div>
+    );
+  }
+
   if (!hasStarted) {
     return (
       <SurveyIntro
+        {...config.introData}
         onStart={() => setHasStarted(true)}
-        onBack={() => router.back()}
+        onBack={() => router.push("/modules")}
       />
     );
   }
@@ -60,14 +74,16 @@ export default function BaselineSurveyPage() {
     return (
       <SurveyCompletion
         answers={answers}
-        onReturnHome={() => router.push("/")}
+        onReturnHome={() => {
+          localStorage.setItem(config.storageKey, "true");
+          router.push("/modules");
+        }}
       />
     );
   }
 
   return (
     <div className="flex-1 flex flex-col animate-fadeIn pb-8 overflow-x-hidden">
-
       {/* Top Header Information & Progress */}
       <div className="bg-secondary p-4 border border-secondary/40 rounded-lg relative overflow-hidden">
         {/* Decorative corner bubble */}
