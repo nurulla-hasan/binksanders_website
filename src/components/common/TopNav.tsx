@@ -58,7 +58,6 @@ export function TopNav() {
           <Button
             variant="ghost"
             size="icon"
-            className="rounded-full bg-muted text-muted-foreground hover:bg-muted/80 w-10 h-10 flex items-center justify-center transition-colors duration-200"
           >
             <User className="w-5 h-5 text-foreground" />
             <span className="sr-only">Profile</span>
