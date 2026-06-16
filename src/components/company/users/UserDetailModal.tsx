@@ -3,11 +3,10 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Eye } from "lucide-react";
-import { ClientData } from "@/app/(admin-route)/super-admin/users/page";
+import { UserData } from "@/app/(admin-route)/company/users/page";
 
 interface UserDetailModalProps {
-  user: ClientData;
-  onClose: () => void;
+  user: UserData;
 }
 
 type ModuleData = {
@@ -92,18 +91,18 @@ export function UserDetailModal({ user }: UserDetailModalProps) {
             {/* Avatar & Name */}
             <div className="flex flex-col items-center sm:flex-row sm:items-start gap-6 mb-6">
               <Avatar className="h-24 w-24 border-4 border-background shadow-md">
-                <AvatarFallback className="text-3xl bg-primary/10 text-primary">
-                  {user.company.charAt(0)}
+                <AvatarFallback className="text-3xl bg-primary/10 text-primary uppercase">
+                  {user.name.charAt(0)}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 text-center sm:text-left space-y-2 mt-2 sm:mt-0">
-                <h2 className="text-2xl font-bold text-foreground">{user.company}</h2>
+                <h2 className="text-2xl font-bold text-foreground">{user.name}</h2>
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-4 w-4">
                       <path d="M1.5 3C1.22386 3 1 3.22386 1 3.5V11.5C1 11.7761 1.22386 12 1.5 12H13.5C13.7761 12 14 11.7761 14 11.5V3.5C14 3.22386 13.7761 3 13.5 3H1.5ZM2 4.15049L7.1444 7.64094C7.35925 7.78663 7.64075 7.78663 7.8556 7.64094L13 4.15049V11H2V4.15049ZM12.3556 4L7.5 7.29415L2.6444 4H12.3556Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path>
                     </svg>
-                    {user.email}
+                    {user.emailOrId}
                   </span>
                   <span className="flex items-center gap-1">
                     <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-4 w-4">
@@ -116,19 +115,19 @@ export function UserDetailModal({ user }: UserDetailModalProps) {
             </div>
             {/* Stats Cards */}
             <div className="grid grid-cols-2 gap-4 w-full mb-6">
-              {/* Total Assigned Modules */}
+              {/* Total Points */}
               <div className="bg-secondary/10 border border-secondary/20 rounded-md p-4 flex flex-col justify-center">
-                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Assigned Modules</span>
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Total Points</span>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-bold text-foreground">{user.assignedModules}</span>
-                  <span className="text-xs text-muted-foreground font-medium">modules</span>
+                  <span className="text-3xl font-bold text-foreground">{user.points}</span>
+                  <span className="text-xs text-muted-foreground font-medium">pts</span>
                 </div>
               </div>
 
-              {/* Active Users */}
-              <div className="bg-destructive/10 border border-destructive/20 rounded-md p-4 flex flex-col justify-center">
-                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Active Users</span>
-                <span className="text-3xl font-bold text-foreground">{user.activeUsers}</span>
+              {/* Assigned Modules */}
+              <div className="bg-primary/10 border border-primary/20 rounded-md p-4 flex flex-col justify-center">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Assigned Modules</span>
+                <span className="text-3xl font-bold text-foreground">{MOCK_MODULES.length}</span>
               </div>
             </div>
 

@@ -8,7 +8,7 @@ export default function MainRouteLayout({
   children: ReactNode;
 }>) {
   return (
-    <div className="flex flex-col min-h-screen relative pb-17 w-full">
+    <div className="flex flex-col min-h-screen relative pb-17 w-full max-w-120 mx-auto">
       <TopNav />
       {/* Main content area */}
       <main className="flex-1 flex flex-col w-full p-4">

@@ -30,7 +30,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${inter.variable} ${raleway.variable} h-full antialiased`}
     >
-      <body className="min-h-full font-sans">
+      <body className="min-h-full font-sans" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

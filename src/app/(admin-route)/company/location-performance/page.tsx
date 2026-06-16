@@ -30,16 +30,16 @@ export default function LocationPerformancePage() {
     },
     {
       accessorKey: "activeUser",
-      header: () => <div className="text-center">Active user</div>,
+      header: () => <div>Active user</div>,
       cell: ({ row }) => {
-        return <div className="text-center text-muted-foreground">{row.original.activeUser}</div>;
+        return <div className="text-muted-foreground">{row.original.activeUser}</div>;
       },
     },
     {
       accessorKey: "progress",
-      header: () => <div className="text-center">Progress</div>,
+      header: () => <div>Progress</div>,
       cell: ({ row }) => {
-        return <div className="text-center text-muted-foreground">{row.original.progress}</div>;
+        return <div className="text-muted-foreground">{row.original.progress}</div>;
       },
     },
     {

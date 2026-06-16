@@ -7,11 +7,18 @@ import { modulesRegistry } from "@/config/modules";
 
 export default function ModulesPage() {
   const [isCompleted, setIsCompleted] = useState(false);
+  const [completedStates, setCompletedStates] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const timer = setTimeout(() => {
       const completed = localStorage.getItem("module_social_safety_completed") === "true";
       setIsCompleted(completed);
+      
+      const states: Record<string, boolean> = {};
+      modulesRegistry.forEach(mod => {
+        states[mod.id] = localStorage.getItem(mod.storageKey) === "true";
+      });
+      setCompletedStates(states);
     }, 0);
     return () => clearTimeout(timer);
   }, []);
@@ -57,7 +64,7 @@ export default function ModulesPage() {
       {/* Modules List Area */}
       <section className="flex-1 p-4 space-y-4">
         {modulesRegistry.map((module) => {
-          const isModuleCompleted = typeof window !== "undefined" ? localStorage.getItem(module.storageKey) === "true" : false;
+          const isModuleCompleted = completedStates[module.id] || false;
           
           return (
             <div key={module.id} className="bg-primary/5 border border-primary/20 rounded-lg p-5 shadow-sm space-y-4 relative overflow-hidden transition-all hover:shadow-md">
