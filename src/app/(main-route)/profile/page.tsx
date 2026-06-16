@@ -46,7 +46,7 @@ export default function ProfilePage() {
       <div className="p-4">
 
         {/* Profile Card */}
-        <div className="bg-[#8ACDDE]/90 rounded-sm p-5 mb-8 shadow-sm">
+        <div className="bg-secondary/90 rounded-sm p-5 mb-8 shadow-sm">
           <div className="flex gap-4 mb-4">
             {/* Profile Picture */}
             <div className="relative w-14 h-14 rounded-full overflow-hidden shrink-0 mt-1">
