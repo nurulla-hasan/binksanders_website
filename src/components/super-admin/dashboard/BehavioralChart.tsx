@@ -43,7 +43,7 @@ export function BehavioralChart() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="h-[300px] w-full">
+        <div className="h-75 w-full">
           <ChartContainer config={chartConfig} className="h-full w-full">
             <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }} barGap={0}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { Trash2 } from "lucide-react";
 import { DataTable } from "@/components/ui/custom/data-table";
-import { AddAdminModal } from "@/components/super-admin/make-admin/AddAdminModal";
+import { AddAdminModal } from "@/components/company-admin/make-admin/AddAdminModal";
 
 export type AdminData = {
   id: string;

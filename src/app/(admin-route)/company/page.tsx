@@ -14,7 +14,7 @@ export default function AdminDashboardPage() {
         />
         <DashboardStats />
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[500px]">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-125">
           <BehavioralChart />
           <Leaderboard />
         </div>

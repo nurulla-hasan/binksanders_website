@@ -7,6 +7,9 @@ import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/ui/custom/data-table";
 import { Eye, Settings, UserCheck, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import Link from "next/link";
 
 export type ClientData = {
   id: string;
@@ -41,42 +44,65 @@ export default function ClientPage() {
     },
     {
       accessorKey: "activeUsers",
-      header: () => <div className="text-center">Active Users</div>,
-      cell: ({ row }) => <div className="text-center text-muted-foreground">{row.original.activeUsers}</div>,
+      header: "Active Users",
+      cell: ({ row }) => row.original.activeUsers
+
     },
     {
       accessorKey: "assignedModules",
-      header: () => <div className="text-center">Assigned Modules</div>,
-      cell: ({ row }) => <div className="text-center text-muted-foreground">{row.original.assignedModules}</div>,
+      header: "Assigned Modules",
+      cell: ({ row }) => <span className="text-muted-foreground">{row.original.assignedModules}</span>,
     },
     {
       accessorKey: "platformStatus",
-      header: () => <div className="text-center">Platform Status</div>,
-      cell: ({ row }) => (
-        <div className="text-center font-medium">
-          <span className={row.original.platformStatus === "Active" ? "text-success" : "text-destructive"}>
-            {row.original.platformStatus}
-          </span>
-        </div>
-      ),
+      header: "Platform Status",
+      cell: ({ row }) => {
+        const isActive = row.original.platformStatus === "Active";
+        return (
+          <div>
+            <Badge variant={isActive ? "active" : "destructive"}>
+              {row.original.platformStatus}
+            </Badge>
+          </div>
+        );
+      },
     },
     {
       id: "actions",
-      header: () => <div className="text-center">Action</div>,
+      header: () => <div className="text-right">Action</div>,
       cell: ({ row }) => {
         // Mocking the second row's red icon to match the screenshot
         const isInactiveToggle = row.index === 1; 
         return (
-          <div className="flex items-center justify-center gap-1">
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
-              <Eye className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-primary">
-              <Settings className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className={`h-8 w-8 ${isInactiveToggle ? 'text-destructive' : 'text-success'}`}>
-              {isInactiveToggle ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
-            </Button>
+          <div className="flex items-center justify-end gap-1">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link href={`/super-admin/users/${row.original.id}`}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>View User</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:text-primary">
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Manage Settings</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className={`h-8 w-8 ${isInactiveToggle ? 'text-destructive hover:text-destructive hover:bg-destructive/10' : 'text-success hover:text-success hover:bg-success/10'}`}>
+                  {isInactiveToggle ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{isInactiveToggle ? 'Deactivate User' : 'Activate User'}</TooltipContent>
+            </Tooltip>
           </div>
         );
       },

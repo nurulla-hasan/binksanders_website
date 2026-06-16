@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Raleway } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -36,7 +37,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <TooltipProvider>
+            {children}
+          </TooltipProvider>
         </ThemeProvider>
       </body>
     </html>
