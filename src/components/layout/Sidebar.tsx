@@ -28,6 +28,8 @@ const superAdminNavItems = [
   { name: "Client", href: "/super-admin/users", icon: Users },
   { name: "Broadcast Message", href: "/super-admin/broadcast", icon: Rss },
   { name: "Make admin", href: "/super-admin/make-admin", icon: UserPlus },
+  { name: "Privacy Policy", href: "/super-admin/privacy-policy", icon: LayoutList },
+  { name: "Terms & Conditions", href: "/super-admin/terms-and-conditions", icon: LayoutList },
 ];
 
 const companyNavItems = [
