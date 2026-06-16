@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { motion } from "framer-motion";
 import { Bot } from "lucide-react";
-import { ChatQuestionData } from "@/types/survey";
+import { ChatQuestionData } from "@/lib/types/survey";
 
 interface ChatQuestionProps {
   question: ChatQuestionData;

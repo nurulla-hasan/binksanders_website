@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { baselineSurveyData } from "@/seed/baseline-survey";
-import { socialSafetySurveyData } from "@/seed/social-safety-survey";
-import { diversityInclusionData } from "@/seed/diversity-inclusion";
+import { baselineSurveyData } from "@/lib/seed/baseline-survey";
+import { socialSafetySurveyData } from "@/lib/seed/social-safety-survey";
+import { diversityInclusionData } from "@/lib/seed/diversity-inclusion";
 
 export interface ModuleConfig {
   id: string;

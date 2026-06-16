@@ -2,7 +2,7 @@
 import { motion, useAnimation, useMotionValue, useTransform } from "framer-motion";
 import { useState } from "react";
 import { Check, X, ArrowLeft, ArrowRight } from "lucide-react";
-import { SwipeQuestionData } from "@/types/survey";
+import { SwipeQuestionData } from "@/lib/types/survey";
 import { Button } from "@/components/ui/button";
 
 interface SwipeQuestionProps {

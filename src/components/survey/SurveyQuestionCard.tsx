@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { SurveyQuestionType } from "@/types/survey";
+import { SurveyQuestionType } from "@/lib/types/survey";
 import { SwipeQuestion } from "./question-types/SwipeQuestion";
 import { ChatQuestion } from "./question-types/ChatQuestion";
 import { RearrangeQuestion } from "./question-types/RearrangeQuestion";

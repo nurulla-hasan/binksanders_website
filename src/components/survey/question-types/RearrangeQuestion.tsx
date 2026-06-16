@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ChevronUp, ChevronDown } from "lucide-react";
-import { RearrangeQuestionData } from "@/types/survey";
+import { RearrangeQuestionData } from "@/lib/types/survey";
 import { Button } from "@/components/ui/button";
 
 interface RearrangeQuestionProps {

@@ -3,6 +3,7 @@ import DashboardPageLayout from "@/components/ui/custom/DashboardPageLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Pencil, Copy, Trash2 } from "lucide-react";
+import Link from "next/link";
 
 export default function CoursePage() {
   const courses = [
@@ -30,12 +31,14 @@ export default function CoursePage() {
           title="Module Directory" 
           description="Manage, edit, or create custom learning paths for your employees." 
         >
-          <Button>
-            <Plus /> Create Module
-          </Button>
+          <Link href="/super-admin/course/create">
+            <Button>
+              <Plus /> Create Module
+            </Button>
+          </Link>
         </DashboardHeader>
         
-        <div className="flex flex-col gap-4 mt-2">
+        <div className="flex flex-col gap-4">
           {courses.map((course, index) => (
             <Card key={index} className="bg-secondary/30 border-secondary/50 shadow-none rounded-md hover:bg-secondary/20 transition-colors">
               <CardContent className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

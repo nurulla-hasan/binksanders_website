@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { VideoQuestionData } from "@/types/survey";
+import { VideoQuestionData } from "@/lib/types/survey";
 
 interface VideoQuestionProps {
   question: VideoQuestionData;

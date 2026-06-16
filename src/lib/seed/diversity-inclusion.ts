@@ -1,4 +1,4 @@
-import { SurveyQuestionType } from "@/types/survey";
+import { SurveyQuestionType } from "@/lib/types/survey";
 
 export const diversityInclusionData: SurveyQuestionType[] = [
   {

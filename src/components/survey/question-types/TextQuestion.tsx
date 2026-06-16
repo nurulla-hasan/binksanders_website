@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { TextQuestionData } from "@/types/survey";
+import { TextQuestionData } from "@/lib/types/survey";
 
 interface TextQuestionProps {
   question: TextQuestionData;

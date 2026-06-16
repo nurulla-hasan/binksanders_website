@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Check, ArrowRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { baselineSurveyData } from "@/seed/baseline-survey";
+import { baselineSurveyData } from "@/lib/seed/baseline-survey";
 
 interface SurveyCompletionProps {
   answers: Record<number, any>;

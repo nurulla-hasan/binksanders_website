@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { MultipleChoiceQuestionData } from "@/types/survey";
+import { MultipleChoiceQuestionData } from "@/lib/types/survey";
 
 interface MultipleChoiceQuestionProps {
   question: MultipleChoiceQuestionData;
