@@ -65,7 +65,7 @@ export default function BroadcastPage() {
                     <SelectTrigger id="company" className="w-full">
                       <SelectValue placeholder="Select a company" />
                     </SelectTrigger>
-                    <SelectContent position="popper">
+                    <SelectContent>
                       <SelectItem value="unilever">Unilever</SelectItem>
                       <SelectItem value="acme">Acme Corp</SelectItem>
                       <SelectItem value="globex">Globex Inc</SelectItem>

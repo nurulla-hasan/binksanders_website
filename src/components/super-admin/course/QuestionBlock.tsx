@@ -60,7 +60,7 @@ export function QuestionBlock({ question, index, onChangeType, onDelete }: Quest
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Question Type" />
             </SelectTrigger>
-            <SelectContent position="popper">
+            <SelectContent>
               <SelectItem value="mcq">MCQ</SelectItem>
               <SelectItem value="swipe">Swipe</SelectItem>
               <SelectItem value="ordering">Ordering</SelectItem>
@@ -95,7 +95,7 @@ export function QuestionBlock({ question, index, onChangeType, onDelete }: Quest
                     <SelectTrigger id={`right-answer-${question.id}`}>
                       <SelectValue placeholder="Select Option" />
                     </SelectTrigger>
-                    <SelectContent position="popper">
+                    <SelectContent>
                       {[0, 1, 2, 3].map(optIdx => (
                         <SelectItem key={optIdx} value={`option${optIdx + 1}`}>Option {optIdx + 1}</SelectItem>
                       ))}
@@ -202,7 +202,7 @@ export function QuestionBlock({ question, index, onChangeType, onDelete }: Quest
                     <SelectTrigger id={`video-right-answer-${question.id}`}>
                       <SelectValue placeholder="Select Option" />
                     </SelectTrigger>
-                    <SelectContent position="popper">
+                    <SelectContent>
                       {[0, 1, 2, 3].map(optIdx => (
                         <SelectItem key={optIdx} value={`option${optIdx + 1}`}>Option {optIdx + 1}</SelectItem>
                       ))}
