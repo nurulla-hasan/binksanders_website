@@ -27,16 +27,18 @@ export const baselineSurveyData: SurveyQuestionType[] = [
     ]
   },
   {
-    id: 2,
-    theme: "Ergonomics & Health",
+    id: 3,
+    theme: "Conflict Resolution",
     type: "multiple-choice",
-    question: "What does the term 'Ergonomics' refer to in office safety?",
+    question: "What is the best way to address an uncomfortable joke made by a colleague in a meeting?",
     options: [
-      { id: "A", text: "Designing the workplace to fit the user's physical needs" },
-      { id: "B", text: "A list of rules about working hours" },
-      { id: "C", text: "The software tools used for coding" },
-      { id: "D", text: "How fast you can type on your keyboard" },
-    ]
+      { id: "A", text: "Politely but firmly address it in the moment." },
+      { id: "B", text: "Ignore it and hope it doesn't happen again." },
+      { id: "C", text: "Complain to other coworkers secretly." },
+      { id: "D", text: "Laugh it off to avoid awkwardness." }
+    ],
+    correctOptionId: "A",
+    explanation: "Addressing the joke respectfully in the moment sets a clear boundary and reinforces a safe work environment without escalating the conflict."
   },
 
   // --- SWIPE QUESTIONS (3) ---
@@ -53,13 +55,6 @@ export const baselineSurveyData: SurveyQuestionType[] = [
     type: "swipe",
     question: "Swipe right to Agree, left to Disagree.",
     statement: "I feel confident reporting a safety hazard to management."
-  },
-  {
-    id: 5,
-    theme: "Workplace Wellness",
-    type: "swipe",
-    question: "Swipe right to Agree, left to Disagree.",
-    statement: "My workload allows me to maintain a healthy work-life balance."
   },
 
   // --- CHAT QUESTIONS (3) ---
@@ -83,17 +78,6 @@ export const baselineSurveyData: SurveyQuestionType[] = [
     options: [
       { id: "opt1", text: "Let's discuss it, I think we can align better." },
       { id: "opt2", text: "No, everything is perfectly fine." }
-    ]
-  },
-  {
-    id: 8,
-    theme: "Safety Awareness",
-    type: "chat",
-    question: "Choose Your Response",
-    botMessage: "I saw some exposed wires near the kitchen, but I'm hesitant to raise a ticket. Should we just tell someone?",
-    options: [
-      { id: "opt1", text: "We should file an official ticket immediately so it gets tracked." },
-      { id: "opt2", text: "Yes, let's just let the office manager know next time we see them." }
     ]
   },
 
@@ -122,18 +106,6 @@ export const baselineSurveyData: SurveyQuestionType[] = [
       { id: "pass4", text: "Sweep the nozzle side-to-side across the fire." }
     ]
   },
-  {
-    id: 11,
-    theme: "Unsafe Work Conditions",
-    type: "rearrange",
-    question: "Arrange the steps for reporting unsafe work conditions in order.",
-    items: [
-      { id: "rep1", text: "Identify and document the unsafe work condition." },
-      { id: "rep2", text: "Notify your supervisor or safety committee representative." },
-      { id: "rep3", text: "Follow up to ensure the hazard is mitigated." },
-      { id: "rep4", text: "Escalate to senior management if unresolved." }
-    ]
-  },
 
   // --- VIDEO QUESTIONS (3) ---
   {
@@ -160,18 +132,6 @@ export const baselineSurveyData: SurveyQuestionType[] = [
       { id: "v2_opt3", text: "Working near electrical hazards" }
     ]
   },
-  {
-    id: 14,
-    theme: "Communication Skills",
-    type: "video",
-    question: "How should the supervisor handle the conversation shown in this scenario?",
-    videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
-    options: [
-      { id: "v3_opt1", text: "Listen carefully first, then coach constructive habits" },
-      { id: "v3_opt2", text: "Issue an immediate formal warning" },
-      { id: "v3_opt3", text: "Reassign the task to a different teammate" }
-    ]
-  },
 
   // --- TEXT QUESTIONS (3) ---
   {
@@ -186,10 +146,4 @@ export const baselineSurveyData: SurveyQuestionType[] = [
     type: "text",
     question: "Describe a situation in your career where you spoke up about safety, or explain what stopped you.",
   },
-  {
-    id: 17,
-    theme: "Improving Social Safety",
-    type: "text",
-    question: "What suggestions do you have to improve social safety and psychological trust in your daily standups?",
-  }
 ];
