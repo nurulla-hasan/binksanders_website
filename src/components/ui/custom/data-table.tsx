@@ -14,7 +14,7 @@ import {
 import { Search } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
-import { useSmartFilter } from "@/hooks/useNextFilter";
+import { useNextFilter } from "@/hooks/useNextFilter";
 import {
   Table,
   TableBody,
@@ -77,7 +77,7 @@ function DataTableInner<TData, TValue>({
   searchPlaceholder,
   showFooter = false,
 }: DataTableProps<TData, TValue>) {
-  const { updateFilter, getFilter } = useSmartFilter<string>({
+  const { updateFilter, getFilter } = useNextFilter<string>({
     paginationKey: "page",
     defaultDebounce: 500,
     defaultMethod: "replace",

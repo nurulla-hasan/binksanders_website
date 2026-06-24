@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useSmartFilter } from "@/hooks/useNextFilter";
+import { useNextFilter } from "@/hooks/useNextFilter";
 import {
   Pagination,
   PaginationContent,
@@ -70,7 +70,7 @@ const CustomPagination: React.FC<CustomPaginationProps> = ({
   totalPages,
   className,
 }) => {
-  const { updateFilter, paramsString } = useSmartFilter({
+  const { updateFilter, paramsString } = useNextFilter({
     defaultMethod: "push",
   });
 
