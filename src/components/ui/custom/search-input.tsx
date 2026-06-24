@@ -4,7 +4,7 @@ import * as React from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { useSmartFilter } from "@/hooks/useSmartFilter";
+import { useSmartFilter } from "@/hooks/useNextFilter";
 
 interface SearchInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   filterKey?: string;

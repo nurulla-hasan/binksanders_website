@@ -15,7 +15,7 @@ export function MultipleChoiceQuestion({
   return (
     <>
       {/* Question Card */}
-      <div className="bg-primary/5 text-primary-foreground p-6 shadow-sm space-y-3 relative overflow-hidden rounded-lg border border-primary/10 mb-6">
+      <div className="bg-primary/5 text-primary-foreground p-4 shadow-sm space-y-2 relative overflow-hidden rounded-lg border border-primary/10 mb-4">
         <span className="inline-block bg-primary text-primary-foreground px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest rounded-sm">
           QUESTION
         </span>
@@ -55,7 +55,7 @@ export function MultipleChoiceQuestion({
               key={option.id}
               disabled={!!answerData && isQuizMode}
               onClick={() => onAnswer(option.id)}
-              className={`w-full flex items-center gap-4 p-4 border transition-all duration-200 text-left rounded-sm ${cardClasses}`}
+              className={`w-full flex items-center gap-3 p-3 border transition-all duration-200 text-left rounded-sm ${cardClasses}`}
             >
               <div className={`shrink-0 w-8 h-8 flex items-center justify-center font-bold text-sm transition-colors rounded-sm ${bubbleClasses}`}>
                 {option.id}

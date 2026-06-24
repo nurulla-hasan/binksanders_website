@@ -10,7 +10,7 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex h-dvh overflow-hidden bg-background">
       {/* Sidebar */}
       <Sidebar
         isSidebarOpen={isSidebarOpen}
@@ -18,7 +18,7 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
       />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col relative lg:ml-70 h-screen overflow-hidden">
+      <div className="flex-1 flex flex-col relative lg:ml-70 h-dvh overflow-hidden">
         <Header onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
 
         <main className="flex-1 overflow-y-auto p-4 mt-16">{children}</main>

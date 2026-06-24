@@ -8,10 +8,13 @@ import {
   Headset, 
   Gavel, 
   ChevronRight, 
-  LogOut 
+  LogOut,
+  Sun,
+  Moon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { useTheme } from "next-themes";
 
 import {
   Drawer,
@@ -26,6 +29,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function ProfilePage() {
   const settingsItems = [
@@ -35,7 +39,16 @@ export default function ProfilePage() {
     { id: "terms", icon: Gavel, label: "Terms & Condition", type: "link", href: "/terms-and-condition" },
   ];
 
-  const router = useRouter()
+  const router = useRouter();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleLogOut = () => {
     router.push("/auth/login");
@@ -54,6 +67,7 @@ export default function ProfilePage() {
                 src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop"
                 alt="Profile Picture"
                 fill
+                sizes="56px"
                 className="object-cover"
               />
             </div>
@@ -76,11 +90,28 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Settings Section */}
         <div className="flex-1 px-1">
           <h3 className="text-[15px] font-bold text-foreground mb-4 font-heading tracking-tight">Settings</h3>
           
           <div className="space-y-2">
+            {/* Theme Toggle Item */}
+            <button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="w-full flex items-center justify-between p-3.5 rounded-sm bg-muted hover:bg-muted/60 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                {!mounted ? (
+                  <Moon className="w-4 h-4 text-foreground/80" />
+                ) : theme === "dark" ? (
+                  <Sun className="w-4 h-4 text-foreground/80" />
+                ) : (
+                  <Moon className="w-4 h-4 text-foreground/80" />
+                )}
+                <span className="text-[13px] font-medium text-foreground/90">
+                  {!mounted ? "Dark Mode" : theme === "dark" ? "Light Mode" : "Dark Mode"}
+                </span>
+              </div>
+            </button>
             {settingsItems.map((item) => {
               const Icon = item.icon;
               

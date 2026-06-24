@@ -3,14 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
-import { User, ArrowLeft, Sun, Moon } from "lucide-react";
+import { User, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function TopNav() {
   const pathname = usePathname();
   const router = useRouter();
-  const { theme, setTheme } = useTheme();
 
   const isHome = pathname === "/";
 
@@ -28,7 +26,7 @@ export function TopNav() {
             <span className="sr-only">Go back</span>
           </Button>
         )}
-        <div className="flex items-center gap-2.5">
+        <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
           <Image
             src="/acme-logo.svg"
             alt="Acme Corp Logo"
@@ -41,19 +39,11 @@ export function TopNav() {
           <span className="text-xl font-bold font-heading tracking-tight text-foreground">
             Acme Corp
           </span>
-        </div>
+        </Link>
       </div>
 
       <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-        >
-          <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-foreground" />
-          <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-foreground" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
+
         <Link href="/profile" passHref>
           <Button
             variant="ghost"

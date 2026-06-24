@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useSmartFilter } from "@/hooks/useSmartFilter";
+import { useSmartFilter } from "@/hooks/useNextFilter";
 import {
   Pagination,
   PaginationContent,

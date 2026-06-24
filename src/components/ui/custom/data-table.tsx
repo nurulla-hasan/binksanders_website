@@ -14,7 +14,7 @@ import {
 import { Search } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
-import { useSmartFilter } from "@/hooks/useSmartFilter";
+import { useSmartFilter } from "@/hooks/useNextFilter";
 import {
   Table,
   TableBody,
