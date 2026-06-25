@@ -15,11 +15,11 @@ export function MultipleChoiceQuestion({
   return (
     <>
       {/* Question Card */}
-      <div className="bg-primary/5 text-primary-foreground p-4 shadow-sm space-y-2 relative overflow-hidden rounded-lg border border-primary/10 mb-4">
-        <span className="inline-block bg-primary text-primary-foreground px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest rounded-sm">
+      <div className="space-y-3 mb-6">
+        <span className="inline-block bg-primary text-primary-foreground px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-sm">
           QUESTION
         </span>
-        <h2 className="text-xl md:text-2xl font-bold font-heading leading-snug text-foreground">
+        <h2 className="text-2xl md:text-3xl font-bold font-heading leading-snug text-secondary-foreground">
           {question.question}
         </h2>
       </div>
@@ -32,22 +32,22 @@ export function MultipleChoiceQuestion({
           const isCorrect = isQuizMode && option.id === question.correctOptionId;
           const isWrongSelection = isQuizMode && isSelected && option.id !== question.correctOptionId;
           
-          let cardClasses = "bg-background border-border/60 hover:bg-muted/50 hover:border-border";
-          let bubbleClasses = "bg-muted text-muted-foreground";
+          let cardClasses = "bg-background border-border hover:border-primary/50";
+          let bubbleClasses = "bg-muted/50 text-muted-foreground";
 
           if (isQuizMode && answerData) {
             if (isCorrect) {
-              cardClasses = "bg-green-500/10 border-green-500/50 shadow-sm";
-              bubbleClasses = "bg-green-500/20 text-green-600";
+              cardClasses = "bg-background border-green-500 border-2 shadow-sm";
+              bubbleClasses = "bg-green-500 text-white";
             } else if (isWrongSelection) {
-              cardClasses = "bg-primary/10 border-primary/50 shadow-sm";
-              bubbleClasses = "bg-primary/20 text-primary";
+              cardClasses = "bg-background border-primary border-2 shadow-sm";
+              bubbleClasses = "bg-primary text-primary-foreground";
             } else {
-              cardClasses = "bg-background border-border/30 opacity-60";
+              cardClasses = "bg-background border-border/50 opacity-60";
             }
           } else if (isSelected) {
-            cardClasses = "bg-green-500/10 border-green-500/50 shadow-sm";
-            bubbleClasses = "bg-green-500/20 text-green-600";
+            cardClasses = "bg-background border-green-500 border-2 shadow-sm";
+            bubbleClasses = "bg-green-500 text-white";
           }
 
           return (
@@ -72,20 +72,20 @@ export function MultipleChoiceQuestion({
       {question.correctOptionId && answerData && (
         <div className="space-y-3 mt-6 animate-fadeIn">
           {answerData === question.correctOptionId ? (
-            <div className="bg-green-500/10 border border-green-500/50 text-green-600 p-3 rounded-sm flex items-center gap-2 text-sm font-semibold">
+            <div className="bg-background border-2 border-green-500 text-green-600 p-3 rounded-lg flex items-center gap-2 text-sm font-semibold shadow-sm">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
               Correct — you got it!
             </div>
           ) : (
-            <div className="bg-primary/10 border border-primary/50 text-primary p-3 rounded-sm flex items-center gap-2 text-sm font-semibold">
+            <div className="bg-background border-2 border-primary text-primary p-3 rounded-lg flex items-center gap-2 text-sm font-semibold shadow-sm">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               Incorrect — correct answer is highlighted.
             </div>
           )}
 
           {question.explanation && answerData !== question.correctOptionId && (
-            <div className="bg-background border border-primary/20 p-4 rounded-sm text-sm text-muted-foreground leading-relaxed shadow-sm">
-              <span className="font-bold text-foreground">Explanation:</span> {question.explanation}
+            <div className="bg-background border-2 border-primary/20 p-4 rounded-lg text-sm text-foreground leading-relaxed shadow-sm mt-3">
+              <span className="font-bold text-primary">Explanation:</span> {question.explanation}
             </div>
           )}
         </div>

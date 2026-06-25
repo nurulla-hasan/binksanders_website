@@ -126,10 +126,10 @@ export default function DynamicModulePage({ params }: { params: Promise<{ slug: 
   }
 
   return (
-    <div className="flex-1 flex flex-col animate-fadeIn pb-8 overflow-x-hidden">
+    <div className="flex-1 flex flex-col animate-fadeIn bg-secondary p-4 rounded-lg border border-secondary/50 shadow-sm overflow-x-hidden relative z-10">
       {/* Slim Progress Header */}
       <div className="flex items-center gap-3 pt-2 pb-4">
-        <span className="text-xs font-bold text-muted-foreground whitespace-nowrap">
+        <span className="text-xs font-bold text-secondary-foreground/80 whitespace-nowrap">
           Q{currentIndex + 1}/{totalQuestions}
         </span>
         <Progress value={progressPercentage} className="h-1.5 flex-1" />

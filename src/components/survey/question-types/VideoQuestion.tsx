@@ -23,10 +23,13 @@ export function VideoQuestion({ question, answerData, onAnswer }: VideoQuestionP
         </video>
       </div>
 
-      <div className="bg-primary/5 p-4 rounded-lg border border-primary/10">
-        <p className="text-sm font-bold text-foreground leading-relaxed">
+      <div className="space-y-3 mt-4 mb-2">
+        <span className="inline-block bg-primary text-primary-foreground px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-sm">
+          QUESTION
+        </span>
+        <h2 className="text-xl md:text-2xl font-bold font-heading leading-snug text-secondary-foreground">
           {question.question}
-        </p>
+        </h2>
       </div>
 
       {/* Options List */}
@@ -39,8 +42,8 @@ export function VideoQuestion({ question, answerData, onAnswer }: VideoQuestionP
               onClick={() => onAnswer(option.id)}
               className={`w-full flex items-center p-4 border transition-all duration-200 text-left rounded-lg ${
                 isSelected
-                  ? "bg-green-500/10 border-green-500 shadow-sm font-semibold text-foreground"
-                  : "bg-background border-border/60 hover:bg-muted/50 hover:border-border text-muted-foreground"
+                  ? "bg-background border-green-500 border-2 shadow-sm font-semibold text-foreground"
+                  : "bg-background border-border hover:border-primary/50 text-muted-foreground"
               }`}
             >
               <span className="text-sm leading-relaxed">{option.text}</span>

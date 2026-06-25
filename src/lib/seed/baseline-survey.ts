@@ -65,8 +65,8 @@ export const baselineSurveyData: SurveyQuestionType[] = [
     question: "Choose Your Response",
     botMessage: "Hi, do you have a moment? I wanted to talk about something that happened in yesterday's meeting.",
     options: [
-      { id: "opt1", text: "Of course, what's on your mind?" },
-      { id: "opt2", text: "Not now, I'm busy." }
+      { id: "A", text: "Of course, what's on your mind?" },
+      { id: "B", text: "Not now, I'm busy." }
     ]
   },
   {
@@ -76,8 +76,8 @@ export const baselineSurveyData: SurveyQuestionType[] = [
     question: "Choose Your Response",
     botMessage: "Hey, I noticed you seemed upset after our presentation. Did I say something wrong?",
     options: [
-      { id: "opt1", text: "Let's discuss it, I think we can align better." },
-      { id: "opt2", text: "No, everything is perfectly fine." }
+      { id: "A", text: "Let's discuss it, I think we can align better." },
+      { id: "B", text: "No, everything is perfectly fine." }
     ]
   },
 

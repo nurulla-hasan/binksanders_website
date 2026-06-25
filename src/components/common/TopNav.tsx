@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { User, ArrowLeft } from "lucide-react";
+import { User, ArrowLeft, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function TopNav() {
@@ -43,7 +43,15 @@ export function TopNav() {
       </div>
 
       <div className="flex items-center gap-2">
-
+        <Link href="/" passHref>
+          <Button
+            variant="ghost"
+            size="icon"
+          >
+            <Home className="w-5 h-5 text-foreground" />
+            <span className="sr-only">Home</span>
+          </Button>
+        </Link>
         <Link href="/profile" passHref>
           <Button
             variant="ghost"

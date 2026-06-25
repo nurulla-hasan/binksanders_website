@@ -20,7 +20,7 @@ export function SwipeQuestion({ question, answerData, onAnswer }: SwipeQuestionP
   const backgroundColor = useTransform(
     x,
     [-150, 0, 150],
-    ["rgba(239, 68, 68, 0.1)", "rgba(138, 205, 222, 0.2)", "rgba(34, 197, 94, 0.1)"]
+    ["rgba(239, 68, 68, 0.6)", "rgba(0, 0, 0, 0)", "rgba(34, 197, 94, 0.6)"]
   );
 
   const handleDragEnd = (event: any, info: any) => {
@@ -55,36 +55,44 @@ export function SwipeQuestion({ question, answerData, onAnswer }: SwipeQuestionP
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.7}
         onDragEnd={handleDragEnd}
-        style={{ x, rotate, backgroundColor }}
+        style={{ x, rotate }}
         animate={controls}
-        className="absolute inset-0 bg-secondary border rounded-lg p-8 flex flex-col justify-center shadow-sm cursor-grab active:cursor-grabbing z-10"
+        className="absolute inset-0 bg-background border border-primary/20 rounded-lg flex flex-col justify-center shadow-md cursor-grab active:cursor-grabbing z-10 overflow-hidden"
       >
-        <h3 className="text-[22px] md:text-2xl font-bold font-heading text-center leading-snug text-foreground">
-          {question.statement}
-        </h3>
-        <div className="absolute bottom-6 inset-x-0 flex items-center justify-center text-muted-foreground text-sm gap-2 opacity-60">
-          <ArrowLeft className="w-4 h-4" />
-          <span>Swipe to respond</span>
-          <ArrowRight className="w-4 h-4" />
+        {/* Color Overlay for swipe feedback */}
+        <motion.div 
+          className="absolute inset-0 pointer-events-none" 
+          style={{ backgroundColor }} 
+        />
+        
+        <div className="relative z-10 p-8 flex flex-col justify-center items-center h-full">
+          <h3 className="text-[22px] md:text-2xl font-bold font-heading text-center leading-snug text-foreground w-full">
+            {question.statement}
+          </h3>
+          <div className="absolute bottom-6 inset-x-0 flex items-center justify-center text-foreground/70 text-sm gap-2 font-medium">
+            <ArrowLeft className="w-4 h-4" />
+            <span>Swipe to respond</span>
+            <ArrowRight className="w-4 h-4" />
+          </div>
         </div>
       </motion.div>
 
       {/* Static Buttons at Bottom */}
       <div className="absolute bottom-[-80px] w-full flex justify-between gap-4 z-20">
         <Button 
-          variant="outline"
+          variant="disagree"
           size={"lg"} 
           disabled={hasSwiped}
-          className="flex-1 border-pink-300 bg-pink-50/50 hover:bg-pink-100 text-pink-500 font-bold tracking-wide"
+          className="flex-1 font-bold tracking-wide"
           onClick={() => handleButtonClick('left')}
         >
           <X className="stroke-3" /> DISAGREE
         </Button>
         <Button 
-          variant="outline"
+          variant="agree"
           size={"lg"} 
           disabled={hasSwiped}
-          className="flex-1 border-green-300 bg-green-50/50 hover:bg-green-100 text-green-600 font-bold tracking-wide"
+          className="flex-1 font-bold tracking-wide"
           onClick={() => handleButtonClick('right')}
         >
           <Check className="stroke-3" /> AGREE
