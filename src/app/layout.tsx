@@ -3,6 +3,7 @@ import { Inter, Raleway } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { DynamicThemeProvider } from "@/providers/dynamic-theme-provider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -31,6 +32,7 @@ export default function RootLayout({
       className={`${inter.variable} ${raleway.variable} h-full antialiased`}
     >
       <body className="min-h-full font-sans" suppressHydrationWarning>
+        <DynamicThemeProvider />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

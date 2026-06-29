@@ -24,7 +24,7 @@ const THEME_PRESETS = [
 ];
 
 const SECONDARY_PRESETS = [
-  { name: "Slate (Default)", secondary: "oklch(72.469% 0.11517 218.16)" },
+  { name: "Aqua Blue (Default)", secondary: "oklch(72.469% 0.11517 218.16)" },
   { name: "Pale Blue", secondary: "oklch(0.85 0.05 250)" },
   { name: "Mint Green", secondary: "oklch(0.85 0.1 150)" },
   { name: "Peach", secondary: "oklch(0.85 0.1 40)" },
