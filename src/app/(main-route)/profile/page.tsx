@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { ThemeCustomizerDrawer } from "@/components/common/ThemeCustomizer";
 import {
   Pencil, 
   ShieldCheck, 
@@ -81,12 +82,12 @@ export default function ProfilePage() {
           </div>
 
           {/* Progress Card Inside Profile */}
-          <div className="bg-white/40 border border-white/50 rounded-sm p-3 shadow-sm">
+          <div className="bg-background/40 border border-border/50 rounded-sm p-3 shadow-sm">
             <div className="flex justify-between items-center mb-2">
               <span className="text-[11px] font-medium text-foreground">Program progress</span>
               <span className="text-[9px] font-bold text-foreground/80">1/8</span>
             </div>
-            <Progress value={12.5} className="h-1.5 bg-white/60" />
+            <Progress value={12.5} className="h-1.5 bg-background/60" />
           </div>
         </div>
 
@@ -112,6 +113,7 @@ export default function ProfilePage() {
                 </span>
               </div>
             </button>
+            <ThemeCustomizerDrawer />
             {settingsItems.map((item) => {
               const Icon = item.icon;
               

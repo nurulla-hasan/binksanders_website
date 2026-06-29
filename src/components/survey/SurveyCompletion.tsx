@@ -70,11 +70,11 @@ export function SurveyCompletion({ answers, onReturnHome }: SurveyCompletionProp
       <div className="flex-1 flex flex-col justify-between min-h-[80vh] animate-fadeIn">
         <div className="space-y-6">
           {/* Top Header Card */}
-          <div className="bg-primary/15 border-none p-6 rounded-lg text-center shadow-sm">
-            <h1 className="text-2xl font-bold font-heading text-foreground">
+          <div className="bg-primary border-none p-6 rounded-lg text-center shadow-sm">
+            <h1 className="text-2xl font-bold font-heading text-primary-foreground">
               Well Done
             </h1>
-            <p className="text-muted-foreground text-sm mt-1.5 font-medium">
+            <p className="text-primary-foreground/90 text-sm mt-1.5 font-medium">
               You completed all steps in this module.
             </p>
           </div>

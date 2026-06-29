@@ -109,9 +109,9 @@ export default function HomePage() {
             </Button>
           </section>
         ) : (
-          <section className="bg-green-500/10 border border-green-500/30 rounded-lg p-6 text-center space-y-2">
-             <h2 className="text-xl font-bold text-green-700">All Caught Up!</h2>
-             <p className="text-sm text-green-600/80">You have successfully completed all available modules.</p>
+          <section className="bg-success rounded-lg p-6 text-center space-y-2 shadow-sm">
+             <h2 className="text-xl font-bold text-success-foreground">All Caught Up!</h2>
+             <p className="text-sm text-success-foreground/90 font-medium">You have successfully completed all available modules.</p>
           </section>
         )}
 
@@ -121,7 +121,7 @@ export default function HomePage() {
             Your Learning Path
           </h2>
 
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-5">
             {modulesRegistry.map((mod, index) => {
               const isCompleted = completedModules[mod.id];
               // Unlocked if it's the next module in line, or already completed
@@ -131,51 +131,66 @@ export default function HomePage() {
               return (
                 <div 
                   key={mod.id}
-                  className={`border rounded-lg p-5 shadow-sm space-y-4 relative overflow-hidden transition-all duration-300
-                    ${isLocked ? "bg-muted/30 border-border/40 opacity-60 grayscale-[0.5]" : "bg-primary/5 border-primary/10"}
+                  className={`border rounded-xl flex flex-col shadow-sm relative overflow-hidden transition-all duration-300
+                    ${isLocked ? "bg-muted/30 border-border/40 opacity-60 grayscale-[0.5]" : "bg-card border-border hover:border-primary/50"}
                   `}
                 >
                   {isLocked && (
                     <div className="absolute inset-0 bg-background/20 z-10 flex items-center justify-center backdrop-blur-[1px]" />
                   )}
 
-                  <div className="flex items-center justify-between relative z-20">
-                    <span className={`inline-block px-2.5 py-0.5 text-[10px] font-bold rounded-lg uppercase tracking-wider
-                      ${isLocked ? "bg-muted text-muted-foreground" : "bg-primary/10 text-primary"}
-                    `}>
-                      {mod.introData.badge}
-                    </span>
-                    {!isLocked ? (
-                      <Link
-                        href={`/modules/${mod.slug}`}
-                        className="text-xs font-bold text-primary hover:underline flex items-center gap-1 group"
-                      >
-                        {isCompleted ? "Review" : "Start"}
-                        <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
-                      </Link>
-                    ) : (
-                      <span className="text-xs font-bold text-muted-foreground flex items-center gap-1">
-                        <Lock className="w-3.5 h-3.5" />
-                        Locked
+                  {/* Module Image Placeholder */}
+                  <div className="w-full h-36 relative bg-muted shrink-0 border-b border-border/50">
+                    <Image
+                      src={mod.id === "baseline" 
+                        ? "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=800&auto=format&fit=crop" 
+                        : "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=800&auto=format&fit=crop"}
+                      alt={mod.introData.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-cover"
+                    />
+                  </div>
+
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-5">
+                    <div className="flex items-center justify-between relative z-20">
+                      <span className={`inline-block px-2.5 py-0.5 text-[10px] font-bold rounded-lg uppercase tracking-wider
+                        ${isLocked ? "bg-muted text-muted-foreground" : "bg-primary/10 text-primary"}
+                      `}>
+                        {mod.introData.badge}
                       </span>
-                    )}
-                  </div>
-
-                  <div className="space-y-1 relative z-20">
-                    <h3 className={`text-base font-bold font-heading leading-tight ${isLocked ? "text-muted-foreground" : "text-foreground"}`}>
-                      {mod.introData.title}
-                    </h3>
-                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-1">
-                      {mod.introData.description}
-                    </p>
-                  </div>
-
-                  <div className="space-y-1.5 pt-1 relative z-20">
-                    <div className="flex justify-between items-center text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                      <span>Progress</span>
-                      <span>{isCompleted ? "100%" : "0%"}</span>
+                      {!isLocked ? (
+                        <Link
+                          href={`/modules/${mod.slug}`}
+                          className="text-xs font-bold text-primary hover:underline flex items-center gap-1 group"
+                        >
+                          {isCompleted ? "Review" : "Start"}
+                          <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
+                        </Link>
+                      ) : (
+                        <span className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+                          <Lock className="w-3.5 h-3.5" />
+                          Locked
+                        </span>
+                      )}
                     </div>
-                    <Progress value={isCompleted ? 100 : 0} className="h-1.5 transition-all duration-500 ease-out" />
+
+                    <div className="space-y-2 relative z-20 flex-1">
+                      <h3 className={`text-base font-bold font-heading leading-tight ${isLocked ? "text-muted-foreground" : "text-foreground"}`}>
+                        {mod.introData.title}
+                      </h3>
+                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                        {mod.introData.description}
+                      </p>
+                    </div>
+
+                    <div className="space-y-1.5 pt-2 relative z-20 shrink-0">
+                      <div className="flex justify-between items-center text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                        <span>Progress</span>
+                        <span>{isCompleted ? "100%" : "0%"}</span>
+                      </div>
+                      <Progress value={isCompleted ? 100 : 0} className="h-1.5 transition-all duration-500 ease-out" />
+                    </div>
                   </div>
                 </div>
               );
