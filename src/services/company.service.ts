@@ -1,3 +1,5 @@
+"use server";
+
 import { buildQueryString } from "@/lib/buildQueryString";
 import { createMultipartBody } from "@/lib/createMultipartBody";
 import { nextServerFetch } from "@/lib/nextServerFetch";
@@ -9,30 +11,30 @@ import type {
 } from "@/lib/types/company.type";
 import type { TQuery } from "@/lib/types/global.type";
 
-export const createCompany = <T = unknown>(payload: CompanyPayload) =>
+export const createCompany = async <T = unknown>(payload: CompanyPayload) =>
   nextServerFetch<ApiResponse<T>>("/company/create-company", {
     method: "POST",
     body: payload,
     updateTag: "companies",
   });
 
-export const getCompanies = <T = unknown>(params: TQuery = {}) =>
+export const getCompanies = async <T = unknown>(params: TQuery = {}) =>
   nextServerFetch<ApiResponse<T>>(`/company${buildQueryString(params)}`, {
     tags: ["companies"],
   });
 
-export const getCompanyDropdown = <T = unknown>(params: TQuery = {}) =>
+export const getCompanyDropdown = async <T = unknown>(params: TQuery = {}) =>
   nextServerFetch<ApiResponse<T>>(
     `/company/dropdown${buildQueryString(params)}`,
     { tags: ["companies"] }
   );
 
-export const getCompany = <T = unknown>(companyId: string) =>
+export const getCompany = async <T = unknown>(companyId: string) =>
   nextServerFetch<ApiResponse<T>>(`/company/${companyId}`, {
     tags: ["companies", `company-${companyId}`],
   });
 
-export const updateCompany = <T = unknown>(
+export const updateCompany = async <T = unknown>(
   companyId: string,
   payload: Partial<CompanyPayload>
 ) =>
@@ -42,7 +44,7 @@ export const updateCompany = <T = unknown>(
     updateTag: ["companies", `company-${companyId}`],
   });
 
-export const updateCompanyStatus = <T = unknown>(
+export const updateCompanyStatus = async <T = unknown>(
   companyId: string,
   status: CompanyStatus
 ) =>
@@ -52,7 +54,7 @@ export const updateCompanyStatus = <T = unknown>(
     updateTag: ["companies", `company-${companyId}`],
   });
 
-export const updateCompanyBranding = <T = unknown>(
+export const updateCompanyBranding = async <T = unknown>(
   companyId: string,
   { data, logo, video }: UpdateCompanyBrandingPayload
 ) =>
@@ -62,7 +64,7 @@ export const updateCompanyBranding = <T = unknown>(
     updateTag: ["companies", `company-${companyId}`],
   });
 
-export const deleteCompany = <T = unknown>(companyId: string) =>
+export const deleteCompany = async <T = unknown>(companyId: string) =>
   nextServerFetch<ApiResponse<T>>(`/company/${companyId}`, {
     method: "DELETE",
     updateTag: ["companies", `company-${companyId}`],

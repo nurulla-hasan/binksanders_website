@@ -134,11 +134,19 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              size="lg"
-              className="w-full"
+              size="lg-full"
             >
               Log In
             </Button>
+
+            <div className="text-center">
+              <Link
+                href="/auth/admin-login"
+                className="text-xs font-semibold text-primary hover:underline"
+              >
+                Admin login
+              </Link>
+            </div>
           </form>
         )}
 

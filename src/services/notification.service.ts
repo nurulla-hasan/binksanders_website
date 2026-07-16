@@ -1,3 +1,5 @@
+"use server";
+
 import { buildQueryString } from "@/lib/buildQueryString";
 import { createMultipartBody } from "@/lib/createMultipartBody";
 import { nextServerFetch } from "@/lib/nextServerFetch";
@@ -8,24 +10,24 @@ import type {
   CompanyBroadcastPayload,
 } from "@/lib/types/notification.type";
 
-export const getNotifications = <T = unknown>(params: TQuery = {}) =>
+export const getNotifications = async <T = unknown>(params: TQuery = {}) =>
   nextServerFetch<ApiResponse<T>>(
     `/notification${buildQueryString(params)}`,
     { revalidate: 0 }
   );
 
-export const markAllNotificationsRead = <T = unknown>() =>
+export const markAllNotificationsRead = async <T = unknown>() =>
   nextServerFetch<ApiResponse<T>>("/notification/mark-all-read", {
     method: "PATCH",
   });
 
-export const markNotificationRead = <T = unknown>(notificationId: string) =>
+export const markNotificationRead = async <T = unknown>(notificationId: string) =>
   nextServerFetch<ApiResponse<T>>(
     `/notification/mark-read/${notificationId}`,
     { method: "PATCH" }
   );
 
-export const broadcastNotification = <T = unknown>({
+export const broadcastNotification = async <T = unknown>({
   data,
   image,
 }: AdminBroadcastPayload) =>
@@ -34,7 +36,7 @@ export const broadcastNotification = <T = unknown>({
     body: createMultipartBody(data, { image }),
   });
 
-export const broadcastToCompanies = <T = unknown>(
+export const broadcastToCompanies = async <T = unknown>(
   payload: CompanyBroadcastPayload
 ) =>
   nextServerFetch<ApiResponse<T>>(

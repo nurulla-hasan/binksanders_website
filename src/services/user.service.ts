@@ -1,3 +1,5 @@
+"use server";
+
 import { buildQueryString } from "@/lib/buildQueryString";
 import { createMultipartBody } from "@/lib/createMultipartBody";
 import { nextServerFetch } from "@/lib/nextServerFetch";
@@ -5,15 +7,15 @@ import type { ApiResponse } from "@/lib/types/api.type";
 import type { TQuery } from "@/lib/types/global.type";
 import type { UpdateUserProfilePayload } from "@/lib/types/user.type";
 
-export const getUsers = <T = unknown>(params: TQuery = {}) =>
+export const getUsers = async <T = unknown>(params: TQuery = {}) =>
   nextServerFetch<ApiResponse<T>>(`/user${buildQueryString(params)}`, {
     tags: ["users"],
   });
 
-export const getMyProfile = <T = unknown>() =>
+export const getMyProfile = async <T = unknown>() =>
   nextServerFetch<ApiResponse<T>>("/user/me", { revalidate: 0 });
 
-export const updateProfile = <T = unknown>({
+export const updateProfile = async <T = unknown>({
   data,
   image,
 }: UpdateUserProfilePayload) =>
@@ -23,7 +25,7 @@ export const updateProfile = <T = unknown>({
     updateTag: "users",
   });
 
-export const setupProfile = <T = unknown>({
+export const setupProfile = async <T = unknown>({
   data,
   image,
 }: UpdateUserProfilePayload) =>

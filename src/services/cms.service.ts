@@ -1,3 +1,5 @@
+"use server";
+
 import { nextServerFetch } from "@/lib/nextServerFetch";
 import type { ApiResponse } from "@/lib/types/api.type";
 import type {
@@ -24,25 +26,25 @@ const getContent = <T>(endpoint: string, tag: string) =>
     tags: [tag],
   });
 
-export const upsertAbout = <T = unknown>(payload: AboutPayload) =>
+export const upsertAbout = async <T = unknown>(payload: AboutPayload) =>
   upsertContent<T>("/about/create-or-update", payload, "about");
 
-export const getAbout = <T = unknown>() =>
+export const getAbout = async <T = unknown>() =>
   getContent<T>("/about/retrive", "about");
 
-export const upsertPrivacy = <T = unknown>(payload: PrivacyPayload) =>
+export const upsertPrivacy = async <T = unknown>(payload: PrivacyPayload) =>
   upsertContent<T>("/privacy/create-or-update", payload, "privacy");
 
-export const getPrivacy = <T = unknown>() =>
+export const getPrivacy = async <T = unknown>() =>
   getContent<T>("/privacy/retrive", "privacy");
 
-export const upsertTerms = <T = unknown>(payload: TermsPayload) =>
+export const upsertTerms = async <T = unknown>(payload: TermsPayload) =>
   upsertContent<T>("/terms/create-or-update", payload, "terms");
 
-export const getTerms = <T = unknown>() =>
+export const getTerms = async <T = unknown>() =>
   getContent<T>("/terms/retrive", "terms");
 
-export const sendSupportMessage = <T = unknown>(payload: ContactPayload) =>
+export const sendSupportMessage = async <T = unknown>(payload: ContactPayload) =>
   nextServerFetch<ApiResponse<T>>("/contact/send-message", {
     method: "POST",
     body: payload,
