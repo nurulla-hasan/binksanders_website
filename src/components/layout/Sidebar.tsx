@@ -19,6 +19,7 @@ import {
 import { ScrollArea } from "../ui/scroll-area";
 import { ErrorToast, SuccessToast } from "@/lib/utils";
 import { logout } from "@/services/auth.service";
+import { useAuthStore } from "@/stores/auth.store";
 
 interface SidebarProps {
   isSidebarOpen: boolean;
@@ -49,6 +50,7 @@ export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }: SidebarProp
   const pathname = usePathname();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const clearAuth = useAuthStore((state) => state.clearAuth);
   
   const isSuperAdmin = pathname?.startsWith("/super-admin");
   const navItems = isSuperAdmin ? superAdminNavItems : companyNavItems;
@@ -64,6 +66,7 @@ export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }: SidebarProp
     } catch (error: unknown) {
       ErrorToast(error instanceof Error ? error.message : "Unable to log out");
     } finally {
+      clearAuth();
       setIsSidebarOpen(false);
       router.replace(isSuperAdmin ? "/auth/admin-login" : "/auth/login");
       setIsLoggingOut(false);

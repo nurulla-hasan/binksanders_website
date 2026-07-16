@@ -1,8 +1,11 @@
-import { Menu, User as UserIcon } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { getInitials } from "@/lib/utils";
+import { useAuthStore } from "@/stores/auth.store";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -10,8 +13,9 @@ interface HeaderProps {
 
 export default function Header({ onMenuClick }: HeaderProps) {
   const pathname = usePathname();
+  const user = useAuthStore((state) => state.user);
   const isSuperAdmin = pathname?.startsWith("/super-admin");
-  const roleTitle = isSuperAdmin ? "Super Admin" : "Company Admin";
+  const roleTitle = user?.role === "superAdmin" ? "Super Admin" : "Admin";
   const profileLink = isSuperAdmin ? "/super-admin/profile" : "/company/profile";
 
   return (
@@ -25,7 +29,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
         >
           <Menu className="h-6 w-6" />
         </Button>
-        <h1 className="text-xl font-bold font-heading hidden sm:block">Welcome back, Admin</h1>
+        <h1 className="text-xl font-bold font-heading hidden sm:block">
+          Welcome back, {user?.firstName || "Admin"}
+        </h1>
       </div>
 
       <div className="flex items-center gap-4">
@@ -36,12 +42,15 @@ export default function Header({ onMenuClick }: HeaderProps) {
         <Link href={profileLink}>
           <div className="flex items-center gap-3 pl-4 border-l border-border cursor-pointer hover:opacity-80 transition-opacity">
             <div className="flex-col items-end hidden sm:flex">
-              <span className="text-sm font-medium leading-none">Admin User</span>
+              <span className="text-sm font-medium leading-none">
+                {user?.fullName || "Admin User"}
+              </span>
               <span className="text-xs text-muted-foreground mt-1">{roleTitle}</span>
             </div>
-            <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
-              <UserIcon className="h-5 w-5" />
-            </div>
+            <Avatar size="lg">
+              {user?.image && <AvatarImage src={user.image} alt={user.fullName} />}
+              <AvatarFallback>{getInitials(user?.fullName || "Admin")}</AvatarFallback>
+            </Avatar>
           </div>
         </Link>
       </div>

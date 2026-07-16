@@ -5,15 +5,18 @@ import { createMultipartBody } from "@/lib/createMultipartBody";
 import { nextServerFetch } from "@/lib/nextServerFetch";
 import type { ApiResponse } from "@/lib/types/api.type";
 import type { TQuery } from "@/lib/types/global.type";
-import type { UpdateUserProfilePayload } from "@/lib/types/user.type";
+import type {
+  CurrentUser,
+  UpdateUserProfilePayload,
+} from "@/lib/types/user.type";
 
 export const getUsers = async <T = unknown>(params: TQuery = {}) =>
   nextServerFetch<ApiResponse<T>>(`/user${buildQueryString(params)}`, {
     tags: ["users"],
   });
 
-export const getMyProfile = async <T = unknown>() =>
-  nextServerFetch<ApiResponse<T>>("/user/me", { revalidate: 0 });
+export const getMyProfile = async () =>
+  nextServerFetch<ApiResponse<CurrentUser>>("/user/me", { revalidate: 0 });
 
 export const updateProfile = async <T = unknown>({
   data,

@@ -1,46 +1,87 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Camera } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { DashboardHeader } from "@/components/ui/custom/DashboardHeader";
 import DashboardPageLayout from "@/components/ui/custom/DashboardPageLayout";
-import { Button } from "@/components/ui/button";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Field, FieldLabel, FieldError, FieldGroup, FieldContent } from "@/components/ui/field";
-import { ErrorToast, SuccessToast } from "@/lib/utils";
-import { changeAdminPassword } from "@/services/admin.service";
-
-const profileSchema = z.object({
-  name: z.string().min(2, "Name is required"),
-  email: z.string().email("Invalid email address"),
-  address: z.string().min(5, "Address is required"),
-});
-
-type ProfileValues = z.infer<typeof profileSchema>;
+import { ErrorToast, getInitials, SuccessToast } from "@/lib/utils";
+import {
+  changeAdminPassword,
+  updateAdminProfile,
+} from "@/services/admin.service";
+import { getMyProfile } from "@/services/user.service";
+import { useAuthStore } from "@/stores/auth.store";
 
 export default function ProfilePage() {
+  const user = useAuthStore((state) => state.user);
+  const setUser = useAuthStore((state) => state.setUser);
+  const [profileDraft, setProfileDraft] = useState<{
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+  }>({});
+  const [image, setImage] = useState<File>();
+  const [imagePreview, setImagePreview] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const { register, handleSubmit, formState: { errors } } = useForm<ProfileValues>({
-    resolver: zodResolver(profileSchema as any),
-    defaultValues: {
-      name: "",
-      email: "",
-      address: "",
-    }
-  });
+  const firstName = profileDraft.firstName ?? user?.firstName ?? "";
+  const lastName = profileDraft.lastName ?? user?.lastName ?? "";
+  const phone = profileDraft.phone ?? user?.phone ?? "";
 
-  const onSubmit = (data: ProfileValues) => {
-    console.log("Profile data:", data);
-    // TODO: Connect this to an API endpoint
+  useEffect(() => {
+    return () => {
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+    };
+  }, [imagePreview]);
+
+  const handleImageChange = (file?: File) => {
+    setImage(file);
+    setImagePreview(file ? URL.createObjectURL(file) : "");
   };
 
-  const handleChangePassword = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleProfileUpdate = async (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
     event.preventDefault();
+    setIsUpdating(true);
+
+    try {
+      const response = await updateAdminProfile({
+        data: { firstName, lastName, phone },
+        image,
+      });
+      if (!response.success) throw new Error(response.message);
+
+      const profileResponse = await getMyProfile();
+      if (profileResponse.success) setUser(profileResponse.data);
+      setProfileDraft({});
+      setImage(undefined);
+      setImagePreview("");
+      SuccessToast(response.message || "Profile updated successfully");
+    } catch (error: unknown) {
+      ErrorToast(error instanceof Error ? error.message : "Unable to update profile");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleChangePassword = async (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
+    event.preventDefault();
+
+    if (newPassword !== confirmPassword) {
+      ErrorToast("New passwords do not match");
+      return;
+    }
+
     setIsChangingPassword(true);
 
     try {
@@ -50,6 +91,7 @@ export default function ProfilePage() {
       SuccessToast(response.message || "Password changed successfully");
       setOldPassword("");
       setNewPassword("");
+      setConfirmPassword("");
     } catch (error: unknown) {
       ErrorToast(error instanceof Error ? error.message : "Unable to change password");
     } finally {
@@ -60,106 +102,171 @@ export default function ProfilePage() {
   return (
     <div className="animate-fadeIn">
       <DashboardPageLayout>
-        <DashboardHeader 
-          title="Company Profile" 
-          description="Manage your company's public information and contact details."
+        <DashboardHeader
+          title="Admin Profile"
+          description="Manage your personal information, profile image, and account security."
         />
 
-        <div className="bg-secondary/10 border border-secondary/20 rounded-xl p-6 shadow-sm max-w-4xl">
-          <h2 className="text-xl font-bold text-foreground mb-6">Company Information</h2>
-          
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <FieldGroup className="gap-6">
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Field data-invalid={!!errors.name}>
-                  <FieldLabel htmlFor="name" className="text-muted-foreground font-medium">Name</FieldLabel>
-                  <FieldContent>
-                    <Input 
-                      id="name" 
-                      placeholder="Type Here.." 
-                      className="bg-transparent shadow-none h-11"
-                      aria-invalid={!!errors.name} 
-                      {...register("name")} 
+        <div className="grid max-w-5xl gap-6">
+          <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <div className="mb-8 flex flex-col gap-5 border-b border-border pb-6 sm:flex-row sm:items-center">
+              <div className="relative w-fit">
+                <Avatar size="xl">
+                  {(imagePreview || user?.image) && (
+                    <AvatarImage
+                      src={imagePreview || user?.image}
+                      alt={user?.fullName || "Admin"}
                     />
-                    <FieldError errors={[errors.name]} />
-                  </FieldContent>
-                </Field>
-
-                <Field data-invalid={!!errors.email}>
-                  <FieldLabel htmlFor="email" className="text-muted-foreground font-medium">Email</FieldLabel>
-                  <FieldContent>
-                    <Input 
-                      id="email" 
-                      type="email" 
-                      placeholder="Type Here.." 
-                      className="bg-transparent shadow-none h-11"
-                      aria-invalid={!!errors.email} 
-                      {...register("email")} 
-                    />
-                    <FieldError errors={[errors.email]} />
-                  </FieldContent>
-                </Field>
+                  )}
+                  <AvatarFallback>
+                    {getInitials(user?.fullName || "Admin")}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="absolute -bottom-1 -right-1 flex size-7 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  <Camera className="size-4" />
+                </div>
               </div>
 
-              <Field data-invalid={!!errors.address}>
-                <FieldLabel htmlFor="address" className="text-muted-foreground font-medium">Address</FieldLabel>
-                <FieldContent>
-                  <Input 
-                    id="address" 
-                    placeholder="Type Here.." 
-                    className="bg-transparent shadow-none h-11"
-                    aria-invalid={!!errors.address} 
-                    {...register("address")} 
+              <div>
+                <h2 className="text-xl font-bold text-foreground">
+                  {user?.fullName || "Admin User"}
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {user?.role === "superAdmin" ? "Super Admin" : "Admin"}
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleProfileUpdate} className="space-y-6">
+              <FieldGroup>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <Field>
+                    <FieldLabel htmlFor="firstName">First Name</FieldLabel>
+                    <Input
+                      id="firstName"
+                      value={firstName}
+                      onChange={(event) =>
+                        setProfileDraft((current) => ({
+                          ...current,
+                          firstName: event.target.value,
+                        }))
+                      }
+                      required
+                    />
+                  </Field>
+
+                  <Field>
+                    <FieldLabel htmlFor="lastName">Last Name</FieldLabel>
+                    <Input
+                      id="lastName"
+                      value={lastName}
+                      onChange={(event) =>
+                        setProfileDraft((current) => ({
+                          ...current,
+                          lastName: event.target.value,
+                        }))
+                      }
+                      required
+                    />
+                  </Field>
+
+                  <Field>
+                    <FieldLabel htmlFor="email">Email</FieldLabel>
+                    <Input id="email" type="email" value={user?.email || ""} disabled />
+                  </Field>
+
+                  <Field>
+                    <FieldLabel htmlFor="phone">Phone</FieldLabel>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      value={phone}
+                      onChange={(event) =>
+                        setProfileDraft((current) => ({
+                          ...current,
+                          phone: event.target.value,
+                        }))
+                      }
+                    />
+                  </Field>
+                </div>
+
+                <Field>
+                  <FieldLabel htmlFor="profileImage">Profile Image</FieldLabel>
+                  <Input
+                    id="profileImage"
+                    type="file"
+                    accept="image/*"
+                    onChange={(event) => handleImageChange(event.target.files?.[0])}
                   />
-                  <FieldError errors={[errors.address]} />
-                </FieldContent>
-              </Field>
-            </FieldGroup>
+                </Field>
+              </FieldGroup>
 
-            <div className="flex justify-end pt-8">
-              <Button type="submit">
-                Publish
-              </Button>
-            </div>
-          </form>
-        </div>
+              <div className="flex justify-end">
+                <Button type="submit" disabled={isUpdating}>
+                  {isUpdating ? "Saving..." : "Save Changes"}
+                </Button>
+              </div>
+            </form>
+          </section>
 
-        <div className="mt-6 max-w-4xl rounded-xl border border-secondary/20 bg-secondary/10 p-6 shadow-sm">
-          <h2 className="mb-6 text-xl font-bold text-foreground">Change Password</h2>
-
-          <form onSubmit={handleChangePassword} className="space-y-6">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <Field>
-                <FieldLabel htmlFor="oldPassword">Current Password</FieldLabel>
-                <Input
-                  id="oldPassword"
-                  type="password"
-                  value={oldPassword}
-                  onChange={(event) => setOldPassword(event.target.value)}
-                  required
-                />
-              </Field>
-
-              <Field>
-                <FieldLabel htmlFor="newPassword">New Password</FieldLabel>
-                <Input
-                  id="newPassword"
-                  type="password"
-                  value={newPassword}
-                  onChange={(event) => setNewPassword(event.target.value)}
-                  minLength={8}
-                  required
-                />
-              </Field>
+          <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
+            <div className="mb-6">
+              <h2 className="text-xl font-bold text-foreground">Change Password</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Use a strong password that you do not use elsewhere.
+              </p>
             </div>
 
-            <div className="flex justify-end">
-              <Button type="submit" disabled={isChangingPassword}>
-                {isChangingPassword ? "Changing..." : "Change Password"}
-              </Button>
-            </div>
-          </form>
+            <form onSubmit={handleChangePassword} className="space-y-6">
+              <FieldGroup>
+                <Field>
+                  <FieldLabel htmlFor="oldPassword">Current Password</FieldLabel>
+                  <Input
+                    id="oldPassword"
+                    type="password"
+                    value={oldPassword}
+                    onChange={(event) => setOldPassword(event.target.value)}
+                    required
+                  />
+                </Field>
+
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <Field>
+                    <FieldLabel htmlFor="newPassword">New Password</FieldLabel>
+                    <Input
+                      id="newPassword"
+                      type="password"
+                      value={newPassword}
+                      onChange={(event) => setNewPassword(event.target.value)}
+                      minLength={8}
+                      required
+                    />
+                  </Field>
+
+                  <Field>
+                    <FieldLabel htmlFor="confirmPassword">
+                      Confirm New Password
+                    </FieldLabel>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(event) => setConfirmPassword(event.target.value)}
+                      minLength={8}
+                      required
+                    />
+                  </Field>
+                </div>
+              </FieldGroup>
+
+              <div className="flex justify-end">
+                <Button type="submit" disabled={isChangingPassword}>
+                  {isChangingPassword ? "Changing..." : "Change Password"}
+                </Button>
+              </div>
+            </form>
+          </section>
         </div>
       </DashboardPageLayout>
     </div>
