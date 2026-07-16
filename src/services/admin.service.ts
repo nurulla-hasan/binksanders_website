@@ -6,6 +6,7 @@ import { nextServerFetch } from "@/lib/nextServerFetch";
 import type {
   AdminLoginData,
   AdminLoginResult,
+  AdminListData,
   CreateAdminPayload,
   UpdateAdminProfilePayload,
 } from "@/lib/types/admin.type";
@@ -101,7 +102,7 @@ export const toggleAdminBlock = async <T = unknown>(adminId: string) =>
     updateTag: "admins",
   });
 
-export const getAdmins = async <T = unknown>(params: TQuery = { role: "admin" }) =>
-  nextServerFetch<ApiResponse<T>>(`/admin${buildQueryString(params)}`, {
+export const getAdmins = async (params: TQuery = { role: "admin" }) =>
+  nextServerFetch<ApiResponse<AdminListData>>(`/admin${buildQueryString(params)}`, {
     tags: ["admins"],
   });

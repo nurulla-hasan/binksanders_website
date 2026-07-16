@@ -1,4 +1,5 @@
 import type { ProfilePayload } from "./api.type";
+import type { TMeta } from "./global.type";
 
 export type AdminRole = "superAdmin" | "admin";
 
@@ -25,6 +26,11 @@ export type AdminLoginData = {
 
 export type AdminLoginResult = {
   role: AdminRole;
+};
+
+export type AdminListData = {
+  meta: TMeta;
+  result: AdminAccount[];
 };
 
 export type CreateAdminPayload = {
