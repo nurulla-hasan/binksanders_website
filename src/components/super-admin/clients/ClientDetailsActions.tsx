@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Ban, Pencil, ShieldCheck, Trash2 } from "lucide-react";
-import { EditBrandingModal } from "@/components/super-admin/clients/EditBrandingModal";
+import { Ban, Palette, Pencil, ShieldCheck, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmationModal } from "@/components/ui/custom/confirmation-modal";
 import { ModalWrapper } from "@/components/ui/custom/modal-wrapper";
@@ -83,7 +83,11 @@ export function ClientDetailsActions({ company }: { company: Company }) {
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <EditBrandingModal company={company} />
+      <Button asChild variant="outline">
+        <Link href={`/super-admin/branding?companyId=${company._id}`}>
+          <Palette /> Branding
+        </Link>
+      </Button>
       <ModalWrapper
         open={editOpen}
         onOpenChange={setEditOpen}
