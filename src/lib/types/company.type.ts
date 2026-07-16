@@ -36,6 +36,8 @@ export type CompanyListData = {
   result: Company[];
 };
 
+export type CompanyDropdownItem = Pick<Company, "_id" | "name">;
+
 export type CompanyStatus = "active" | "inactive" | "suspended";
 
 export type CompanyBrandingData = {

@@ -1,136 +1,70 @@
-"use client";
-
-import { useMemo } from "react";
-import DashboardPageLayout from "@/components/ui/custom/DashboardPageLayout";
+import { AddTeamModal } from "@/components/super-admin/location-performance/AddTeamModal";
+import { CompanyFilter } from "@/components/super-admin/location-performance/CompanyFilter";
+import { columns } from "@/components/super-admin/location-performance/TeamColumn";
 import { DashboardHeader } from "@/components/ui/custom/DashboardHeader";
-import { ColumnDef } from "@tanstack/react-table";
+import DashboardPageLayout from "@/components/ui/custom/DashboardPageLayout";
 import { DataTable } from "@/components/ui/custom/data-table";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Copy, Download, Edit, Trash2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { GenerateQRModal } from "@/components/super-admin/location-performance/GenerateQRModal";
+import type { TSearchParams } from "@/lib/types/global.type";
+import type { TeamRow } from "@/lib/types/team.type";
+import { getCompanyDropdown } from "@/services/company.service";
+import { getCompanyTeams, getTeams } from "@/services/team.service";
 
-export type AccessQRData = {
-  id: string;
-  company: string;
-  location: string;
-  linkedCourse: string;
-  loginMethod: string;
-  password?: string;
-};
+export default async function TeamManagementPage({
+  searchParams,
+}: {
+  searchParams: TSearchParams;
+}) {
+  const params = await searchParams;
+  const companyId = typeof params.companyId === "string" ? params.companyId : "";
+  const teamParams = { ...params };
+  delete teamParams.companyId;
 
-const tableData: AccessQRData[] = [
-  { id: "1", company: "Unilever", location: "Utrecht", linkedCourse: "Social Safety", loginMethod: "Employ ID", password: "1223" },
-  { id: "2", company: "Retail Corp", location: "Utrecht", linkedCourse: "Social Safety", loginMethod: "Anonymous" },
-  { id: "3", company: "Hema", location: "Utrecht", linkedCourse: "Social Safety", loginMethod: "Anonymous" },
-];
+  const [teamResponse, companyResponse] = await Promise.all([
+    companyId ? getCompanyTeams(companyId, teamParams) : getTeams(teamParams),
+    getCompanyDropdown(),
+  ]);
 
-export default function AccessQRManagementPage() {
-  const columns = useMemo<ColumnDef<AccessQRData>[]>(() => [
-    {
-      accessorKey: "company",
-      header: "Company",
-      cell: ({ row }) => <div className="py-2 text-muted-foreground">{row.original.company}</div>,
-    },
-    {
-      accessorKey: "location",
-      header: "Location / Team",
-      cell: ({ row }) => <div className="text-muted-foreground">{row.original.location}</div>,
-    },
-    {
-      accessorKey: "linkedCourse",
-      header: "Linked Course",
-      cell: ({ row }) => (
-        <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 font-normal">
-          {row.original.linkedCourse}
-        </Badge>
-      ),
-    },
-    {
-      accessorKey: "loginMethod",
-      header: "Log In Method",
-      cell: ({ row }) => <div className="text-muted-foreground">{row.original.loginMethod}</div>,
-    },
-    {
-      accessorKey: "password",
-      header: "Password",
-      cell: ({ row }) => <div className="text-muted-foreground">{row.original.password || "-"}</div>,
-    },
-    {
-      id: "actions",
-      header: () => <div className="text-right">Action</div>,
-      cell: () => {
-        return (
-          <div className="flex items-center justify-end gap-2 text-muted-foreground">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="hover:text-primary">
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Copy Credentials</TooltipContent>
-            </Tooltip>
-            
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="hover:text-primary">
-                  <Download className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Download QR Code</TooltipContent>
-            </Tooltip>
+  if (!teamResponse.success) {
+    throw new Error(teamResponse.message || "Unable to load teams");
+  }
+  if (!companyResponse.success) {
+    throw new Error(companyResponse.message || "Unable to load companies");
+  }
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-amber-500 hover:text-amber-600 hover:bg-amber-500/10">
-                  <Edit className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Edit Details</TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10">
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Delete Entry</TooltipContent>
-            </Tooltip>
-          </div>
-        );
-      },
-    },
-  ], []);
+  const companyNames = new Map(
+    companyResponse.data.map((company) => [company._id, company.name]),
+  );
+  const teams: TeamRow[] = teamResponse.data.result.map((team) => ({
+    ...team,
+    companyName: companyNames.get(team.companyId) || "Unknown company",
+  }));
 
   return (
     <div className="animate-fadeIn">
       <DashboardPageLayout>
-        <DashboardHeader 
-          title="Access & QR Management" 
-          description="Assign a location or team to a client company and generate their unique training QR code"
+        <DashboardHeader
+          title="Location & Team"
+          description="Create and manage client teams and their access passcodes."
         >
-          <div className="flex items-center gap-4">
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder="Select Company" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="unilever">Unilever</SelectItem>
-                <SelectItem value="retail">Retail Corp</SelectItem>
-                <SelectItem value="hema">Hema</SelectItem>
-              </SelectContent>
-            </Select>
-            <GenerateQRModal />
+          <div className="flex flex-wrap items-center gap-2">
+            <CompanyFilter companies={companyResponse.data} />
+            <AddTeamModal companies={companyResponse.data} />
           </div>
         </DashboardHeader>
-        
-        <div className="bg-card border rounded-md p-4 shadow-sm">
+
+        <div className="rounded-md border border-border bg-card p-4 shadow-sm">
           <DataTable
             columns={columns}
-            data={tableData}
+            data={teams}
+            meta={{
+              page: teamResponse.data.meta.page,
+              limit: teamResponse.data.meta.limit,
+              total: teamResponse.data.meta.total,
+              totalPages: teamResponse.data.meta.totalPage,
+            }}
+            limit={teamResponse.data.meta.limit}
+            searchKey="searchTerm"
+            searchPlaceholder="Search teams..."
           />
         </div>
       </DashboardPageLayout>

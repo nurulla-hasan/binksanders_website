@@ -4,7 +4,7 @@ import { buildQueryString } from "@/lib/buildQueryString";
 import { nextServerFetch } from "@/lib/nextServerFetch";
 import type { ApiResponse } from "@/lib/types/api.type";
 import type { TQuery } from "@/lib/types/global.type";
-import type { CreateTeamPayload, UpdateTeamPayload } from "@/lib/types/team.type";
+import type { CreateTeamPayload, TeamListData, UpdateTeamPayload } from "@/lib/types/team.type";
 
 export const createTeam = async <T = unknown>(payload: CreateTeamPayload) =>
   nextServerFetch<ApiResponse<T>>("/team/create-team", {
@@ -13,16 +13,16 @@ export const createTeam = async <T = unknown>(payload: CreateTeamPayload) =>
     updateTag: "teams",
   });
 
-export const getTeams = async <T = unknown>(params: TQuery = {}) =>
-  nextServerFetch<ApiResponse<T>>(`/team${buildQueryString(params)}`, {
+export const getTeams = async (params: TQuery = {}) =>
+  nextServerFetch<ApiResponse<TeamListData>>(`/team${buildQueryString(params)}`, {
     tags: ["teams"],
   });
 
-export const getCompanyTeams = async <T = unknown>(
+export const getCompanyTeams = async (
   companyId: string,
   params: TQuery = {}
 ) =>
-  nextServerFetch<ApiResponse<T>>(
+  nextServerFetch<ApiResponse<TeamListData>>(
     `/team/company/${companyId}${buildQueryString(params)}`,
     { tags: ["teams", `company-${companyId}-teams`] }
   );

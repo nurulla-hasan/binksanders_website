@@ -8,6 +8,7 @@ import type {
   CompanyPayload,
   Company,
   CompanyListData,
+  CompanyDropdownItem,
   CompanyStatus,
   UpdateCompanyBrandingPayload,
 } from "@/lib/types/company.type";
@@ -25,8 +26,8 @@ export const getCompanies = async (params: TQuery = {}) =>
     tags: ["companies"],
   });
 
-export const getCompanyDropdown = async <T = unknown>(params: TQuery = {}) =>
-  nextServerFetch<ApiResponse<T>>(
+export const getCompanyDropdown = async (params: TQuery = {}) =>
+  nextServerFetch<ApiResponse<CompanyDropdownItem[]>>(
     `/company/dropdown${buildQueryString(params)}`,
     { tags: ["companies"] }
   );
