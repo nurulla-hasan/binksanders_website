@@ -76,7 +76,7 @@ export const createAdmin = async <T = unknown>(payload: CreateAdminPayload) =>
     updateTag: "admins",
   });
 
-export const resendAdminOtp = async <T = unknown>(payload?: IdentifierPayload) =>
+export const resendAdminOtp = async <T = unknown>(payload: IdentifierPayload) =>
   nextServerFetch<ApiResponse<T>>("/admin/resendOtp", {
     method: "POST",
     body: payload,

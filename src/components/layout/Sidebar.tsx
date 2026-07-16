@@ -1,6 +1,9 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { 
   LayoutDashboard, 
@@ -14,6 +17,8 @@ import {
   LayoutList
 } from "lucide-react";
 import { ScrollArea } from "../ui/scroll-area";
+import { ErrorToast, SuccessToast } from "@/lib/utils";
+import { logout } from "@/services/auth.service";
 
 interface SidebarProps {
   isSidebarOpen: boolean;
@@ -42,10 +47,28 @@ const companyNavItems = [
 
 export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   const isSuperAdmin = pathname?.startsWith("/super-admin");
   const navItems = isSuperAdmin ? superAdminNavItems : companyNavItems;
   const basePath = isSuperAdmin ? "/super-admin" : "/company";
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+
+    try {
+      const response = await logout();
+      if (!response.success) throw new Error(response.message);
+      SuccessToast(response.message || "Logged out successfully");
+    } catch (error: unknown) {
+      ErrorToast(error instanceof Error ? error.message : "Unable to log out");
+    } finally {
+      setIsSidebarOpen(false);
+      router.replace(isSuperAdmin ? "/auth/admin-login" : "/auth/login");
+      setIsLoggingOut(false);
+    }
+  };
 
   return (
     <aside
@@ -94,11 +117,15 @@ export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }: SidebarProp
       {/* Bottom fixed area: Logout */}
       <div className="h-12 border-t border-border shrink-0">
         <Button
-          variant="ghost"
-          className="flex justify-start items-center gap-3 px-4 h-full w-full rounded-none transition-all text-muted-foreground hover:bg-red-500/10 hover:text-red-500"
+          variant="sidebar-logout"
+          size="sidebar-logout"
+          onClick={handleLogout}
+          disabled={isLoggingOut}
         >
           <LogOut className="h-5 w-5" />
-          <span className="text-base font-medium">Log out</span>
+          <span className="text-base font-medium">
+            {isLoggingOut ? "Logging out..." : "Log out"}
+          </span>
         </Button>
       </div>
     </aside>

@@ -1,6 +1,7 @@
 "use server";
 
 import { nextServerFetch } from "@/lib/nextServerFetch";
+import { cookies } from "next/headers";
 import type {
   ApiResponse,
   IdentifierPayload,
@@ -74,5 +75,15 @@ export const resetPassword = async <T = unknown>(payload: ResetPasswordPayload) 
 export const refreshToken = async <T = unknown>(payload: RefreshTokenPayload) =>
   postPublicWithSession<T>("/auth/refresh-token", payload);
 
-export const logout = async <T = unknown>() =>
-  nextServerFetch<ApiResponse<T>>("/auth/logout", { method: "POST" });
+export const logout = async <T = unknown>() => {
+  try {
+    return await nextServerFetch<ApiResponse<T>>("/auth/logout", {
+      method: "POST",
+    });
+  } finally {
+    const cookieStore = await cookies();
+    cookieStore.delete("accessToken");
+    cookieStore.delete("refreshToken");
+    cookieStore.delete("rememberMe");
+  }
+};
