@@ -20,7 +20,7 @@ export function TextQuestion({ question, answerData, onAnswer }: TextQuestionPro
       </div>
 
       <textarea
-        className="w-full flex-1 min-h-[200px] p-4 bg-background text-foreground shadow-sm border border-primary/20 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-muted-foreground"
+        className="w-full flex-1 min-h-50 p-4 bg-background text-foreground shadow-sm border border-primary/20 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-muted-foreground"
         placeholder="Write your thoughts here..."
         value={answerData || ""}
         onChange={(e) => onAnswer(e.target.value)}

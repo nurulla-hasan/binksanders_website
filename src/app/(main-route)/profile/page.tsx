@@ -145,7 +145,7 @@ export default function ProfilePage() {
                     </button>
                   </DrawerTrigger>
                   <DrawerContent>
-                    <div className="mx-auto w-full max-w-[480px]">
+                    <div className="mx-auto w-full max-w-120">
                       <DrawerHeader>
                         <DrawerTitle>{item.label}</DrawerTitle>
                         <DrawerDescription>

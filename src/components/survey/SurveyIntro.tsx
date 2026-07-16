@@ -26,7 +26,7 @@ export function SurveyIntro({
   return (
     <div className="flex-1 flex flex-col w-full">
       {/* Cover Image */}
-      <div className="relative w-full h-[220px] rounded-lg overflow-hidden mb-4 z-0 bg-muted shadow-sm">
+      <div className="relative w-full h-55 rounded-lg overflow-hidden mb-4 z-0 bg-muted shadow-sm">
         <Image 
           src={imageUrl} 
           alt={title} 

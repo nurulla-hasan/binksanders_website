@@ -11,7 +11,7 @@ interface ChatQuestionProps {
 
 export function ChatQuestion({ question, answerData, onAnswer }: ChatQuestionProps) {
   return (
-    <div className="flex-1 flex flex-col w-full min-h-[400px]">
+    <div className="flex-1 flex flex-col w-full min-h-100">
       
       {/* Chat History Area */}
       <div className="flex-1 space-y-4 p-4 bg-muted/30 rounded-lg overflow-y-auto mb-4 border">

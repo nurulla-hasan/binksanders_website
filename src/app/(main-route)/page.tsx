@@ -40,7 +40,7 @@ export default function HomePage() {
       <div className="flex-1 space-y-6 animate-fadeIn pb-8">
         
         {/* Welcome Progress Card (Pink) */}
-        <section className="bg-primary text-primary-foreground rounded-lg p-6 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[160px] gap-6">
+        <section className="bg-primary text-primary-foreground rounded-lg p-6 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-40 gap-6">
           <div className="space-y-1">
             <h1 className="text-2xl font-bold font-heading tracking-tight">
               Welcome back, Willem!
@@ -79,7 +79,7 @@ export default function HomePage() {
                 <h2 className="text-2xl font-bold text-secondary-foreground font-heading leading-tight pr-2">
                   {nextModule.introData.title}
                 </h2>
-                <p className="text-xs text-secondary-foreground/80 leading-relaxed max-w-[220px]">
+                <p className="text-xs text-secondary-foreground/80 leading-relaxed max-w-55">
                   {nextModule.introData.description.substring(0, 65)}...
                 </p>
               </div>

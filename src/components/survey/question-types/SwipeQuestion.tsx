@@ -45,7 +45,7 @@ export function SwipeQuestion({ question, answerData, onAnswer }: SwipeQuestionP
   };
 
   return (
-    <div className="flex-1 flex flex-col relative w-full min-h-[350px] mb-[80px]">
+    <div className="flex-1 flex flex-col relative w-full min-h-87.5 mb-20">
       
 
 
@@ -78,7 +78,7 @@ export function SwipeQuestion({ question, answerData, onAnswer }: SwipeQuestionP
       </motion.div>
 
       {/* Static Buttons at Bottom */}
-      <div className="absolute bottom-[-80px] w-full flex justify-between gap-4 z-20">
+      <div className="absolute -bottom-20 w-full flex justify-between gap-4 z-20">
         <Button 
           variant="disagree"
           size={"lg"} 

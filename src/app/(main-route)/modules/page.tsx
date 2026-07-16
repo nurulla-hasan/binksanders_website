@@ -32,8 +32,8 @@ export default function ModulesPage() {
       {/* Top Header Section (Light Blue Background) */}
       <section className="bg-secondary/80 text-secondary-foreground p-4 relative overflow-hidden border-b border-secondary/20">
         {/* Semi-transparent decorative circles matching Figma */}
-        <div className="absolute top-[-30px] right-[-20px] w-28 h-28 rounded-full bg-secondary/70 pointer-events-none" />
-        <div className="absolute top-[-10px] right-[-45px] w-24 h-24 rounded-full bg-secondary/60 pointer-events-none" />
+        <div className="absolute -top-7.5 -right-5 w-28 h-28 rounded-full bg-secondary/70 pointer-events-none" />
+        <div className="absolute -top-2.5 -right-11.25 w-24 h-24 rounded-full bg-secondary/60 pointer-events-none" />
 
         <div className="relative z-10 space-y-4">
           <div className="space-y-1">

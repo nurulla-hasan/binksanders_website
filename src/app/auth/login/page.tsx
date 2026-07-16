@@ -226,7 +226,7 @@ export default function LoginPage() {
               <h1 className="text-3xl font-bold font-heading tracking-tight text-foreground">
                 Scan To Authenticate
               </h1>
-              <p className="text-sm text-muted-foreground max-w-[280px] mx-auto leading-relaxed">
+              <p className="text-sm text-muted-foreground max-w-70 mx-auto leading-relaxed">
                 Scan the QR code to gain access for the training
               </p>
             </div>

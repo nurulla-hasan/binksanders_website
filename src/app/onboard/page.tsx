@@ -8,7 +8,7 @@ export default function OnboardPage() {
     <div className="flex flex-col min-h-screen dark bg-background text-foreground font-sans relative w-full overflow-hidden">
       
       {/* Top Video Section */}
-      <div className="relative w-full h-[55vh] min-h-[400px]">
+      <div className="relative w-full h-[55vh] min-h-100">
         {/* Background Video Placeholder Image */}
         <Image
           src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=600&auto=format&fit=crop"
