@@ -6,6 +6,8 @@ import { nextServerFetch } from "@/lib/nextServerFetch";
 import type { ApiResponse } from "@/lib/types/api.type";
 import type {
   CompanyPayload,
+  Company,
+  CompanyListData,
   CompanyStatus,
   UpdateCompanyBrandingPayload,
 } from "@/lib/types/company.type";
@@ -18,8 +20,8 @@ export const createCompany = async <T = unknown>(payload: CompanyPayload) =>
     updateTag: "companies",
   });
 
-export const getCompanies = async <T = unknown>(params: TQuery = {}) =>
-  nextServerFetch<ApiResponse<T>>(`/company${buildQueryString(params)}`, {
+export const getCompanies = async (params: TQuery = {}) =>
+  nextServerFetch<ApiResponse<CompanyListData>>(`/company${buildQueryString(params)}`, {
     tags: ["companies"],
   });
 
@@ -29,8 +31,8 @@ export const getCompanyDropdown = async <T = unknown>(params: TQuery = {}) =>
     { tags: ["companies"] }
   );
 
-export const getCompany = async <T = unknown>(companyId: string) =>
-  nextServerFetch<ApiResponse<T>>(`/company/${companyId}`, {
+export const getCompany = async (companyId: string) =>
+  nextServerFetch<ApiResponse<Company>>(`/company/${companyId}`, {
     tags: ["companies", `company-${companyId}`],
   });
 

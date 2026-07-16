@@ -7,11 +7,12 @@ import type { ApiResponse } from "@/lib/types/api.type";
 import type { TQuery } from "@/lib/types/global.type";
 import type {
   CurrentUser,
+  UserListData,
   UpdateUserProfilePayload,
 } from "@/lib/types/user.type";
 
-export const getUsers = async <T = unknown>(params: TQuery = {}) =>
-  nextServerFetch<ApiResponse<T>>(`/user${buildQueryString(params)}`, {
+export const getUsers = async (params: TQuery = {}) =>
+  nextServerFetch<ApiResponse<UserListData>>(`/user${buildQueryString(params)}`, {
     tags: ["users"],
   });
 

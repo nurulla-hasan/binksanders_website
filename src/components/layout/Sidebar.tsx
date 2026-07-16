@@ -31,7 +31,7 @@ const superAdminNavItems = [
   { name: "Module Builder", href: "/super-admin/course", icon: GraduationCap },
   { name: "Client Branding", href: "/super-admin/branding", icon: Megaphone },
   { name: "Location & Team", href: "/super-admin/location-performance", icon: MapPin },
-  { name: "Client", href: "/super-admin/users", icon: Users },
+  { name: "Client", href: "/super-admin/clients", icon: Users },
   { name: "Broadcast Message", href: "/super-admin/broadcast", icon: Rss },
   { name: "Make admin", href: "/super-admin/make-admin", icon: UserPlus },
   { name: "Privacy Policy", href: "/super-admin/privacy-policy", icon: LayoutList },
