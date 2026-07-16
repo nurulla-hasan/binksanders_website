@@ -43,7 +43,6 @@ const companyNavItems = [
   { name: "Course", href: "/company/course", icon: GraduationCap },
   { name: "Location & Performance", href: "/company/location-performance", icon: LayoutList },
   { name: "All user", href: "/company/users", icon: Users },
-  { name: "Make admin", href: "/company/make-admin", icon: UserPlus },
 ];
 
 export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) {

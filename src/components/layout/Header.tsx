@@ -15,7 +15,12 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const pathname = usePathname();
   const user = useAuthStore((state) => state.user);
   const isSuperAdmin = pathname?.startsWith("/super-admin");
-  const roleTitle = user?.role === "superAdmin" ? "Super Admin" : "Admin";
+  const roleTitle =
+    user?.role === "superAdmin"
+      ? "Super Admin"
+      : user?.role === "company"
+        ? "Company"
+        : "Admin";
   const profileLink = isSuperAdmin ? "/super-admin/profile" : "/company/profile";
 
   return (

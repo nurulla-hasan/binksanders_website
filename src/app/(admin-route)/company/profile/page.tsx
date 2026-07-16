@@ -1,106 +1,166 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-"use client";
-
+import { Building2, Mail, MapPin, ShieldCheck, UserRound } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { DashboardHeader } from "@/components/ui/custom/DashboardHeader";
 import DashboardPageLayout from "@/components/ui/custom/DashboardPageLayout";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Field, FieldLabel, FieldError, FieldGroup, FieldContent } from "@/components/ui/field";
+import { formatDate, getInitials } from "@/lib/utils";
+import { getCompany } from "@/services/company.service";
+import { getMyProfile } from "@/services/user.service";
 
-const profileSchema = z.object({
-  name: z.string().min(2, "Name is required"),
-  email: z.string().email("Invalid email address"),
-  address: z.string().min(5, "Address is required"),
-});
+export default async function CompanyProfilePage() {
+  const profileResponse = await getMyProfile();
 
-type ProfileValues = z.infer<typeof profileSchema>;
+  if (!profileResponse.success) {
+    throw new Error(profileResponse.message || "Unable to load profile");
+  }
 
-export default function ProfilePage() {
-  const { register, handleSubmit, formState: { errors } } = useForm<ProfileValues>({
-    resolver: zodResolver(profileSchema as any),
-    defaultValues: {
-      name: "",
-      email: "",
-      address: "",
-    }
-  });
+  const profile = profileResponse.data;
+  if (!profile.companyId) {
+    throw new Error("Company account is not linked to a company");
+  }
 
-  const onSubmit = (data: ProfileValues) => {
-    console.log("Profile data:", data);
-    // TODO: Connect this to an API endpoint
-  };
+  const companyResponse = await getCompany(profile.companyId);
+
+  if (!companyResponse.success) {
+    throw new Error(companyResponse.message || "Unable to load company");
+  }
+
+  const company = companyResponse.data;
 
   return (
     <div className="animate-fadeIn">
       <DashboardPageLayout>
-        <DashboardHeader 
-          title="Company Profile" 
-          description="Manage your company's public information and contact details."
+        <DashboardHeader
+          title="Company Profile"
+          description="View your company and account information."
         />
 
-        <div className="bg-secondary/10 border border-secondary/20 rounded-xl p-6 shadow-sm max-w-4xl">
-          <h2 className="text-xl font-bold text-foreground mb-6">Company Information</h2>
-          
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <FieldGroup className="gap-6">
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Field data-invalid={!!errors.name}>
-                  <FieldLabel htmlFor="name" className="text-muted-foreground font-medium">Name</FieldLabel>
-                  <FieldContent>
-                    <Input 
-                      id="name" 
-                      placeholder="Type Here.." 
-                      className="bg-transparent shadow-none h-11"
-                      aria-invalid={!!errors.name} 
-                      {...register("name")} 
-                    />
-                    <FieldError errors={[errors.name]} />
-                  </FieldContent>
-                </Field>
-
-                <Field data-invalid={!!errors.email}>
-                  <FieldLabel htmlFor="email" className="text-muted-foreground font-medium">Email</FieldLabel>
-                  <FieldContent>
-                    <Input 
-                      id="email" 
-                      type="email" 
-                      placeholder="Type Here.." 
-                      className="bg-transparent shadow-none h-11"
-                      aria-invalid={!!errors.email} 
-                      {...register("email")} 
-                    />
-                    <FieldError errors={[errors.email]} />
-                  </FieldContent>
-                </Field>
+        <section className="max-w-5xl overflow-hidden rounded-md border border-border bg-card shadow-sm">
+          <div className="flex flex-col gap-5 border-b border-border p-6 sm:flex-row sm:items-center">
+            <Avatar className="size-20">
+              {company.logo && <AvatarImage src={company.logo} alt={company.name} />}
+              <AvatarFallback>{getInitials(company.name)}</AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              <div className="flex flex-wrap items-center gap-3">
+                <h2 className="font-heading text-2xl font-bold text-foreground">
+                  {company.name}
+                </h2>
+                <Badge variant={company.status === "active" ? "active" : "blocked"}>
+                  {company.status}
+                </Badge>
               </div>
-
-              <Field data-invalid={!!errors.address}>
-                <FieldLabel htmlFor="address" className="text-muted-foreground font-medium">Address</FieldLabel>
-                <FieldContent>
-                  <Input 
-                    id="address" 
-                    placeholder="Type Here.." 
-                    className="bg-transparent shadow-none h-11"
-                    aria-invalid={!!errors.address} 
-                    {...register("address")} 
-                  />
-                  <FieldError errors={[errors.address]} />
-                </FieldContent>
-              </Field>
-            </FieldGroup>
-
-            <div className="flex justify-end pt-8">
-              <Button type="submit">
-                Publish
-              </Button>
+              <p className="mt-1 text-sm text-muted-foreground">{company.slug}</p>
             </div>
-          </form>
-        </div>
+          </div>
+
+          <div className="grid gap-6 p-6 sm:grid-cols-2">
+            <ProfileDetail icon={<Mail />} label="Company Email" value={company.email} />
+            <ProfileDetail icon={<MapPin />} label="Address" value={company.address || "—"} />
+            <ProfileDetail icon={<Building2 />} label="Member Since" value={formatDate(company.createdAt)} />
+            <ProfileDetail icon={<ShieldCheck />} label="Company ID" value={company._id} />
+          </div>
+        </section>
+
+        <section className="max-w-5xl rounded-md border border-border bg-card p-6 shadow-sm">
+          <h2 className="font-heading text-xl font-bold text-foreground">
+            Account Information
+          </h2>
+          <div className="mt-6 grid gap-6 sm:grid-cols-2">
+            <ProfileDetail icon={<UserRound />} label="Account Name" value={profile.fullName} />
+            <ProfileDetail icon={<Mail />} label="Login Email" value={profile.email} />
+            <ProfileDetail icon={<ShieldCheck />} label="Role" value={profile.role} />
+            <ProfileDetail icon={<ShieldCheck />} label="Authentication" value={profile.authType || "—"} />
+          </div>
+        </section>
+
+        <section className="max-w-5xl rounded-md border border-border bg-card p-6 shadow-sm">
+          <h2 className="font-heading text-xl font-bold text-foreground">
+            Company Branding
+          </h2>
+          <div className="mt-6 grid gap-6 sm:grid-cols-2">
+            <ColorDetail
+              label="Primary Color"
+              color={company.branding.primaryColor}
+            />
+            <ColorDetail
+              label="Secondary Color"
+              color={company.branding.secondaryColor}
+            />
+            <ProfileDetail
+              icon={<Building2 />}
+              label="Video Title"
+              value={company.branding.videoTitle || "Not set"}
+            />
+            <ProfileDetail
+              icon={<UserRound />}
+              label="Presenter"
+              value={company.branding.presenterName || "Not set"}
+            />
+            <ProfileDetail
+              icon={<ShieldCheck />}
+              label="Presenter Designation"
+              value={company.branding.presenterDesignation || "Not set"}
+            />
+            <ProfileDetail
+              icon={<Building2 />}
+              label="Video Description"
+              value={company.branding.videoDescription || "Not set"}
+            />
+          </div>
+
+          {company.branding.videoUrl && (
+            <video
+              src={company.branding.videoUrl}
+              controls
+              className="mt-6 max-h-96 w-full rounded-md border border-border bg-background"
+            />
+          )}
+        </section>
       </DashboardPageLayout>
+    </div>
+  );
+}
+
+function ColorDetail({ label, color }: { label: string; color: string }) {
+  return (
+    <div>
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        {label}
+      </p>
+      <div className="mt-2 flex items-center gap-2">
+        <span
+          className="size-6 rounded-full border border-border"
+          style={{ backgroundColor: color }}
+        />
+        <span className="text-sm font-medium uppercase text-foreground">
+          {color || "Not set"}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function ProfileDetail({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex min-w-0 gap-3">
+      <div className="mt-0.5 text-muted-foreground [&_svg]:size-4">{icon}</div>
+      <div className="min-w-0">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          {label}
+        </p>
+        <p className="mt-1 wrap-break-word text-sm font-medium capitalize text-foreground">
+          {value}
+        </p>
+      </div>
     </div>
   );
 }
