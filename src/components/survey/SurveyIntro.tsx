@@ -49,7 +49,7 @@ export function SurveyIntro({
         </p>
         
         {/* Stats Box */}
-        <div className="bg-background/80 backdrop-blur-sm p-4 flex items-center justify-between mb-8 shadow-sm rounded-lg">
+        <div className="bg-background/80 p-4 flex items-center justify-between mb-8 shadow-sm rounded-lg">
           <div className="flex-1 text-center">
             <div className="text-2xl font-bold text-primary">{questionCount}</div>
             <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mt-0.5">Question</div>

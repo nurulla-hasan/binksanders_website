@@ -139,7 +139,7 @@ function DataTableInner<TData, TValue>({
               value={getFilter(searchKey)}
               onChange={(event) =>
                 updateFilter(searchKey, event.target.value, {
-                  debounce: 500,
+                  debounce: 300,
                   method: "replace",
                 })
               }
