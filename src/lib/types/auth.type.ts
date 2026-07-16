@@ -1,4 +1,15 @@
 import type { IdentifierPayload } from "./api.type";
+import type { CurrentUser } from "./user.type";
+
+export type LoginUser = CurrentUser & {
+  password: string;
+};
+
+export type LoginData = {
+  accessToken: string;
+  refreshToken: string;
+  user: LoginUser;
+};
 
 export type EmployeeIdLoginPayload = {
   employeeId: string;

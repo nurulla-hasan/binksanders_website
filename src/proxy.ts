@@ -47,9 +47,14 @@ export function proxy(request: NextRequest) {
   const accessToken = request.cookies.get("accessToken")?.value;
   const payload = decodeValidToken(accessToken);
   const isAdmin = Boolean(payload?.role && ADMIN_ROLES.has(payload.role));
+  const isCompany = payload?.role === "company";
 
   if (payload && isAdmin && !pathname.startsWith("/super-admin")) {
     return redirectTo(request, "/super-admin");
+  }
+
+  if (payload && isCompany && !pathname.startsWith("/company")) {
+    return redirectTo(request, "/company");
   }
 
   if (ADMIN_PUBLIC_ROUTES.has(pathname)) {
@@ -60,7 +65,10 @@ export function proxy(request: NextRequest) {
 
   if (USER_PUBLIC_ROUTES.has(pathname)) {
     if (!payload) return NextResponse.next();
-    return redirectTo(request, isAdmin ? "/super-admin" : "/");
+    return redirectTo(
+      request,
+      isAdmin ? "/super-admin" : isCompany ? "/company" : "/",
+    );
   }
 
   if (pathname.startsWith("/super-admin")) {
@@ -72,6 +80,7 @@ export function proxy(request: NextRequest) {
   if (pathname.startsWith("/company")) {
     if (!payload) return redirectTo(request, "/auth/login");
     if (isAdmin) return redirectTo(request, "/super-admin");
+    if (!isCompany) return redirectTo(request, "/");
     return NextResponse.next();
   }
 

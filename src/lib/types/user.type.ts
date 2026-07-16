@@ -7,13 +7,18 @@ export type CurrentUser = {
   lastName: string;
   fullName: string;
   email: string;
-  phone: string;
+  phone?: string;
   image: string;
   role: string;
+  authType?: string;
+  companyId?: string;
   status: string;
+  isOtpVerified?: boolean;
   isDeleted: boolean;
+  fcmToken?: string | null;
   createdAt: string;
   updatedAt: string;
+  lastActiveAt?: string;
   __v: number;
 };
 

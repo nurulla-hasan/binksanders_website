@@ -3,23 +3,49 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Mail, Eye, EyeOff, User, Scan } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldGroup } from "@/components/ui/field";
+import { ErrorToast, SuccessToast } from "@/lib/utils";
+import { login } from "@/services/auth.service";
+import { useAuthStore } from "@/stores/auth.store";
 
 type LoginMode = "email" | "employee" | "scan";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const setUser = useAuthStore((state) => state.setUser);
   const [mode, setMode] = useState<LoginMode>("email");
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [employeeId, setEmployeeId] = useState("");
+  const [isPending, setIsPending] = useState(false);
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert(`Logged in via ${mode} mode!`);
+  const handleLoginSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    if (mode !== "email") return;
+
+    setIsPending(true);
+
+    try {
+      const response = await login({ identifier: email, password });
+      if (!response.success) throw new Error(response.message);
+
+      const { password: storedPassword, ...user } = response.data.user;
+      void storedPassword;
+      setUser(user);
+      SuccessToast(response.message || "Logged in successfully");
+      router.replace(user.role === "company" ? "/company" : "/");
+      router.refresh();
+    } catch (error: unknown) {
+      ErrorToast(error instanceof Error ? error.message : "Unable to log in");
+    } finally {
+      setIsPending(false);
+    }
   };
 
   return (
@@ -135,8 +161,9 @@ export default function LoginPage() {
             <Button
               type="submit"
               size="lg-full"
+              disabled={isPending}
             >
-              Log In
+              {isPending ? "Logging in..." : "Log In"}
             </Button>
 
             <div className="text-center">

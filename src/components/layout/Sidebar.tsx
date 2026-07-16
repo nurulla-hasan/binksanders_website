@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { 
   LayoutDashboard, 
@@ -48,7 +48,6 @@ const companyNavItems = [
 
 export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const clearAuth = useAuthStore((state) => state.clearAuth);
   
@@ -68,8 +67,9 @@ export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }: SidebarProp
     } finally {
       clearAuth();
       setIsSidebarOpen(false);
-      router.replace(isSuperAdmin ? "/auth/admin-login" : "/auth/login");
-      setIsLoggingOut(false);
+      window.location.replace(
+        isSuperAdmin ? "/auth/admin-login" : "/auth/login",
+      );
     }
   };
 

@@ -12,6 +12,7 @@ import type {
 import type {
   EmployeeIdLoginPayload,
   GuestLoginPayload,
+  LoginData,
   QrLoginPayload,
   RefreshTokenPayload,
   RegisterPayload,
@@ -38,8 +39,8 @@ const postPublicWithSession = <T>(endpoint: string, body: unknown) =>
     setCookies: tokenCookies,
   });
 
-export const login = async <T = unknown>(payload: LoginPayload) =>
-  postPublicWithSession<T>("/auth/login", payload);
+export const login = async (payload: LoginPayload) =>
+  postPublicWithSession<LoginData>("/auth/login", payload);
 
 export const employeeIdLogin = async <T = unknown>(payload: EmployeeIdLoginPayload) =>
   postPublicWithSession<T>("/auth/employee-id-login", payload);
