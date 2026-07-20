@@ -5,9 +5,17 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { useFormContext } from "react-hook-form";
 import { CreateModuleFormValues } from "@/lib/validations/course";
 
-export function ModuleBasicInfo() {
+export function ModuleBasicInfo({
+  existingThumbnail,
+  allowThumbnail = true,
+}: {
+  existingThumbnail?: string;
+  allowThumbnail?: boolean;
+}) {
   const { register, setValue } = useFormContext<CreateModuleFormValues>();
-  const [preview, setPreview] = useState<string | null>(null);
+  const [preview, setPreview] = useState<string | null>(
+    existingThumbnail || null,
+  );
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -43,8 +51,7 @@ export function ModuleBasicInfo() {
         />
       </Field>
 
-      {/* Thumbnail Image */}
-      <Field>
+      {allowThumbnail && <Field>
         <FieldLabel>
           Thumbnail Image
         </FieldLabel>
@@ -62,7 +69,7 @@ export function ModuleBasicInfo() {
             </div>
           )}
         </label>
-      </Field>
+      </Field>}
     </div>
   );
 }

@@ -1,297 +1,239 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
+import { Controller, useFormContext, useWatch } from "react-hook-form";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Image as ImageIcon, Trash2 } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Field, FieldLabel } from "@/components/ui/field";
-import { useFormContext, Controller } from "react-hook-form";
-import { CreateModuleFormValues, QuestionDataSchemaType } from "@/lib/validations/course";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type {
+  CreateModuleFormValues,
+  QuestionDataSchemaType,
+} from "@/lib/validations/course";
 
 interface QuestionBlockProps {
   question: QuestionDataSchemaType;
   index: number;
-  onChangeType: (id: string, newType: string) => void;
+  onChangeType: (
+    id: string,
+    newType: QuestionDataSchemaType["type"],
+  ) => void;
   onDelete: () => void;
 }
 
-export function QuestionBlock({ question, index, onChangeType, onDelete }: QuestionBlockProps) {
-  const isRating = question.type === 'rating';
-  const { register, control, setValue, watch } = useFormContext<CreateModuleFormValues>();
-  const [preview, setPreview] = useState<string | null>(null);
+const questionTypes: QuestionDataSchemaType["type"][] = [
+  "MCQ",
+  "Swipe",
+  "Ordering",
+  "Chat Scenario",
+  "Video",
+  "Rating",
+];
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setPreview(URL.createObjectURL(file));
-      setValue(`questions.${index}.image` as any, file);
-    }
-  };
-
-  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setPreview(URL.createObjectURL(file));
-      setValue(`questions.${index}.videoFile` as any, file);
-    }
-  };
-
-  // Watch for addExplanation/addImage to dynamically show/hide fields if needed in the future, 
-  // currently we just render everything that belongs to the schema type, but checkboxes can control this.
-  const addExplanation = watch(`questions.${index}.addExplanation` as any);
-  const addImage = watch(`questions.${index}.addImage` as any);
+export function QuestionBlock({
+  question,
+  index,
+  onChangeType,
+  onDelete,
+}: QuestionBlockProps) {
+  const { control, register } = useFormContext<CreateModuleFormValues>();
+  const currentQuestion = useWatch({
+    control,
+    name: `questions.${index}`,
+  }) as QuestionDataSchemaType;
 
   return (
-    <div className="bg-card border rounded-md p-6 shadow-sm">
-      {/* Top Row: Question/Title & Type Select */}
-      <div className="flex gap-4 items-start mb-6">
-        <div className="flex-1">
-          <Input 
-            placeholder={isRating ? "Title" : "Question"} 
-            {...register(`questions.${index}.id` as any)} // Using id as the placeholder for the question title/prompt for now if we don't have a separate title field per question. Wait, the question title might need a field? Let's just bind to `id` or ignore it if not in schema. I will bind to an imaginary `title` or just ignore since we don't have it in schema. Let's ignore binding for this placeholder since we don't have `questionTitle` in schema.
+    <div className="space-y-6 rounded-md border border-border bg-card p-6 shadow-sm">
+      <div className="grid gap-4 sm:grid-cols-[1fr_12rem]">
+        <Field>
+          <FieldLabel htmlFor={`question-${question.id}`}>Content</FieldLabel>
+          <Input
+            id={`question-${question.id}`}
+            placeholder="Question or instruction"
+            {...register(`questions.${index}.content`)}
           />
-        </div>
-        <div className="w-48 shrink-0">
-          <Select 
-            value={question.type} 
-            onValueChange={(value) => onChangeType(question.id, value)}
+        </Field>
+        <Field>
+          <FieldLabel>Question Type</FieldLabel>
+          <Select
+            value={currentQuestion.type}
+            onValueChange={(value) =>
+              onChangeType(
+                question.id,
+                value as QuestionDataSchemaType["type"],
+              )
+            }
           >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Question Type" />
+            <SelectTrigger>
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="mcq">MCQ</SelectItem>
-              <SelectItem value="swipe">Swipe</SelectItem>
-              <SelectItem value="ordering">Ordering</SelectItem>
-              <SelectItem value="chat_scenario">Chat Scenario</SelectItem>
-              <SelectItem value="video">Video</SelectItem>
-              <SelectItem value="free_input">Free Input</SelectItem>
-              <SelectItem value="rating">Rating</SelectItem>
+              {questionTypes.map((type) => (
+                <SelectItem key={type} value={type}>
+                  {type}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
-        </div>
+        </Field>
       </div>
 
-      {/* Dynamic Fields based on Type */}
-      <div className="mb-6">
-        {question.type === 'mcq' && (
-          <>
-            <div className="grid grid-cols-2 gap-x-6 gap-y-4 mb-6">
-              {[0, 1, 2, 3].map(optIdx => (
-                <Field key={optIdx}>
-                  <FieldLabel htmlFor={`option-${question.id}-${optIdx}`}>Option {optIdx + 1}</FieldLabel>
-                  <Input id={`option-${question.id}-${optIdx}`} placeholder="Type here" {...register(`questions.${index}.options.${optIdx}` as const)} />
-                </Field>
-              ))}
-            </div>
-            <Field className="mb-6">
-              <FieldLabel htmlFor={`right-answer-${question.id}`}>Select Right Answer</FieldLabel>
-              <Controller
-                control={control}
-                name={`questions.${index}.rightAnswer` as any}
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <SelectTrigger id={`right-answer-${question.id}`}>
-                      <SelectValue placeholder="Select Option" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[0, 1, 2, 3].map(optIdx => (
-                        <SelectItem key={optIdx} value={`option${optIdx + 1}`}>Option {optIdx + 1}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </Field>
-            {addExplanation && (
-              <Field className="mb-6">
-                <FieldLabel htmlFor={`explanation-${question.id}`}>Explanation</FieldLabel>
-                <Input id={`explanation-${question.id}`} placeholder="Type here" {...register(`questions.${index}.explanation` as const)} />
-              </Field>
-            )}
-            {addImage && (
-              <Field>
-                <FieldLabel>Image</FieldLabel>
-                <label className="relative border-2 border-dashed border-secondary/40 rounded-md h-32 flex items-center justify-center bg-background/50 hover:bg-background cursor-pointer transition-colors w-full overflow-hidden">
-                  <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
-                  {preview ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={preview} alt="Preview" className="w-full h-full object-contain" />
-                  ) : (
-                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                      <div className="flex items-center gap-2">
-                        <ImageIcon className="h-4 w-4" />
-                        <span className="text-sm font-medium">Upload here..</span>
-                      </div>
-                    </div>
+      {currentQuestion.type === "MCQ" && (
+        <FieldGroup>
+          <div className="grid gap-4 sm:grid-cols-3">
+            {currentQuestion.options.map((_, optionIndex) => (
+              <Field key={optionIndex}>
+                <FieldLabel>Option {optionIndex + 1}</FieldLabel>
+                <Input
+                  {...register(
+                    `questions.${index}.options.${optionIndex}` as const,
                   )}
-                </label>
-              </Field>
-            )}
-          </>
-        )}
-
-        {question.type === 'swipe' && (
-          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-            <Field>
-              <FieldLabel htmlFor={`left-swipe-${question.id}`} className="uppercase tracking-wider">LEFT SWIPE VALUE</FieldLabel>
-              <Input id={`left-swipe-${question.id}`} placeholder="Type here" {...register(`questions.${index}.leftSwipe` as any)} />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor={`right-swipe-${question.id}`} className="uppercase tracking-wider">Right SWIPE VALUE</FieldLabel>
-              <Input id={`right-swipe-${question.id}`} placeholder="Type here" {...register(`questions.${index}.rightSwipe` as any)} />
-            </Field>
-          </div>
-        )}
-
-        {question.type === 'ordering' && (
-          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-            {["First", "Second", "Third", "Fourth"].map((step, stepIdx) => (
-              <Field key={step}>
-                <FieldLabel htmlFor={`step-${question.id}-${step}`}>{step} Step</FieldLabel>
-                <Input id={`step-${question.id}-${step}`} placeholder="Type here" {...register(`questions.${index}.steps.${stepIdx}` as any)} />
+                />
               </Field>
             ))}
           </div>
-        )}
-
-        {question.type === 'chat_scenario' && (
-          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-            {[0, 1].map(optIdx => (
-              <Field key={optIdx}>
-                <FieldLabel htmlFor={`response-${question.id}-${optIdx}`}>Response {optIdx + 1}</FieldLabel>
-                <Input id={`response-${question.id}-${optIdx}`} placeholder="Type here" {...register(`questions.${index}.responses.${optIdx}` as any)} />
-              </Field>
-            ))}
-          </div>
-        )}
-
-        {question.type === 'video' && (
-          <>
-            <div className="mb-6">
-              <label className="relative border-2 border-dashed border-secondary/40 rounded-md h-40 flex items-center justify-center bg-background/50 hover:bg-background cursor-pointer transition-colors w-full overflow-hidden">
-                <input type="file" className="hidden" accept="video/*" onChange={handleVideoChange} />
-                {preview ? (
-                  <video src={preview} controls className="w-full h-full object-contain" />
-                ) : (
-                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <ImageIcon className="h-4 w-4" />
-                      <span className="text-sm font-medium">Upload video here..</span>
-                    </div>
-                  </div>
-                )}
-              </label>
-            </div>
-            <div className="grid grid-cols-2 gap-x-6 gap-y-4 mb-6">
-              {[0, 1, 2, 3].map(optIdx => (
-                <Field key={optIdx}>
-                  <FieldLabel htmlFor={`video-response-${question.id}-${optIdx}`}>Response {optIdx + 1}</FieldLabel>
-                  <Input id={`video-response-${question.id}-${optIdx}`} placeholder="Type here" {...register(`questions.${index}.options.${optIdx}` as any)} />
-                </Field>
-              ))}
-            </div>
-            <Field>
-              <FieldLabel htmlFor={`video-right-answer-${question.id}`}>Select Right Answer</FieldLabel>
-              <Controller
-                control={control}
-                name={`questions.${index}.rightAnswer` as any}
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <SelectTrigger id={`video-right-answer-${question.id}`}>
-                      <SelectValue placeholder="Select Option" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[0, 1, 2, 3].map(optIdx => (
-                        <SelectItem key={optIdx} value={`option${optIdx + 1}`}>Option {optIdx + 1}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </Field>
-          </>
-        )}
-
-        {question.type === 'rating' && (
           <Field>
-            <Input placeholder="Description" {...register(`questions.${index}.description` as any)} />
-          </Field>
-        )}
-      </div>
-
-      <hr className="my-6 border-border" />
-
-      {/* Footer: Checkboxes and Delete */}
-      <div className="flex items-end justify-between">
-        <div className="space-y-4">
-          <Field orientation="horizontal">
+            <FieldLabel>Correct Answer</FieldLabel>
             <Controller
               control={control}
-              name={`questions.${index}.excludeFromScoring` as any}
+              name={`questions.${index}.correctAnswer`}
               render={({ field }) => (
-                <Checkbox id={`exclude-${question.id}`} checked={field.value} onCheckedChange={field.onChange} />
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select correct answer" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {currentQuestion.options
+                      .filter(Boolean)
+                      .map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
               )}
             />
-            <FieldLabel htmlFor={`exclude-${question.id}`} className="font-normal cursor-pointer">
-              Exclude from scoring
-            </FieldLabel>
           </Field>
-          
-          {question.type === 'ordering' && (
-            <Field orientation="horizontal">
-              <Controller
-                control={control}
-                name={`questions.${index}.ableToRetry` as any}
-                render={({ field }) => (
-                  <Checkbox id={`retry-${question.id}`} checked={field.value} onCheckedChange={field.onChange} />
-                )}
-              />
-              <FieldLabel htmlFor={`retry-${question.id}`} className="font-normal cursor-pointer">
-                Able to retry
-              </FieldLabel>
-            </Field>
-          )}
-          
-          {question.type !== 'rating' && question.type !== 'video' && (
-            <Field orientation="horizontal">
-              <Controller
-                control={control}
-                name={`questions.${index}.addExplanation` as any}
-                render={({ field }) => (
-                  <Checkbox id={`exp-${question.id}`} checked={field.value} onCheckedChange={field.onChange} />
-                )}
-              />
-              <FieldLabel htmlFor={`exp-${question.id}`} className="font-normal cursor-pointer">
-                Add Explanation
-              </FieldLabel>
-            </Field>
-          )}
-          
-          {question.type !== 'video' && question.type !== 'rating' && (
-            <Field orientation="horizontal">
-              <Controller
-                control={control}
-                name={`questions.${index}.addImage` as any}
-                render={({ field }) => (
-                  <Checkbox id={`img-${question.id}`} checked={field.value} onCheckedChange={field.onChange} />
-                )}
-              />
-              <FieldLabel htmlFor={`img-${question.id}`} className="font-normal cursor-pointer">
-                Add Image
-              </FieldLabel>
-            </Field>
-          )}
+          <Field>
+            <FieldLabel>Explanation</FieldLabel>
+            <Input {...register(`questions.${index}.explanation`)} />
+          </Field>
+        </FieldGroup>
+      )}
+
+      {currentQuestion.type === "Swipe" && (
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Field>
+            <FieldLabel>Left Label</FieldLabel>
+            <Input {...register(`questions.${index}.leftLabel`)} />
+          </Field>
+          <Field>
+            <FieldLabel>Right Label</FieldLabel>
+            <Input {...register(`questions.${index}.rightLabel`)} />
+          </Field>
+          <Field>
+            <FieldLabel>Correct Direction</FieldLabel>
+            <Controller
+              control={control}
+              name={`questions.${index}.correctDirection`}
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="left">Left</SelectItem>
+                    <SelectItem value="right">Right</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </Field>
         </div>
-        
-        <Button 
-          type="button"
-          variant="outline" 
-          onClick={onDelete}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
-        >
-          <Trash2 className="h-4 w-4" /> Delete
+      )}
+
+      {currentQuestion.type === "Ordering" && (
+        <div className="grid gap-4 sm:grid-cols-3">
+          {currentQuestion.items.map((_, itemIndex) => (
+            <Field key={itemIndex}>
+              <FieldLabel>Item {itemIndex + 1}</FieldLabel>
+              <Input
+                {...register(`questions.${index}.items.${itemIndex}` as const)}
+              />
+            </Field>
+          ))}
+        </div>
+      )}
+
+      {currentQuestion.type === "Chat Scenario" && (
+        <div className="space-y-4">
+          {currentQuestion.messages.map((_, messageIndex) => (
+            <div key={messageIndex} className="grid gap-4 sm:grid-cols-3">
+              <Field>
+                <FieldLabel>Sender</FieldLabel>
+                <Input
+                  {...register(
+                    `questions.${index}.messages.${messageIndex}.sender` as const,
+                  )}
+                />
+              </Field>
+              <Field className="sm:col-span-2">
+                <FieldLabel>Message</FieldLabel>
+                <Input
+                  {...register(
+                    `questions.${index}.messages.${messageIndex}.text` as const,
+                  )}
+                />
+              </Field>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {currentQuestion.type === "Video" && (
+        <Field>
+          <FieldLabel>Video URL</FieldLabel>
+          <Input
+            type="url"
+            placeholder="https://example.com/video.mp4"
+            {...register(`questions.${index}.videoUrl`)}
+          />
+        </Field>
+      )}
+
+      {currentQuestion.type === "Rating" && (
+        <Field>
+          <FieldLabel>Rating Scale</FieldLabel>
+          <Input
+            type="number"
+            min={2}
+            max={10}
+            {...register(`questions.${index}.scale`, { valueAsNumber: true })}
+          />
+        </Field>
+      )}
+
+      <div className="flex items-center justify-between border-t border-border pt-4">
+        <Field orientation="horizontal">
+          <Controller
+            control={control}
+            name={`questions.${index}.isScored`}
+            render={({ field }) => (
+              <Checkbox
+                id={`scored-${question.id}`}
+                checked={field.value}
+                onCheckedChange={field.onChange}
+              />
+            )}
+          />
+          <FieldLabel htmlFor={`scored-${question.id}`}>Scored question</FieldLabel>
+        </Field>
+        <Button type="button" variant="destructive" onClick={onDelete}>
+          <Trash2 /> Delete
         </Button>
       </div>
     </div>

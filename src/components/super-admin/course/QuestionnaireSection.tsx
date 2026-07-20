@@ -16,10 +16,14 @@ export function QuestionnaireSection() {
 
   const addQuestion = () => {
     const newId = Math.random().toString(36).substr(2, 9);
-    append(getDefaultQuestionValues("mcq", newId));
+    append(getDefaultQuestionValues("MCQ", newId));
   };
 
-  const changeQuestionType = (index: number, id: string, newType: string) => {
+  const changeQuestionType = (
+    index: number,
+    id: string,
+    newType: QuestionDataSchemaType["type"],
+  ) => {
     update(index, getDefaultQuestionValues(newType, id));
   };
 

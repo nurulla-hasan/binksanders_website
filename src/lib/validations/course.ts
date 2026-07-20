@@ -2,68 +2,49 @@ import * as z from "zod";
 
 const baseQuestionSchema = z.object({
   id: z.string(),
-  excludeFromScoring: z.boolean().default(false).optional(),
+  content: z.string().min(1, "Question content is required"),
+  isScored: z.boolean(),
 });
 
-export const mcqSchema = baseQuestionSchema.extend({
-  type: z.literal("mcq"),
-  options: z.array(z.string()).min(2).default(["", "", "", ""]),
-  rightAnswer: z.string().optional(),
+const mcqSchema = baseQuestionSchema.extend({
+  type: z.literal("MCQ"),
+  options: z.array(z.string().min(1)).min(2),
+  correctAnswer: z.string().min(1, "Correct answer is required"),
   explanation: z.string().optional(),
-  image: z.any().optional(), // File | null
-  addExplanation: z.boolean().default(false).optional(),
-  addImage: z.boolean().default(false).optional(),
 });
 
-export const swipeSchema = baseQuestionSchema.extend({
-  type: z.literal("swipe"),
-  leftSwipe: z.string().optional(),
-  rightSwipe: z.string().optional(),
-  explanation: z.string().optional(),
-  image: z.any().optional(),
-  addExplanation: z.boolean().default(false).optional(),
-  addImage: z.boolean().default(false).optional(),
+const swipeSchema = baseQuestionSchema.extend({
+  type: z.literal("Swipe"),
+  leftLabel: z.string().min(1),
+  rightLabel: z.string().min(1),
+  correctDirection: z.enum(["left", "right"]),
 });
 
-export const orderingSchema = baseQuestionSchema.extend({
-  type: z.literal("ordering"),
-  steps: z.array(z.string()).min(2).default(["", "", "", ""]),
-  explanation: z.string().optional(),
-  image: z.any().optional(),
-  ableToRetry: z.boolean().default(false).optional(),
-  addExplanation: z.boolean().default(false).optional(),
-  addImage: z.boolean().default(false).optional(),
+const orderingSchema = baseQuestionSchema.extend({
+  type: z.literal("Ordering"),
+  items: z.array(z.string().min(1)).min(2),
 });
 
-export const chatScenarioSchema = baseQuestionSchema.extend({
-  type: z.literal("chat_scenario"),
-  responses: z.array(z.string()).min(2).default(["", ""]),
-  explanation: z.string().optional(),
-  image: z.any().optional(),
-  addExplanation: z.boolean().default(false).optional(),
-  addImage: z.boolean().default(false).optional(),
+const chatScenarioSchema = baseQuestionSchema.extend({
+  type: z.literal("Chat Scenario"),
+  messages: z
+    .array(
+      z.object({
+        sender: z.string().min(1),
+        text: z.string().min(1),
+      }),
+    )
+    .min(1),
 });
 
-export const videoSchema = baseQuestionSchema.extend({
-  type: z.literal("video"),
-  videoFile: z.any().optional(), // File | null
-  options: z.array(z.string()).min(2).default(["", "", "", ""]),
-  rightAnswer: z.string().optional(),
-  explanation: z.string().optional(),
-  addExplanation: z.boolean().default(false).optional(),
+const videoSchema = baseQuestionSchema.extend({
+  type: z.literal("Video"),
+  videoUrl: z.string().url("Enter a valid video URL"),
 });
 
-export const freeInputSchema = baseQuestionSchema.extend({
-  type: z.literal("free_input"),
-  explanation: z.string().optional(),
-  image: z.any().optional(),
-  addExplanation: z.boolean().default(false).optional(),
-  addImage: z.boolean().default(false).optional(),
-});
-
-export const ratingSchema = baseQuestionSchema.extend({
-  type: z.literal("rating"),
-  description: z.string().optional(),
+const ratingSchema = baseQuestionSchema.extend({
+  type: z.literal("Rating"),
+  scale: z.coerce.number().int().min(2).max(10),
 });
 
 export const questionSchema = z.discriminatedUnion("type", [
@@ -72,40 +53,57 @@ export const questionSchema = z.discriminatedUnion("type", [
   orderingSchema,
   chatScenarioSchema,
   videoSchema,
-  freeInputSchema,
   ratingSchema,
 ]);
 
-export type QuestionDataSchemaType = z.infer<typeof questionSchema>;
-
 export const createModuleSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  description: z.string().optional(),
-  thumbnail: z.any().optional(), // File | null
-  questions: z.array(questionSchema),
+  description: z.string().min(1, "Description is required"),
+  thumbnail: z.instanceof(File).optional(),
+  questions: z.array(questionSchema).min(1, "Add at least one question"),
 });
 
 export type CreateModuleFormValues = z.infer<typeof createModuleSchema>;
+export type QuestionDataSchemaType = z.infer<typeof questionSchema>;
 
-// Default templates for newly created questions
-export const getDefaultQuestionValues = (type: string, id: string): QuestionDataSchemaType => {
-  const base = { id, excludeFromScoring: false };
+export const getDefaultQuestionValues = (
+  type: QuestionDataSchemaType["type"],
+  id: string,
+): QuestionDataSchemaType => {
+  const base = { id, content: "", isScored: true };
+
   switch (type) {
-    case "mcq":
-      return { ...base, type: "mcq", options: ["", "", "", ""], rightAnswer: "", explanation: "", addExplanation: false, addImage: false };
-    case "swipe":
-      return { ...base, type: "swipe", leftSwipe: "", rightSwipe: "", explanation: "", addExplanation: false, addImage: false };
-    case "ordering":
-      return { ...base, type: "ordering", steps: ["", "", "", ""], explanation: "", ableToRetry: false, addExplanation: false, addImage: false };
-    case "chat_scenario":
-      return { ...base, type: "chat_scenario", responses: ["", ""], explanation: "", addExplanation: false, addImage: false };
-    case "video":
-      return { ...base, type: "video", options: ["", "", "", ""], rightAnswer: "", explanation: "", addExplanation: false };
-    case "free_input":
-      return { ...base, type: "free_input", explanation: "", addExplanation: false, addImage: false };
-    case "rating":
-      return { ...base, type: "rating", description: "" };
-    default:
-      return { ...base, type: "mcq", options: ["", "", "", ""] } as QuestionDataSchemaType;
+    case "MCQ":
+      return {
+        ...base,
+        type,
+        options: ["", "", ""],
+        correctAnswer: "",
+        explanation: "",
+      };
+    case "Swipe":
+      return {
+        ...base,
+        type,
+        leftLabel: "",
+        rightLabel: "",
+        correctDirection: "left",
+      };
+    case "Ordering":
+      return { ...base, type, items: ["", "", ""] };
+    case "Chat Scenario":
+      return {
+        ...base,
+        type,
+        isScored: false,
+        messages: [
+          { sender: "", text: "" },
+          { sender: "", text: "" },
+        ],
+      };
+    case "Video":
+      return { ...base, type, isScored: false, videoUrl: "" };
+    case "Rating":
+      return { ...base, type, isScored: false, scale: 5 };
   }
 };
