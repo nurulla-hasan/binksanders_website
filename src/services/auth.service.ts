@@ -2,6 +2,7 @@
 
 import { nextServerFetch } from "@/lib/nextServerFetch";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import type {
   ApiResponse,
   IdentifierPayload,
@@ -76,15 +77,21 @@ export const resetPassword = async <T = unknown>(payload: ResetPasswordPayload) 
 export const refreshToken = async <T = unknown>(payload: RefreshTokenPayload) =>
   postPublicWithSession<T>("/auth/refresh-token", payload);
 
-export const logout = async <T = unknown>() => {
+export const logout = async (
+  redirectPath: "/auth/login" | "/auth/admin-login"
+) => {
   try {
-    return await nextServerFetch<ApiResponse<T>>("/auth/logout", {
+    await nextServerFetch<ApiResponse<unknown>>("/auth/logout", {
       method: "POST",
     });
+  } catch {
+    // Local session must still be cleared if the API session is already invalid.
   } finally {
     const cookieStore = await cookies();
     cookieStore.delete("accessToken");
     cookieStore.delete("refreshToken");
     cookieStore.delete("rememberMe");
   }
+
+  redirect(redirectPath);
 };

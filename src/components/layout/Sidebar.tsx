@@ -17,7 +17,6 @@ import {
   LayoutList
 } from "lucide-react";
 import { ScrollArea } from "../ui/scroll-area";
-import { ErrorToast, SuccessToast } from "@/lib/utils";
 import { logout } from "@/services/auth.service";
 import { useAuthStore } from "@/stores/auth.store";
 
@@ -56,20 +55,9 @@ export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }: SidebarProp
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
-
-    try {
-      const response = await logout();
-      if (!response.success) throw new Error(response.message);
-      SuccessToast(response.message || "Logged out successfully");
-    } catch (error: unknown) {
-      ErrorToast(error instanceof Error ? error.message : "Unable to log out");
-    } finally {
-      clearAuth();
-      setIsSidebarOpen(false);
-      window.location.replace(
-        isSuperAdmin ? "/auth/admin-login" : "/auth/login",
-      );
-    }
+    clearAuth();
+    setIsSidebarOpen(false);
+    await logout(isSuperAdmin ? "/auth/admin-login" : "/auth/login");
   };
 
   return (

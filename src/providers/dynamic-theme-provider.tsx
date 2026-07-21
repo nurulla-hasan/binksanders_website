@@ -1,74 +1,109 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
+import { getCompany } from "@/services/company.service";
+import { getMyProfile } from "@/services/user.service";
 
-function getContrastYIQ(hexcolor: string) {
-  if (!/^#([0-9A-F]{3}){1,2}$/i.test(hexcolor)) return "oklch(1 0 0)";
-  let hex = hexcolor.replace("#", "");
-  if (hex.length === 3) {
-    hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+const THEME_PROPERTIES = [
+  "--primary",
+  "--primary-foreground",
+  "--secondary",
+  "--secondary-foreground",
+  "--ring",
+  "--sidebar-primary",
+  "--sidebar-ring",
+] as const;
+
+const isValidColor = (color?: string) =>
+  Boolean(color && CSS.supports("color", color));
+
+const getContrastColor = (color: string) => {
+  const hex = color.replace("#", "");
+  const normalized =
+    hex.length === 3
+      ? hex
+          .split("")
+          .map((character) => character.repeat(2))
+          .join("")
+      : hex;
+
+  if (!/^[0-9a-f]{6}$/i.test(normalized)) return "#ffffff";
+
+  const red = Number.parseInt(normalized.slice(0, 2), 16);
+  const green = Number.parseInt(normalized.slice(2, 4), 16);
+  const blue = Number.parseInt(normalized.slice(4, 6), 16);
+  const brightness = (red * 299 + green * 587 + blue * 114) / 1000;
+
+  return brightness >= 128 ? "#171717" : "#ffffff";
+};
+
+const clearCompanyTheme = () => {
+  const root = document.documentElement;
+  THEME_PROPERTIES.forEach((property) => root.style.removeProperty(property));
+};
+
+const applyCompanyTheme = (primaryColor: string, secondaryColor: string) => {
+  const root = document.documentElement;
+
+  if (isValidColor(primaryColor)) {
+    root.style.setProperty("--primary", primaryColor);
+    root.style.setProperty("--primary-foreground", getContrastColor(primaryColor));
+    root.style.setProperty("--ring", primaryColor);
+    root.style.setProperty("--sidebar-primary", primaryColor);
+    root.style.setProperty("--sidebar-ring", primaryColor);
   }
-  const r = parseInt(hex.substr(0, 2), 16);
-  const g = parseInt(hex.substr(2, 2), 16);
-  const b = parseInt(hex.substr(4, 2), 16);
-  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
-  return yiq >= 128 ? "oklch(0.145 0 0)" : "oklch(1 0 0)";
-}
 
-const THEME_PRESETS = [
-  { name: "Magenta (Default)", primary: "oklch(60.691% 0.22607 355.384)", primaryForeground: "oklch(1 0 0)" },
-  { name: "Corporate Blue", primary: "oklch(0.55 0.15 250)", primaryForeground: "oklch(1 0 0)" },
-  { name: "Forest Green", primary: "oklch(0.55 0.15 150)", primaryForeground: "oklch(1 0 0)" },
-  { name: "Deep Orange", primary: "oklch(0.65 0.18 40)", primaryForeground: "oklch(1 0 0)" },
-  { name: "Royal Purple", primary: "oklch(0.55 0.2 300)", primaryForeground: "oklch(1 0 0)" },
-];
-
-const SECONDARY_PRESETS = [
-  { name: "Aqua Blue (Default)", secondary: "oklch(72.469% 0.11517 218.16)" },
-  { name: "Pale Blue", secondary: "oklch(0.85 0.05 250)" },
-  { name: "Mint Green", secondary: "oklch(0.85 0.1 150)" },
-  { name: "Peach", secondary: "oklch(0.85 0.1 40)" },
-  { name: "Lavender", secondary: "oklch(0.85 0.1 300)" },
-];
+  if (isValidColor(secondaryColor)) {
+    root.style.setProperty("--secondary", secondaryColor);
+    root.style.setProperty(
+      "--secondary-foreground",
+      getContrastColor(secondaryColor)
+    );
+  }
+};
 
 export function DynamicThemeProvider() {
+  const pathname = usePathname();
+
   useEffect(() => {
-    const savedTheme = localStorage.getItem("app-theme-color");
-    const savedSecondary = localStorage.getItem("app-secondary-color");
-    const root = document.documentElement;
+    let isCancelled = false;
 
-    const applyPrimary = (primary: string, primaryForeground: string) => {
-      root.style.setProperty("--primary", primary);
-      root.style.setProperty("--primary-foreground", primaryForeground);
-    };
-
-    const applySecondary = (secondary: string, secondaryForeground: string) => {
-      root.style.setProperty("--secondary", secondary);
-      root.style.setProperty("--secondary-foreground", secondaryForeground);
-    };
-
-    // Primary Logic
-    if (savedTheme) {
-      const preset = THEME_PRESETS.find((p) => p.name === savedTheme);
-      if (preset) {
-        applyPrimary(preset.primary, preset.primaryForeground);
-      } else if (savedTheme.startsWith("#")) {
-        applyPrimary(savedTheme, getContrastYIQ(savedTheme));
-      }
-    } else {
-      applyPrimary(THEME_PRESETS[0].primary, THEME_PRESETS[0].primaryForeground);
+    if (pathname.startsWith("/auth")) {
+      clearCompanyTheme();
+      return;
     }
 
-    // Secondary Logic
-    if (savedSecondary) {
-      const preset = SECONDARY_PRESETS.find((p) => p.name === savedSecondary);
-      if (preset) {
-        applySecondary(preset.secondary, getContrastYIQ(preset.secondary));
-      } else if (savedSecondary.startsWith("#")) {
-        applySecondary(savedSecondary, getContrastYIQ(savedSecondary));
+    const loadCompanyTheme = async () => {
+      try {
+        const profileResponse = await getMyProfile();
+        const companyId = profileResponse.success
+          ? profileResponse.data.companyId
+          : undefined;
+
+        if (!companyId) {
+          if (!isCancelled) clearCompanyTheme();
+          return;
+        }
+
+        const companyResponse = await getCompany(companyId);
+        if (!companyResponse.success || isCancelled) return;
+
+        applyCompanyTheme(
+          companyResponse.data.branding.primaryColor,
+          companyResponse.data.branding.secondaryColor
+        );
+      } catch {
+        if (!isCancelled) clearCompanyTheme();
       }
-    }
-  }, []);
+    };
+
+    void loadCompanyTheme();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [pathname]);
 
   return null;
 }
