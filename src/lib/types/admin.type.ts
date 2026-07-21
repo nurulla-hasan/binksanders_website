@@ -24,9 +24,16 @@ export type AdminLoginData = {
   admin: AdminAccount;
 };
 
-export type AdminLoginResult = {
-  role: AdminRole;
-};
+export type AdminLoginResult =
+  | {
+      success: true;
+      message: string;
+      role: AdminRole;
+    }
+  | {
+      success: false;
+      message: string;
+    };
 
 export type AdminListData = {
   meta: TMeta;

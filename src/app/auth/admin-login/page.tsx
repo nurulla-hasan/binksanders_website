@@ -23,8 +23,13 @@ export default function AdminLoginPage() {
     setIsPending(true);
 
     try {
-      await adminLogin({ identifier, password });
-      SuccessToast("Logged in successfully");
+      const result = await adminLogin({ identifier, password });
+      if (!result.success) {
+        ErrorToast(result.message);
+        return;
+      }
+
+      SuccessToast(result.message);
       router.replace("/super-admin");
     } catch (error: unknown) {
       ErrorToast(

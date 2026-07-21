@@ -22,20 +22,40 @@ import type { TQuery } from "@/lib/types/global.type";
 export const adminLogin = async (
   payload: LoginPayload
 ): Promise<AdminLoginResult> => {
-  const response = await nextServerFetch<ApiResponse<AdminLoginData>>("/admin/login", {
-    method: "POST",
-    body: payload,
-    isPublic: true,
-    setCookies: [
-      { responsePath: "data.accessToken", cookieName: "accessToken" },
-    ],
-  });
+  try {
+    const response = await nextServerFetch<ApiResponse<AdminLoginData>>(
+      "/admin/login",
+      {
+        method: "POST",
+        body: payload,
+        isPublic: true,
+        setCookies: [
+          { responsePath: "data.accessToken", cookieName: "accessToken" },
+        ],
+      }
+    );
 
-  if (!response.success) {
-    throw new Error(response.message || "Unable to log in");
+    if (!response.success) {
+      return {
+        success: false,
+        message: response.message || "Unable to log in",
+      };
+    }
+
+    return {
+      success: true,
+      message: response.message || "Logged in successfully",
+      role: response.data.admin.role,
+    };
+  } catch (error: unknown) {
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Unable to log in. Please try again.",
+    };
   }
-
-  return { role: response.data.admin.role };
 };
 
 export const adminForgotPassword = async <T = unknown>(payload: IdentifierPayload) =>
