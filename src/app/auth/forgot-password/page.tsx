@@ -3,17 +3,32 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Mail, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldGroup } from "@/components/ui/field";
+import { ErrorToast, SuccessToast } from "@/lib/utils";
+import { forgotPassword } from "@/services/auth.service";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
+  const [isPending, setIsPending] = useState(false);
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`OTP sent to ${email}`);
+    setIsPending(true);
+    try {
+      const response = await forgotPassword({ identifier: email });
+      if (!response.success) throw new Error(response.message);
+      SuccessToast(response.message || "OTP sent successfully");
+      router.push(`/auth/reset-password?identifier=${encodeURIComponent(email)}`);
+    } catch (error: unknown) {
+      ErrorToast(error instanceof Error ? error.message : "Unable to send OTP");
+    } finally {
+      setIsPending(false);
+    }
   };
 
   return (
@@ -72,15 +87,13 @@ export default function ForgotPasswordPage() {
             </Field>
           </FieldGroup>
 
-          <Link href="/auth/verify-otp" className="w-full block">
             <Button
               type="submit"
-              size="lg"
-              className="w-full"
+              size="lg-full"
+              disabled={isPending}
             >
-              SEND OTP
+              {isPending ? "SENDING..." : "SEND OTP"}
             </Button>
-          </Link>
         </form>
       </div>
 

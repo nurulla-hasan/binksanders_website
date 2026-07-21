@@ -3,18 +3,37 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldGroup } from "@/components/ui/field";
+import { ErrorToast, SuccessToast } from "@/lib/utils";
+import { resetPassword } from "@/services/auth.service";
 
 export default function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [isPending, setIsPending] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const identifier = searchParams.get("identifier") || "";
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Password reset successfully!");
+    if (!identifier) return ErrorToast("Email address is missing");
+    setIsPending(true);
+    try {
+      const response = await resetPassword({ identifier, otp, newPassword: password });
+      if (!response.success) throw new Error(response.message);
+      SuccessToast(response.message || "Password reset successfully");
+      router.replace("/auth/login");
+    } catch (error: unknown) {
+      ErrorToast(error instanceof Error ? error.message : "Unable to reset password");
+    } finally {
+      setIsPending(false);
+    }
   };
 
   return (
@@ -59,6 +78,9 @@ export default function ResetPasswordPage() {
 
           <FieldGroup className="space-y-4">
             <Field>
+              <Input value={otp} onChange={(e) => setOtp(e.target.value)} placeholder="OTP" maxLength={6} required />
+            </Field>
+            <Field>
               <div className="relative flex items-center">
                 <Input
                   type={showPassword ? "text" : "password"}
@@ -79,15 +101,13 @@ export default function ResetPasswordPage() {
             </Field>
           </FieldGroup>
 
-          <Link href="/auth/login" className="w-full block">
             <Button
               type="submit"
-              size="lg"
-              className="w-full"
+              size="lg-full"
+              disabled={isPending}
             >
-              SET PASSWORD
+              {isPending ? "SAVING..." : "SET PASSWORD"}
             </Button>
-          </Link>
         </form>
       </div>
 

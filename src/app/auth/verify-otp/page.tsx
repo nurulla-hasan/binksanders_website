@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,13 +11,42 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { ErrorToast, SuccessToast } from "@/lib/utils";
+import { resendOtp, verifyRegistrationOtp } from "@/services/auth.service";
 
 export default function VerifyOtpPage() {
   const [otp, setOtp] = useState("");
+  const [isPending, setIsPending] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const identifier = searchParams.get("identifier") || "";
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`Verified OTP: ${otp}`);
+    if (!identifier) return ErrorToast("Email address is missing");
+    setIsPending(true);
+    try {
+      const response = await verifyRegistrationOtp({ identifier, otp });
+      if (!response.success) throw new Error(response.message);
+      SuccessToast(response.message || "Account verified successfully");
+      router.replace("/");
+      router.refresh();
+    } catch (error: unknown) {
+      ErrorToast(error instanceof Error ? error.message : "Unable to verify OTP");
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!identifier) return ErrorToast("Email address is missing");
+    try {
+      const response = await resendOtp({ identifier });
+      if (!response.success) throw new Error(response.message);
+      SuccessToast(response.message || "OTP sent successfully");
+    } catch (error: unknown) {
+      ErrorToast(error instanceof Error ? error.message : "Unable to resend OTP");
+    }
   };
 
   return (
@@ -55,7 +85,7 @@ export default function VerifyOtpPage() {
               Verify Otp
             </h1>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              We sent an otp to xxxx12@gmail.com enter it below to continue
+              We sent an OTP to {identifier || "your email"}. Enter it below to continue.
             </p>
           </div>
 
@@ -80,19 +110,17 @@ export default function VerifyOtpPage() {
             </div>
             
             <div className="text-center text-xs text-muted-foreground">
-              Don&apos;t get the code? <button type="button" className="text-primary hover:underline">Resend Otp.</button>
+              Don&apos;t get the code? <button type="button" onClick={handleResend} className="text-primary hover:underline">Resend OTP.</button>
             </div>
           </div>
 
-          <Link href="/auth/reset-password" className="w-full block">
             <Button
               type="submit"
-              size="lg"
-              className="w-full"
+              size="lg-full"
+              disabled={isPending || otp.length !== 6}
             >
-              VERIFY OTP
+              {isPending ? "VERIFYING..." : "VERIFY OTP"}
             </Button>
-          </Link>
         </form>
       </div>
 

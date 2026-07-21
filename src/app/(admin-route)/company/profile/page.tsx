@@ -1,5 +1,6 @@
 import { Building2, Mail, MapPin, ShieldCheck, UserRound } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ChangePasswordModal } from "@/components/auth/ChangePasswordModal";
 import { Badge } from "@/components/ui/badge";
 import { DashboardHeader } from "@/components/ui/custom/DashboardHeader";
 import DashboardPageLayout from "@/components/ui/custom/DashboardPageLayout";
@@ -33,7 +34,9 @@ export default async function CompanyProfilePage() {
         <DashboardHeader
           title="Company Profile"
           description="View your company and account information."
-        />
+        >
+          <ChangePasswordModal />
+        </DashboardHeader>
 
         <section className="max-w-5xl overflow-hidden rounded-md border border-border bg-card shadow-sm">
           <div className="flex flex-col gap-5 border-b border-border p-6 sm:flex-row sm:items-center">

@@ -18,6 +18,7 @@ const ADMIN_PUBLIC_ROUTES = new Set([
 
 const USER_PUBLIC_ROUTES = new Set([
   "/auth/login",
+  "/auth/register",
   "/auth/forgot-password",
   "/auth/verify-otp",
   "/auth/reset-password",
@@ -42,46 +43,50 @@ const redirectTo = (request: NextRequest, pathname: string) => {
   return NextResponse.redirect(url);
 };
 
+const isRoute = (pathname: string, route: string) =>
+  pathname === route || pathname.startsWith(`${route}/`);
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const accessToken = request.cookies.get("accessToken")?.value;
   const payload = decodeValidToken(accessToken);
   const isAdmin = Boolean(payload?.role && ADMIN_ROLES.has(payload.role));
   const isCompany = payload?.role === "company";
+  const homePath = isAdmin ? "/super-admin" : isCompany ? "/company" : "/";
+  const isPublicAuthRoute =
+    ADMIN_PUBLIC_ROUTES.has(pathname) || USER_PUBLIC_ROUTES.has(pathname);
 
-  if (payload && isAdmin && !pathname.startsWith("/super-admin")) {
-    return redirectTo(request, "/super-admin");
+  if (isPublicAuthRoute) {
+    return payload ? redirectTo(request, homePath) : NextResponse.next();
   }
 
-  if (payload && isCompany && !pathname.startsWith("/company")) {
-    return redirectTo(request, "/company");
-  }
-
-  if (ADMIN_PUBLIC_ROUTES.has(pathname)) {
-    return payload && isAdmin
-      ? redirectTo(request, "/super-admin")
-      : NextResponse.next();
-  }
-
-  if (USER_PUBLIC_ROUTES.has(pathname)) {
-    if (!payload) return NextResponse.next();
+  if (!payload) {
     return redirectTo(
       request,
-      isAdmin ? "/super-admin" : isCompany ? "/company" : "/",
+      isRoute(pathname, "/super-admin")
+        ? "/auth/admin-login"
+        : "/auth/login",
     );
   }
 
-  if (pathname.startsWith("/super-admin")) {
-    if (!payload) return redirectTo(request, "/auth/admin-login");
-    if (!isAdmin) return redirectTo(request, "/");
-    return NextResponse.next();
+  if (isAdmin) {
+    return isRoute(pathname, "/super-admin")
+      ? NextResponse.next()
+      : redirectTo(request, "/super-admin");
   }
 
-  if (pathname.startsWith("/company")) {
-    if (!payload) return redirectTo(request, "/auth/login");
-    if (isAdmin) return redirectTo(request, "/super-admin");
-    if (!isCompany) return redirectTo(request, "/");
-    return NextResponse.next();
+  if (isCompany) {
+    return isRoute(pathname, "/company")
+      ? NextResponse.next()
+      : redirectTo(request, "/company");
+  }
+
+  if (
+    isRoute(pathname, "/super-admin") ||
+    isRoute(pathname, "/company") ||
+    isRoute(pathname, "/auth")
+  ) {
+    return redirectTo(request, "/");
   }
 
   return NextResponse.next();
