@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -14,7 +14,7 @@ import {
 import { ErrorToast, SuccessToast } from "@/lib/utils";
 import { resendOtp, verifyRegistrationOtp } from "@/services/auth.service";
 
-export default function VerifyOtpPage() {
+function VerifyOtpForm() {
   const [otp, setOtp] = useState("");
   const [isPending, setIsPending] = useState(false);
   const router = useRouter();
@@ -137,5 +137,13 @@ export default function VerifyOtpPage() {
       </div>
 
     </div>
+  );
+}
+
+export default function VerifyOtpPage() {
+  return (
+    <Suspense>
+      <VerifyOtpForm />
+    </Suspense>
   );
 }

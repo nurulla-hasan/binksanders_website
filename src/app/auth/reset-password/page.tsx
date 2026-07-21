@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -11,7 +11,7 @@ import { Field, FieldGroup } from "@/components/ui/field";
 import { ErrorToast, SuccessToast } from "@/lib/utils";
 import { resetPassword } from "@/services/auth.service";
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
@@ -124,5 +124,13 @@ export default function ResetPasswordPage() {
       </div>
 
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }
