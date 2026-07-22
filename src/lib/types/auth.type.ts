@@ -50,6 +50,21 @@ export type GenerateQrPayload = {
   teamId: string;
 };
 
+export type GenerateQrData = {
+  qrToken: string;
+  qrUrl: string;
+  qrImage: string;
+  expiresIn: string;
+  company: {
+    _id: string;
+    name: string;
+  };
+  team: {
+    _id: string;
+    name: string;
+  };
+};
+
 export type RegisterPayload = {
   firstName: string;
   lastName: string;

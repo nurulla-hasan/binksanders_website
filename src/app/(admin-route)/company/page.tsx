@@ -9,7 +9,7 @@ export default function AdminDashboardPage() {
     <div className="animate-fadeIn">
       <DashboardPageLayout>
         <DashboardHeader 
-          title="Welcome back, Admin" 
+          title="Welcome back, Company" 
           description="Real-time overview of your organization's" 
         />
         <DashboardStats />

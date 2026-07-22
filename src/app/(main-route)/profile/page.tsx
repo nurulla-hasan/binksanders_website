@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ThemeCustomizerDrawer } from "@/components/common/ThemeCustomizer";
 import {
   Pencil, 
   ShieldCheck, 
@@ -29,8 +28,9 @@ import {
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { logout } from "@/services/auth.service";
+import { useAuthStore } from "@/stores/auth.store";
 
 export default function ProfilePage() {
   const settingsItems = [
@@ -40,9 +40,10 @@ export default function ProfilePage() {
     { id: "terms", icon: Gavel, label: "Terms & Condition", type: "link", href: "/terms-and-condition" },
   ];
 
-  const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const clearAuth = useAuthStore((state) => state.clearAuth);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -51,9 +52,11 @@ export default function ProfilePage() {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleLogOut = () => {
-    router.push("/auth/login");
-  }
+  const handleLogOut = async () => {
+    setIsLoggingOut(true);
+    clearAuth();
+    await logout("/auth/login");
+  };
 
   return (
     <div className="flex-1 flex flex-col pb-18 animate-fadeIn -m-4">
@@ -113,7 +116,6 @@ export default function ProfilePage() {
                 </span>
               </div>
             </button>
-            <ThemeCustomizerDrawer />
             {settingsItems.map((item) => {
               const Icon = item.icon;
               
@@ -202,12 +204,15 @@ export default function ProfilePage() {
         {/* Log Out Button */}
         <div className="mt-12 px-1">
           <Button
-          onClick={handleLogOut}
+            onClick={handleLogOut}
+            disabled={isLoggingOut}
             variant="outline"
             className="w-full flex items-center justify-center gap-2 p-3.5 h-auto rounded-sm bg-muted hover:bg-muted/70 border-border/40 text-[#E11D48] hover:text-[#E11D48]"
           >
             <LogOut className="w-4 h-4" />
-            <span className="text-[13px] font-medium">Log Out</span>
+            <span className="text-[13px] font-medium">
+              {isLoggingOut ? "Logging out..." : "Log Out"}
+            </span>
           </Button>
         </div>
       </div>

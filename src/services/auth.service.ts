@@ -12,6 +12,7 @@ import type {
 } from "@/lib/types/api.type";
 import type {
   EmployeeIdLoginPayload,
+  GenerateQrData,
   GenerateQrPayload,
   GuestLoginPayload,
   LoginData,
@@ -81,8 +82,8 @@ export const qrLogin = async (
   }
 };
 
-export const generateQrCode = async <T = unknown>(payload: GenerateQrPayload) =>
-  nextServerFetch<ApiResponse<T>>("/auth/generate-qr", {
+export const generateQrCode = async (payload: GenerateQrPayload) =>
+  nextServerFetch<ApiResponse<GenerateQrData>>("/auth/generate-qr", {
     method: "POST",
     body: payload,
   });
