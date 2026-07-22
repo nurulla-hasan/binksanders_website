@@ -71,3 +71,8 @@ export type UpdateModulePayload = Partial<ModuleData>;
 export type DuplicateModulePayload = {
   title: string;
 };
+
+export type AssignModulesPayload = {
+  moduleIds: string[];
+  companyId: string;
+};

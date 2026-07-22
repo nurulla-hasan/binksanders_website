@@ -21,6 +21,8 @@ export type TeamListData = {
   result: Team[];
 };
 
+export type TeamDropdownItem = Pick<Team, "_id" | "name">;
+
 export type TeamRow = Team & {
   companyName: string;
 };

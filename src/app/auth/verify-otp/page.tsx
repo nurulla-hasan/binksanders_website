@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AuthPageLinks } from "@/components/auth/AuthPageLinks";
 import {
   InputOTP,
   InputOTPGroup,
@@ -122,6 +123,7 @@ function VerifyOtpForm() {
               {isPending ? "VERIFYING..." : "VERIFY OTP"}
             </Button>
         </form>
+        <AuthPageLinks />
       </div>
 
       {/* Bottom Footer Section */}

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Mail, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AuthPageLinks } from "@/components/auth/AuthPageLinks";
 import { Input } from "@/components/ui/input";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { ErrorToast, SuccessToast } from "@/lib/utils";
@@ -95,6 +96,7 @@ export default function ForgotPasswordPage() {
               {isPending ? "SENDING..." : "SEND OTP"}
             </Button>
         </form>
+        <AuthPageLinks />
       </div>
 
       {/* Bottom Footer Section */}

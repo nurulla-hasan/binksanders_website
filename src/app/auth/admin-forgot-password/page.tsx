@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AuthPageLinks } from "@/components/auth/AuthPageLinks";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { ErrorToast, SuccessToast } from "@/lib/utils";
@@ -81,6 +82,7 @@ export default function AdminForgotPasswordPage() {
             {isPending ? "Sending..." : "Send OTP"}
           </Button>
         </form>
+        <AuthPageLinks />
       </main>
 
       <div className="flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">

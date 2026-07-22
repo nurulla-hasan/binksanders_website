@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AuthPageLinks } from "@/components/auth/AuthPageLinks";
 import { Input } from "@/components/ui/input";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { ErrorToast, SuccessToast } from "@/lib/utils";
@@ -109,6 +110,7 @@ function ResetPasswordForm() {
               {isPending ? "SAVING..." : "SET PASSWORD"}
             </Button>
         </form>
+        <AuthPageLinks />
       </div>
 
       {/* Bottom Footer Section */}

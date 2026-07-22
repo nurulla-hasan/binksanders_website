@@ -4,7 +4,12 @@ import { buildQueryString } from "@/lib/buildQueryString";
 import { nextServerFetch } from "@/lib/nextServerFetch";
 import type { ApiResponse } from "@/lib/types/api.type";
 import type { TQuery } from "@/lib/types/global.type";
-import type { CreateTeamPayload, TeamListData, UpdateTeamPayload } from "@/lib/types/team.type";
+import type {
+  CreateTeamPayload,
+  TeamDropdownItem,
+  TeamListData,
+  UpdateTeamPayload,
+} from "@/lib/types/team.type";
 
 export const createTeam = async <T = unknown>(payload: CreateTeamPayload) =>
   nextServerFetch<ApiResponse<T>>("/team/create-team", {
@@ -34,6 +39,15 @@ export const getCompanyTeamDropdown = async <T = unknown>(
   nextServerFetch<ApiResponse<T>>(
     `/team/company/${companyId}/dropdown${buildQueryString(params)}`,
     { tags: ["teams", `company-${companyId}-teams`] }
+  );
+
+export const getPublicCompanyTeamDropdown = async (companyId: string) =>
+  nextServerFetch<ApiResponse<TeamDropdownItem[]>>(
+    `/team/company/${companyId}/dropdown`,
+    {
+      isPublic: true,
+      revalidate: 300,
+    }
   );
 
 export const updateTeam = async <T = unknown>(

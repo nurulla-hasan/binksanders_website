@@ -6,6 +6,7 @@ import { nextServerFetch } from "@/lib/nextServerFetch";
 import type { ApiResponse } from "@/lib/types/api.type";
 import type { TQuery } from "@/lib/types/global.type";
 import type {
+  AssignModulesPayload,
   CreateModulePayload,
   DuplicateModulePayload,
   LearningModule,
@@ -56,5 +57,20 @@ export const duplicateModule = async <T = unknown>(
 export const deleteModule = async <T = unknown>(moduleId: string) =>
   nextServerFetch<ApiResponse<T>>(`/module/${moduleId}`, {
     method: "DELETE",
+    updateTag: ["modules", `module-${moduleId}`],
+  });
+
+export const assignModulesToCompany = async <T = unknown>(
+  payload: AssignModulesPayload,
+) =>
+  nextServerFetch<ApiResponse<T>>("/module/assign", {
+    method: "POST",
+    body: payload,
+    updateTag: ["modules", `company-${payload.companyId}-modules`],
+  });
+
+export const unassignModule = async <T = unknown>(moduleId: string) =>
+  nextServerFetch<ApiResponse<T>>(`/module/unassign/${moduleId}`, {
+    method: "POST",
     updateTag: ["modules", `module-${moduleId}`],
   });

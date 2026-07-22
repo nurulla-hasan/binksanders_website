@@ -31,6 +31,11 @@ export type QrLoginPayload = {
   lastName: string;
 };
 
+export type GenerateQrPayload = {
+  companyId: string;
+  teamId: string;
+};
+
 export type RegisterPayload = {
   firstName: string;
   lastName: string;

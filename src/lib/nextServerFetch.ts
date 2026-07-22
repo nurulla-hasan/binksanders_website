@@ -174,7 +174,7 @@ export const nextServerFetch = async <T = any>(
 
   const defaultHeaders: Record<string, string> = {};
 
-  const accessToken = await getValidAccessToken(baseUrl);
+  const accessToken = isPublic ? null : await getValidAccessToken(baseUrl);
 
   if (accessToken) {
     defaultHeaders.Authorization = `Bearer ${accessToken}`;

@@ -32,6 +32,12 @@ export const getCompanyDropdown = async (params: TQuery = {}) =>
     { tags: ["companies"] }
   );
 
+export const getPublicCompanyDropdown = async () =>
+  nextServerFetch<ApiResponse<CompanyDropdownItem[]>>("/company/dropdown", {
+    isPublic: true,
+    revalidate: 300,
+  });
+
 export const getCompany = async (companyId: string) =>
   nextServerFetch<ApiResponse<Company>>(`/company/${companyId}`, {
     tags: ["companies", `company-${companyId}`],

@@ -4,6 +4,8 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { CompanyTeamSelect } from "@/components/auth/CompanyTeamSelect";
+import { AuthPageLinks } from "@/components/auth/AuthPageLinks";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { ErrorToast, SuccessToast } from "@/lib/utils";
@@ -25,6 +27,9 @@ export default function RegisterPage() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!acceptedTerms) return ErrorToast("Please accept the terms");
+    if (!form.companyId || !form.teamId) {
+      return ErrorToast("Please select a company and team");
+    }
     setIsPending(true);
 
     try {
@@ -44,7 +49,7 @@ export default function RegisterPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <h1 className="font-heading text-3xl font-bold">Create Account</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Use the company and team IDs provided to you.</p>
+          <p className="mt-2 text-sm text-muted-foreground">Select your company and team to create an account.</p>
         </div>
         <FieldGroup>
           <div className="grid grid-cols-2 gap-3">
@@ -53,8 +58,17 @@ export default function RegisterPage() {
           </div>
           <Field><FieldLabel>Email</FieldLabel><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required /></Field>
           <Field><FieldLabel>Password</FieldLabel><Input type="password" minLength={8} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required /></Field>
-          <Field><FieldLabel>Company ID</FieldLabel><Input value={form.companyId} onChange={(e) => setForm({ ...form, companyId: e.target.value })} required /></Field>
-          <Field><FieldLabel>Team ID</FieldLabel><Input value={form.teamId} onChange={(e) => setForm({ ...form, teamId: e.target.value })} required /></Field>
+          <CompanyTeamSelect
+            companyId={form.companyId}
+            teamId={form.teamId}
+            onCompanyChange={(companyId) =>
+              setForm((current) => ({ ...current, companyId }))
+            }
+            onTeamChange={(teamId) =>
+              setForm((current) => ({ ...current, teamId }))
+            }
+            showLabels
+          />
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={acceptedTerms} onChange={(e) => setAcceptedTerms(e.target.checked)} />
             I accept the terms and conditions
@@ -63,6 +77,7 @@ export default function RegisterPage() {
         <Button type="submit" size="lg-full" disabled={isPending}>{isPending ? "Creating..." : "Create Account"}</Button>
         <p className="text-center text-sm text-muted-foreground">Already registered? <Link href="/auth/login" className="text-primary hover:underline">Log in</Link></p>
       </form>
+      <AuthPageLinks />
     </div>
   );
 }

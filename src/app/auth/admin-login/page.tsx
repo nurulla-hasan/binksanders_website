@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AuthPageLinks } from "@/components/auth/AuthPageLinks";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { ErrorToast, SuccessToast } from "@/lib/utils";
@@ -126,6 +127,7 @@ export default function AdminLoginPage() {
             </Link>
           </div>
         </form>
+        <AuthPageLinks showUserLogin />
       </main>
 
       <div className="flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
