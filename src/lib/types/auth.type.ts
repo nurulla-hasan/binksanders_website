@@ -27,9 +27,23 @@ export type GuestLoginPayload = {
 
 export type QrLoginPayload = {
   qrToken: string;
-  firstName: string;
-  lastName: string;
 };
+
+export type QrLoginUser = CurrentUser & {
+  teamId: string;
+  guestId: string;
+};
+
+export type QrLoginData = {
+  accessToken: string;
+  refreshToken: string;
+  user: QrLoginUser;
+  isNewUser: boolean;
+};
+
+export type QrLoginResult =
+  | { success: true; message: string; data: QrLoginData }
+  | { success: false; message: string };
 
 export type GenerateQrPayload = {
   companyId: string;

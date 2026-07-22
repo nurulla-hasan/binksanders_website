@@ -4,19 +4,19 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Mail, Eye, EyeOff, User, Scan } from "lucide-react";
+import { Mail, Eye, EyeOff, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CompanyTeamSelect } from "@/components/auth/CompanyTeamSelect";
 import { AuthPageLinks } from "@/components/auth/AuthPageLinks";
+import { QrCodeScanner } from "@/components/auth/QrCodeScanner";
 import { ErrorToast, SuccessToast } from "@/lib/utils";
 import {
   employeeIdLogin,
   guestLogin,
   login,
-  qrLogin,
 } from "@/services/auth.service";
 import { useAuthStore } from "@/stores/auth.store";
 
@@ -42,7 +42,6 @@ export default function LoginPage() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [passcode, setPasscode] = useState("");
-  const [qrToken, setQrToken] = useState("");
   const [isPending, setIsPending] = useState(false);
 
   const handleLoginSubmit = async (event: React.FormEvent) => {
@@ -64,19 +63,19 @@ export default function LoginPage() {
         setUser(user);
         SuccessToast(response.message || "Logged in successfully");
         router.replace(user.role === "company" ? "/company" : "/");
-      } else {
-        const response =
-          mode === "employee"
-            ? await employeeIdLogin({
-                employeeId,
-                companyId,
-                teamId,
-                firstName,
-                lastName,
-              })
-            : mode === "guest"
-              ? await guestLogin({ passcode, companyId, teamId })
-              : await qrLogin({ qrToken, firstName, lastName });
+      } else if (mode === "employee") {
+        const response = await employeeIdLogin({
+          employeeId,
+          companyId,
+          teamId,
+          firstName,
+          lastName,
+        });
+        if (!response.success) throw new Error(response.message);
+        SuccessToast(response.message || "Logged in successfully");
+        router.replace("/");
+      } else if (mode === "guest") {
+        const response = await guestLogin({ passcode, companyId, teamId });
         if (!response.success) throw new Error(response.message);
         SuccessToast(response.message || "Logged in successfully");
         router.replace("/");
@@ -298,10 +297,7 @@ export default function LoginPage() {
           </TabsContent>
 
           <TabsContent value="scan" className="mt-0 flex-none">
-            <form
-              onSubmit={handleLoginSubmit}
-              className="space-y-8 animate-fadeIn text-center flex flex-col items-center"
-            >
+            <div className="space-y-8 animate-fadeIn text-center flex flex-col items-center">
               {/* Scan illustration image from Figma */}
               <div className="relative w-44 h-28 flex items-center justify-center mb-2">
                 <Image
@@ -319,45 +315,12 @@ export default function LoginPage() {
                   Scan To Authenticate
                 </h1>
                 <p className="text-sm text-muted-foreground max-w-70 mx-auto leading-relaxed">
-                  Scan the QR code to gain access for the training
+                  Open the camera and scan the QR code provided by your company.
                 </p>
               </div>
 
-              <FieldGroup className="w-full">
-                <Field>
-                  <Input
-                    placeholder="QR Token"
-                    required
-                    value={qrToken}
-                    onChange={(e) => setQrToken(e.target.value)}
-                  />
-                </Field>
-                <div className="grid grid-cols-2 gap-3">
-                  <Input
-                    placeholder="First name"
-                    required
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                  />
-                  <Input
-                    placeholder="Last name"
-                    required
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                  />
-                </div>
-              </FieldGroup>
-
-              <Button
-                type="submit"
-                disabled={isPending}
-                className="w-full gap-2"
-                size="lg"
-              >
-                <Scan className="w-5 h-5" />
-                {isPending ? "AUTHENTICATING..." : "CONTINUE WITH QR"}
-              </Button>
-            </form>
+              <QrCodeScanner />
+            </div>
           </TabsContent>
 
           <AuthPageLinks />

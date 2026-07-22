@@ -69,7 +69,7 @@ export function DynamicThemeProvider() {
   useEffect(() => {
     let isCancelled = false;
 
-    if (pathname.startsWith("/auth")) {
+    if (pathname.startsWith("/auth") || pathname === "/qr-login") {
       clearCompanyTheme();
       return;
     }

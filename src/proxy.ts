@@ -22,6 +22,7 @@ const USER_PUBLIC_ROUTES = new Set([
   "/auth/forgot-password",
   "/auth/verify-otp",
   "/auth/reset-password",
+  "/qr-login",
 ]);
 
 const decodeValidToken = (token?: string): TokenPayload | null => {

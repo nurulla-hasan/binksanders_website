@@ -15,7 +15,9 @@ import type {
   GenerateQrPayload,
   GuestLoginPayload,
   LoginData,
+  QrLoginData,
   QrLoginPayload,
+  QrLoginResult,
   RefreshTokenPayload,
   RegisterPayload,
   VerifyRegistrationOtpPayload,
@@ -50,8 +52,34 @@ export const employeeIdLogin = async <T = unknown>(payload: EmployeeIdLoginPaylo
 export const guestLogin = async <T = unknown>(payload: GuestLoginPayload) =>
   postPublicWithSession<T>("/auth/guest-login", payload);
 
-export const qrLogin = async <T = unknown>(payload: QrLoginPayload) =>
-  postPublicWithSession<T>("/auth/qr-login", payload);
+export const qrLogin = async (
+  payload: QrLoginPayload
+): Promise<QrLoginResult> => {
+  try {
+    const response = await postPublicWithSession<QrLoginData>(
+      "/auth/qr-login",
+      payload
+    );
+
+    if (!response.success) {
+      return { success: false, message: response.message || "QR login failed" };
+    }
+
+    return {
+      success: true,
+      message: response.message || "QR login successful",
+      data: response.data,
+    };
+  } catch (error: unknown) {
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Unable to log in with this QR code",
+    };
+  }
+};
 
 export const generateQrCode = async <T = unknown>(payload: GenerateQrPayload) =>
   nextServerFetch<ApiResponse<T>>("/auth/generate-qr", {
