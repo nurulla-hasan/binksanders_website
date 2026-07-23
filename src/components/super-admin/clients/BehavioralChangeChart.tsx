@@ -11,17 +11,15 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const chartData = [
-  { name: "Social Safety", baseline: 60, followUp: 90 },
-  { name: "Workplace Respect", baseline: 55, followUp: 85 },
-  { name: "Inclusion & Equity", baseline: 65, followUp: 95 },
-  { name: "Well-being", baseline: 70, followUp: 92 },
-  { name: "Team Collaboration", baseline: 50, followUp: 88 },
-  { name: "Conflict Resolution", baseline: 45, followUp: 78 },
-  { name: "Leadership Skills", baseline: 62, followUp: 85 },
-];
-
-export function BehavioralChangeChart() {
+export function BehavioralChangeChart({
+  data,
+  averageIncrease,
+  assessmentCount,
+}: {
+  data: Array<{ name: string; baseline: number; followUp: number }>;
+  averageIncrease: number;
+  assessmentCount: number;
+}) {
   return (
     <div className="bg-card border border-border shadow-sm p-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
@@ -52,7 +50,7 @@ export function BehavioralChangeChart() {
       <div className="h-80 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
-            data={chartData}
+            data={data}
             barGap={8}
             margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
           >
@@ -94,13 +92,13 @@ export function BehavioralChangeChart() {
 
       <div className="mt-6 flex flex-wrap items-center gap-3 pt-4 border-t border-border">
         <Badge className="bg-secondary/15 text-secondary-foreground hover:bg-secondary/25 font-semibold border-0 px-4 py-1.5 text-xs">
-          Average score increase: +22%
+          Average score increase: +{averageIncrease}%
         </Badge>
         <Badge
           variant="outline"
           className="text-muted-foreground font-normal border-border text-xs px-4 py-1.5"
         >
-          Based on 4 assessments
+          Based on {assessmentCount} assessments
         </Badge>
       </div>
     </div>

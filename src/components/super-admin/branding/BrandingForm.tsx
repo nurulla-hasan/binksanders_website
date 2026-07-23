@@ -57,7 +57,7 @@ export function BrandingForm({
       SuccessToast(response.message || "Branding updated successfully");
       setLogo(undefined);
       setVideo(undefined);
-      router.push(`/super-admin/clients/${company._id}`);
+      router.push(`/super-admin/clients/${company._id}/settings`);
     } catch (error: unknown) {
       ErrorToast(error instanceof Error ? error.message : "Unable to update branding");
     } finally {

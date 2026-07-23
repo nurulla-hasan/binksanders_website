@@ -14,6 +14,7 @@ import type {
   PublicCompanyDropdownItem,
   CompanyStatus,
   UpdateCompanyBrandingPayload,
+  CompanyAnalytics,
 } from "@/lib/types/company.type";
 import type { TQuery } from "@/lib/types/global.type";
 
@@ -117,6 +118,14 @@ export const getCompany = async (companyId: string) => {
     data: normalizeCompany(response.data),
   };
 };
+
+export const getCompanyAnalytics = async (companyId: string) =>
+  nextServerFetch<ApiResponse<CompanyAnalytics>>(
+    `/company/${companyId}/details`,
+    {
+      tags: ["companies", `company-${companyId}-analytics`],
+    },
+  );
 
 export const updateCompany = async <T = unknown>(
   companyId: string,

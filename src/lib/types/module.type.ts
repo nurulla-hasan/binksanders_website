@@ -7,7 +7,8 @@ export type ModuleQuestionType =
   | "Ordering"
   | "Chat Scenario"
   | "Video"
-  | "Rating";
+  | "Rating"
+  | "Free Input";
 
 export type ModuleMessage = {
   sender: string;

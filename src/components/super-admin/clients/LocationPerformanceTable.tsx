@@ -1,23 +1,16 @@
+"use client";
+
 import { MapPin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/ui/custom/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 
-type LocationData = {
+export type LocationData = {
   team: string;
   activeUser: number;
   progress: number;
   avgScore: string;
 };
-
-const mockLocations: LocationData[] = [
-  { team: "Utrecht", activeUser: 15, progress: 95, avgScore: "88%" },
-  { team: "Hilversum Store", activeUser: 15, progress: 95, avgScore: "88%" },
-  { team: "Team 05", activeUser: 15, progress: 88, avgScore: "85%" },
-  { team: "Amsterdam Office", activeUser: 28, progress: 62, avgScore: "76%" },
-  { team: "Rotterdam Branch", activeUser: 18, progress: 45, avgScore: "91%" },
-  { team: "Team 05", activeUser: 15, progress: 88, avgScore: "85%" },
-];
 
 const columns: ColumnDef<LocationData>[] = [
   {
@@ -85,7 +78,7 @@ const columns: ColumnDef<LocationData>[] = [
   },
 ];
 
-export function LocationPerformanceTable() {
+export function LocationPerformanceTable({ data }: { data: LocationData[] }) {
   return (
     <div className="bg-card border border-border shadow-sm overflow-hidden rounded-md">
       <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/20">
@@ -94,11 +87,11 @@ export function LocationPerformanceTable() {
           <h3 className="font-bold text-foreground">Location & Performance</h3>
         </div>
         <span className="text-xs text-muted-foreground bg-muted/50 px-2.5 py-1">
-          {mockLocations.length} locations
+          {data.length} teams
         </span>
       </div>
       <div className="p-4">
-        <DataTable columns={columns} data={mockLocations} />
+        <DataTable columns={columns} data={data} />
       </div>
     </div>
   );

@@ -90,3 +90,43 @@ export type UpdateCompanyBrandingPayload = {
   logo?: Blob;
   video?: Blob;
 };
+
+export type CompanyAnalytics = {
+  company: {
+    name: string;
+    industry: string;
+    employeeCount: number;
+    memberSince: string;
+  };
+  stats: {
+    activeParticipants: number;
+    completionRate: number;
+    organizationGrade: number;
+  };
+  barChart: {
+    averageIncreasePercentage: number;
+    assessmentCount: number;
+    chartData: Array<{
+      name: string;
+      baseline: number;
+      followUp: number;
+      score: number;
+    }>;
+  };
+  teamPerformance: Array<{
+    teamId: string;
+    teamName: string;
+    activeCount: number;
+    progressPercentage: number;
+    averageScore: number;
+  }>;
+  moduleCompliance: Array<{
+    moduleId: string;
+    moduleName: string;
+    teamId: string;
+    teamName: string;
+    completionPercentage: number;
+    completedCount: number;
+    totalAssigned: number;
+  }>;
+};

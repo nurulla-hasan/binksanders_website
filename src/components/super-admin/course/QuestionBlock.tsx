@@ -1,5 +1,5 @@
 import { Controller, useFormContext, useWatch } from "react-hook-form";
-import { Trash2 } from "lucide-react";
+import { Plus, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -33,6 +33,7 @@ const questionTypes: QuestionDataSchemaType["type"][] = [
   "Chat Scenario",
   "Video",
   "Rating",
+  "Free Input",
 ];
 
 export function QuestionBlock({
@@ -41,11 +42,75 @@ export function QuestionBlock({
   onChangeType,
   onDelete,
 }: QuestionBlockProps) {
-  const { control, register } = useFormContext<CreateModuleFormValues>();
+  const { control, register, setValue } =
+    useFormContext<CreateModuleFormValues>();
   const currentQuestion = useWatch({
     control,
     name: `questions.${index}`,
   }) as QuestionDataSchemaType;
+
+  const addOption = () => {
+    if (currentQuestion.type !== "MCQ") return;
+    setValue(`questions.${index}.options`, [...currentQuestion.options, ""], {
+      shouldDirty: true,
+    });
+  };
+
+  const removeOption = (optionIndex: number) => {
+    if (currentQuestion.type !== "MCQ" || currentQuestion.options.length <= 2)
+      return;
+    const removed = currentQuestion.options[optionIndex];
+    setValue(
+      `questions.${index}.options`,
+      currentQuestion.options.filter((_, index) => index !== optionIndex),
+      { shouldDirty: true, shouldValidate: true },
+    );
+    if (currentQuestion.correctAnswer === removed) {
+      setValue(`questions.${index}.correctAnswer`, "", { shouldDirty: true });
+    }
+  };
+
+  const addOrderingItem = () => {
+    if (currentQuestion.type !== "Ordering") return;
+    setValue(`questions.${index}.items`, [...currentQuestion.items, ""], {
+      shouldDirty: true,
+    });
+  };
+
+  const removeOrderingItem = (itemIndex: number) => {
+    if (
+      currentQuestion.type !== "Ordering" ||
+      currentQuestion.items.length <= 2
+    )
+      return;
+    setValue(
+      `questions.${index}.items`,
+      currentQuestion.items.filter((_, index) => index !== itemIndex),
+      { shouldDirty: true, shouldValidate: true },
+    );
+  };
+
+  const addChatMessage = () => {
+    if (currentQuestion.type !== "Chat Scenario") return;
+    setValue(
+      `questions.${index}.messages`,
+      [...currentQuestion.messages, { sender: "", text: "" }],
+      { shouldDirty: true },
+    );
+  };
+
+  const removeChatMessage = (messageIndex: number) => {
+    if (
+      currentQuestion.type !== "Chat Scenario" ||
+      currentQuestion.messages.length <= 1
+    )
+      return;
+    setValue(
+      `questions.${index}.messages`,
+      currentQuestion.messages.filter((_, index) => index !== messageIndex),
+      { shouldDirty: true, shouldValidate: true },
+    );
+  };
 
   return (
     <div className="space-y-6 rounded-md border border-border bg-card p-6 shadow-sm">
@@ -85,10 +150,29 @@ export function QuestionBlock({
 
       {currentQuestion.type === "MCQ" && (
         <FieldGroup>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="flex items-center justify-between gap-3">
+            <FieldLabel>Options</FieldLabel>
+            <Button type="button" variant="outline" size="sm" onClick={addOption}>
+              <Plus /> Add Option
+            </Button>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {currentQuestion.options.map((_, optionIndex) => (
               <Field key={optionIndex}>
-                <FieldLabel>Option {optionIndex + 1}</FieldLabel>
+                <div className="flex items-center justify-between gap-2">
+                  <FieldLabel>Option {optionIndex + 1}</FieldLabel>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    className="text-destructive"
+                    onClick={() => removeOption(optionIndex)}
+                    disabled={currentQuestion.options.length <= 2}
+                    aria-label={`Remove option ${optionIndex + 1}`}
+                  >
+                    <X />
+                  </Button>
+                </div>
                 <Input
                   {...register(
                     `questions.${index}.options.${optionIndex}` as const,
@@ -157,22 +241,62 @@ export function QuestionBlock({
       )}
 
       {currentQuestion.type === "Ordering" && (
-        <div className="grid gap-4 sm:grid-cols-3">
-          {currentQuestion.items.map((_, itemIndex) => (
-            <Field key={itemIndex}>
-              <FieldLabel>Item {itemIndex + 1}</FieldLabel>
-              <Input
-                {...register(`questions.${index}.items.${itemIndex}` as const)}
-              />
-            </Field>
-          ))}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between gap-3">
+            <FieldLabel>Ordering Items</FieldLabel>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addOrderingItem}
+            >
+              <Plus /> Add Item
+            </Button>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {currentQuestion.items.map((_, itemIndex) => (
+              <Field key={itemIndex}>
+                <div className="flex items-center justify-between gap-2">
+                  <FieldLabel>Item {itemIndex + 1}</FieldLabel>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    className="text-destructive"
+                    onClick={() => removeOrderingItem(itemIndex)}
+                    disabled={currentQuestion.items.length <= 2}
+                    aria-label={`Remove item ${itemIndex + 1}`}
+                  >
+                    <X />
+                  </Button>
+                </div>
+                <Input
+                  {...register(`questions.${index}.items.${itemIndex}` as const)}
+                />
+              </Field>
+            ))}
+          </div>
         </div>
       )}
 
       {currentQuestion.type === "Chat Scenario" && (
         <div className="space-y-4">
+          <div className="flex items-center justify-between gap-3">
+            <FieldLabel>Messages</FieldLabel>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addChatMessage}
+            >
+              <Plus /> Add Message
+            </Button>
+          </div>
           {currentQuestion.messages.map((_, messageIndex) => (
-            <div key={messageIndex} className="grid gap-4 sm:grid-cols-3">
+            <div
+              key={messageIndex}
+              className="grid gap-4 rounded-md border p-3 sm:grid-cols-[1fr_2fr_auto]"
+            >
               <Field>
                 <FieldLabel>Sender</FieldLabel>
                 <Input
@@ -181,7 +305,7 @@ export function QuestionBlock({
                   )}
                 />
               </Field>
-              <Field className="sm:col-span-2">
+              <Field>
                 <FieldLabel>Message</FieldLabel>
                 <Input
                   {...register(
@@ -189,6 +313,17 @@ export function QuestionBlock({
                   )}
                 />
               </Field>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                className="self-end text-destructive"
+                onClick={() => removeChatMessage(messageIndex)}
+                disabled={currentQuestion.messages.length <= 1}
+                aria-label={`Remove message ${messageIndex + 1}`}
+              >
+                <Trash2 />
+              </Button>
             </div>
           ))}
         </div>

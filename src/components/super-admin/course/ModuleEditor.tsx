@@ -29,7 +29,31 @@ export function ModuleEditor({ module }: { module?: LearningModule }) {
       title: module?.title || "",
       description: module?.description || "",
       questions:
-        (module?.questions as CreateModuleFormValues["questions"]) || [],
+        (module?.questions.map((question) => {
+          if (question.type === "MCQ") {
+            const options = question.options || [];
+            return {
+              ...question,
+              options:
+                options.length >= 4
+                  ? options
+                  : [...options, ...Array(4 - options.length).fill("")],
+            };
+          }
+
+          if (question.type === "Ordering") {
+            const items = question.items || [];
+            return {
+              ...question,
+              items:
+                items.length >= 4
+                  ? items
+                  : [...items, ...Array(4 - items.length).fill("")],
+            };
+          }
+
+          return question;
+        }) as CreateModuleFormValues["questions"]) || [],
     },
   });
 

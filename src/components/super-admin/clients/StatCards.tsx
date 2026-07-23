@@ -2,10 +2,19 @@
 
 import { Users, TrendingUp, Award } from "lucide-react";
 
+export function StatCards({
+  activeParticipants,
+  completionRate,
+  organizationGrade,
+}: {
+  activeParticipants: number;
+  completionRate: number;
+  organizationGrade: number;
+}) {
 const stats = [
   {
     label: "Active Participants",
-    value: "1,200",
+    value: activeParticipants.toLocaleString(),
     suffix: "employees",
     icon: Users,
     color: "from-primary/10 to-primary/5",
@@ -14,7 +23,7 @@ const stats = [
   },
   {
     label: "Completion Rate",
-    value: "38%",
+    value: `${completionRate}%`,
     suffix: "Completed",
     icon: TrendingUp,
     color: "from-secondary/10 to-secondary/5",
@@ -23,16 +32,14 @@ const stats = [
   },
   {
     label: "Organization Grade",
-    value: "8.4",
-    suffix: "/10",
+    value: organizationGrade.toString(),
+    suffix: "/100",
     icon: Award,
     color: "from-success/10 to-success/5",
     border: "border-success/10",
     iconBg: "bg-success/10 text-success",
   },
 ];
-
-export function StatCards() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
       {stats.map((stat, idx) => {

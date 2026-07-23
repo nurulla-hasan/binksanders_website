@@ -47,6 +47,10 @@ const ratingSchema = baseQuestionSchema.extend({
   scale: z.coerce.number().int().min(2).max(10),
 });
 
+const freeInputSchema = baseQuestionSchema.extend({
+  type: z.literal("Free Input"),
+});
+
 export const questionSchema = z.discriminatedUnion("type", [
   mcqSchema,
   swipeSchema,
@@ -54,6 +58,7 @@ export const questionSchema = z.discriminatedUnion("type", [
   chatScenarioSchema,
   videoSchema,
   ratingSchema,
+  freeInputSchema,
 ]);
 
 export const createModuleSchema = z.object({
@@ -77,7 +82,7 @@ export const getDefaultQuestionValues = (
       return {
         ...base,
         type,
-        options: ["", "", ""],
+        options: ["", "", "", ""],
         correctAnswer: "",
         explanation: "",
       };
@@ -90,7 +95,7 @@ export const getDefaultQuestionValues = (
         correctDirection: "left",
       };
     case "Ordering":
-      return { ...base, type, items: ["", "", ""] };
+      return { ...base, type, items: ["", "", "", ""] };
     case "Chat Scenario":
       return {
         ...base,
@@ -105,5 +110,7 @@ export const getDefaultQuestionValues = (
       return { ...base, type, isScored: false, videoUrl: "" };
     case "Rating":
       return { ...base, type, isScored: false, scale: 5 };
+    case "Free Input":
+      return { ...base, type, isScored: false };
   }
 };
