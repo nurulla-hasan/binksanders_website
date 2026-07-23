@@ -38,6 +38,11 @@ export type ModuleCreator = {
   email: string;
 };
 
+export type ModuleTeam = {
+  _id: string;
+  name: string;
+};
+
 export type LearningModule = {
   _id: string;
   title: string;
@@ -49,6 +54,8 @@ export type LearningModule = {
   isDeleted: boolean;
   createdAt: string;
   updatedAt: string;
+  companyId?: string;
+  teamId?: ModuleTeam;
 };
 
 export type ModuleListResponse = ApiResponse<LearningModule[]> & {
@@ -75,4 +82,5 @@ export type DuplicateModulePayload = {
 export type AssignModulesPayload = {
   moduleIds: string[];
   companyId: string;
+  teamId: string;
 };

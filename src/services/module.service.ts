@@ -24,6 +24,15 @@ export const getModule = async (moduleId: string) =>
     tags: ["modules", `module-${moduleId}`],
   });
 
+export const getCompanyModules = async (
+  companyId: string,
+  params: TQuery = {},
+) =>
+  nextServerFetch<ApiResponse<LearningModule[]>>(
+    `/module/company/${companyId}${buildQueryString(params)}`,
+    { tags: ["modules", `company-${companyId}-modules`] },
+  );
+
 export const createModule = async <T = unknown>({
   data,
   thumbnailImage,
@@ -66,11 +75,22 @@ export const assignModulesToCompany = async <T = unknown>(
   nextServerFetch<ApiResponse<T>>("/module/assign", {
     method: "POST",
     body: payload,
-    updateTag: ["modules", `company-${payload.companyId}-modules`],
+    updateTag: [
+      "modules",
+      `company-${payload.companyId}-modules`,
+      `company-${payload.companyId}-teams`,
+    ],
   });
 
-export const unassignModule = async <T = unknown>(moduleId: string) =>
+export const unassignModule = async <T = unknown>(
+  moduleId: string,
+  companyId: string,
+) =>
   nextServerFetch<ApiResponse<T>>(`/module/unassign/${moduleId}`, {
     method: "POST",
-    updateTag: ["modules", `module-${moduleId}`],
+    updateTag: [
+      "modules",
+      `module-${moduleId}`,
+      `company-${companyId}-modules`,
+    ],
   });

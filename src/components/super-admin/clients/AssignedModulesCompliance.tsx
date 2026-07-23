@@ -1,98 +1,183 @@
 "use client";
 
-import { BookOpen } from "lucide-react";
+import { useState } from "react";
+import type { ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { BookOpen, Layers3, Unlink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { ConfirmationModal } from "@/components/ui/custom/confirmation-modal";
+import type { LearningModule } from "@/lib/types/module.type";
+import { ErrorToast, SuccessToast } from "@/lib/utils";
+import { unassignModule } from "@/services/module.service";
 
-const mockModules = [
-  {
-    id: "01",
-    name: "Fire Safety & Evacuation",
-    compliance: 95,
-    completed: 190,
-    total: 200,
-  },
-  {
-    id: "02",
-    name: "Harassment Prevention",
-    compliance: 88,
-    completed: 176,
-    total: 200,
-  },
-  {
-    id: "03",
-    name: "Data Privacy & GDPR",
-    compliance: 76,
-    completed: 152,
-    total: 200,
-  },
-  {
-    id: "04",
-    name: "Inclusive Leadership",
-    compliance: 82,
-    completed: 164,
-    total: 200,
-  },
-  {
-    id: "05",
-    name: "Mental Health Awareness",
-    compliance: 70,
-    completed: 140,
-    total: 200,
-  },
-];
+type AssignedModulesComplianceProps = {
+  companyId: string;
+  modules: LearningModule[];
+  action?: ReactNode;
+};
 
-export function AssignedModulesCompliance() {
+export function AssignedModulesCompliance({
+  companyId,
+  modules,
+  action,
+}: AssignedModulesComplianceProps) {
+  const groupedModules = modules.reduce(
+    (groups, module) => {
+      const teamId = module.teamId?._id || "unassigned";
+      const currentGroup = groups.get(teamId);
+
+      if (currentGroup) {
+        currentGroup.modules.push(module);
+      } else {
+        groups.set(teamId, {
+          teamName: module.teamId?.name || "Other modules",
+          modules: [module],
+        });
+      }
+
+      return groups;
+    },
+    new Map<string, { teamName: string; modules: LearningModule[] }>(),
+  );
+
   return (
-    <div className="bg-card border border-border shadow-sm overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/20">
+    <section className="overflow-hidden rounded-md border border-border bg-card shadow-sm">
+      <div className="flex items-center justify-between border-b border-border bg-muted/20 px-5 py-4">
         <div className="flex items-center gap-2">
-          <BookOpen className="w-4 h-4 text-primary" />
-          <h3 className="font-bold text-foreground">
-            Assigned Modules Compliance
-          </h3>
+          <BookOpen className="size-4 text-primary" />
+          <h2 className="font-heading font-bold text-foreground">
+            Assigned Modules
+          </h2>
         </div>
-        <span className="text-xs text-muted-foreground bg-muted/50 px-2.5 py-1">
-          {mockModules.length} modules
-        </span>
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary">
+            {modules.length} {modules.length === 1 ? "module" : "modules"}
+          </Badge>
+          {action}
+        </div>
       </div>
-      <div className="p-4 space-y-4">
-        {mockModules.map((mod, idx) => (
-          <div key={idx} className="group p-4 border border-border/50 rounded-md bg-muted/10 hover:bg-muted/30 transition-colors">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <Badge
-                  variant="secondary"
-                  className="font-bold text-xs px-2 py-0.5 shrink-0"
-                >
-                  {mod.id}
-                </Badge>
-                <span className="font-medium text-foreground text-sm truncate">
-                  {mod.name}
-                </span>
+
+      {modules.length > 0 ? (
+        <div className="space-y-6 p-5">
+          {Array.from(groupedModules.entries()).map(
+            ([teamId, { teamName, modules: teamModules }]) => (
+              <div key={teamId} className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Layers3 className="size-4 text-muted-foreground" />
+                  <h3 className="text-sm font-semibold">{teamName}</h3>
+                  <span className="text-xs text-muted-foreground">
+                    ({teamModules.length})
+                  </span>
+                </div>
+
+                <div className="grid gap-3 lg:grid-cols-2">
+                  {teamModules.map((module) => (
+                    <div
+                      key={module._id}
+                      className="flex items-center gap-3 rounded-md border border-border/70 bg-muted/10 p-4"
+                    >
+                      <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                        <BookOpen className="size-5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold">
+                          {module.title}
+                        </p>
+                        <div className="mt-1 flex items-center gap-2">
+                          <Badge
+                            variant={
+                              module.status === "published"
+                                ? "success"
+                                : "progress"
+                            }
+                            className="capitalize"
+                          >
+                            {module.status}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {module.questions.length} questions
+                          </span>
+                        </div>
+                      </div>
+                      <UnassignButton
+                        companyId={companyId}
+                        module={module}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
-              <span className="font-bold text-foreground text-sm ml-2 shrink-0">
-                {mod.compliance}%
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Progress
-                value={mod.compliance}
-                className={`h-2 flex-1 ${
-                  mod.compliance >= 80
-                    ? "[&>div]:bg-success"
-                    : mod.compliance >= 50
-                      ? "[&>div]:bg-amber-500"
-                      : "[&>div]:bg-destructive"
-                }`}
-              />
-              <span className="text-xs text-muted-foreground shrink-0 w-16 text-right">
-                {mod.completed}/{mod.total}
-              </span>
-            </div>
+            ),
+          )}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center px-6 py-14 text-center">
+          <div className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <BookOpen className="size-5" />
           </div>
-        ))}
-      </div>
-    </div>
+          <h3 className="mt-4 font-heading font-bold">No modules assigned</h3>
+          <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+            Assign modules to a team and they will appear here.
+          </p>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function UnassignButton({
+  companyId,
+  module,
+}: {
+  companyId: string;
+  module: LearningModule;
+}) {
+  const router = useRouter();
+  const [isOpen, setIsOpen] = useState(false);
+  const [isPending, setIsPending] = useState(false);
+
+  const handleUnassign = async () => {
+    setIsPending(true);
+
+    try {
+      const response = await unassignModule(module._id, companyId);
+      if (!response.success) throw new Error(response.message);
+
+      SuccessToast(response.message || "Module unassigned successfully");
+      setIsOpen(false);
+      router.refresh();
+    } catch (error: unknown) {
+      ErrorToast(
+        error instanceof Error ? error.message : "Unable to unassign module",
+      );
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  return (
+    <ConfirmationModal
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      title="Unassign module?"
+      description={`Remove ${module.title} from ${module.teamId?.name || "this company"}?`}
+      confirmText="Unassign"
+      loadingText="Unassigning..."
+      onConfirm={handleUnassign}
+      isLoading={isPending}
+      variant="destructive"
+      actionTrigger={
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          aria-label={`Unassign ${module.title}`}
+          title="Unassign module"
+        >
+          <Unlink />
+        </Button>
+      }
+    />
   );
 }

@@ -124,7 +124,7 @@ export function CompanyQrAccess({
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Company</label>
-                  <div className="flex h-10 items-center rounded-md border border-input bg-muted/50 px-3 text-sm font-medium">
+                  <div className="flex h-9 items-center rounded-md border border-input bg-muted/50 px-3 text-sm font-medium">
                     {companyName || "Current company"}
                   </div>
                 </div>
