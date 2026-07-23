@@ -38,7 +38,9 @@ export const getCompanyTeamDropdown = async <T = unknown>(
 ) =>
   nextServerFetch<ApiResponse<T>>(
     `/team/company/${companyId}/dropdown${buildQueryString(params)}`,
-    { tags: ["teams", `company-${companyId}-teams`] }
+    {
+      cache: "no-store",
+    },
   );
 
 export const getPublicCompanyTeamDropdown = async (companyId: string) =>
@@ -46,8 +48,8 @@ export const getPublicCompanyTeamDropdown = async (companyId: string) =>
     `/team/company/${companyId}/dropdown`,
     {
       isPublic: true,
-      revalidate: 300,
-    }
+      cache: "no-store",
+    },
   );
 
 export const updateTeam = async <T = unknown>(

@@ -81,7 +81,9 @@ export const getCompanies = async (
 export const getCompanyDropdown = async (params: TQuery = {}) => {
   const response = await nextServerFetch<ApiResponse<PublicCompanyDropdownItem[]>>(
     `/company/dropdown${buildQueryString(params)}`,
-    { tags: ["companies"] }
+    {
+      cache: "no-store",
+    },
   );
 
   return {
@@ -94,9 +96,9 @@ export const getPublicCompanyDropdown = async () => {
   const response = await nextServerFetch<ApiResponse<PublicCompanyDropdownItem[]>>(
     "/company/dropdown",
     {
-    isPublic: true,
-    revalidate: 300,
-    }
+      isPublic: true,
+      cache: "no-store",
+    },
   );
 
   return {
