@@ -251,12 +251,12 @@ export default function LoginPage() {
                 </Button>
 
                 {/* Informational Help Box - Styled using secondary theme colors with opacity */}
-                <div className="flex gap-2.5 p-4 bg-secondary/20 border border-secondary/30 rounded-md text-xs text-foreground leading-relaxed">
+                {/* <div className="flex gap-2.5 p-4 bg-secondary/20 border border-secondary/30 rounded-md text-xs text-foreground leading-relaxed">
                   <span>
                     Your employee number is on your onboarding card or ask your
                     manager.
                   </span>
-                </div>
+                </div> */}
               </div>
             </form>
           </TabsContent>
