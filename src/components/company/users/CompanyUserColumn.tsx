@@ -38,17 +38,32 @@ export const columns: ColumnDef<CompanyUser>[] = [
     accessorKey: "email",
     header: "Email / ID",
     cell: ({ row }) => (
-      <span className="text-muted-foreground">{row.original.email}</span>
+      <div>
+        <p className="text-muted-foreground">{row.original.email}</p>
+        {row.original.employeeId && (
+          <p className="text-xs text-muted-foreground">
+            ID: {row.original.employeeId}
+          </p>
+        )}
+      </div>
     ),
   },
   {
     accessorKey: "authType",
     header: "Login Method",
-    cell: ({ row }) => (
-      <span className="capitalize text-muted-foreground">
-        {row.original.authType}
-      </span>
-    ),
+    cell: ({ row }) => {
+      const labels: Record<string, string> = {
+        employeeId: "Employee ID",
+        qr: "QR Code",
+        email: "Email",
+      };
+
+      return (
+        <span className="text-muted-foreground">
+          {labels[row.original.authType] || row.original.authType}
+        </span>
+      );
+    },
   },
   {
     accessorKey: "status",

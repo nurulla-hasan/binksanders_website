@@ -113,7 +113,10 @@ export function BroadcastForm({
                     </SelectTrigger>
                     <SelectContent>
                       {companies.map((company) => (
-                        <SelectItem key={company._id} value={company._id}>
+                        <SelectItem
+                          key={company._id}
+                          value={company.companyId || company._id}
+                        >
                           {company.name}
                         </SelectItem>
                       ))}

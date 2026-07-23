@@ -53,7 +53,14 @@ export function AddTeamModal({ companies }: { companies: CompanyDropdownItem[] }
             <Select value={form.companyId} onValueChange={(value) => setForm({ ...form, companyId: value })} required>
               <SelectTrigger><SelectValue placeholder="Select company" /></SelectTrigger>
               <SelectContent>
-                {companies.map((company) => <SelectItem key={company._id} value={company._id}>{company.name}</SelectItem>)}
+                {companies.map((company) => (
+                  <SelectItem
+                    key={company._id}
+                    value={company.companyId || company._id}
+                  >
+                    {company.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </Field>

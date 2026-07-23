@@ -7,6 +7,8 @@ import type { ApiResponse } from "@/lib/types/api.type";
 import type {
   CompanyPayload,
   Company,
+  CompanyApiItem,
+  CompanyApiListData,
   CompanyListData,
   CompanyDropdownItem,
   PublicCompanyDropdownItem,
@@ -15,6 +17,49 @@ import type {
 } from "@/lib/types/company.type";
 import type { TQuery } from "@/lib/types/global.type";
 
+const defaultBranding = {
+  primaryColor: "#8ACDDE",
+  secondaryColor: "#E9308F",
+  videoTitle: "",
+  videoDescription: "",
+  presenterName: "",
+  presenterDesignation: "",
+  videoUrl: "",
+};
+
+const normalizeCompany = (item: CompanyApiItem): Company => ({
+  _id: item._id,
+  companyId: item.companyId,
+  name: item.name || item.fullName || item.firstName || "Unnamed company",
+  email: item.email || "",
+  address: item.address || "",
+  logo: item.logo || item.image || "",
+  slug: item.slug || "",
+  status: item.status || "active",
+  isDeleted: item.isDeleted ?? false,
+  branding: { ...defaultBranding, ...item.branding },
+  createdAt: item.createdAt || "",
+  updatedAt: item.updatedAt || "",
+  __v: item.__v ?? 0,
+  users: item.users,
+  id: item.id || item._id,
+});
+
+const normalizeCompanyDropdown = (
+  item: PublicCompanyDropdownItem
+): CompanyDropdownItem => ({
+  _id: item._id,
+  companyId: item.companyId,
+  name: item.name || item.firstName || "Unnamed company",
+});
+
+const normalizePublicCompanyDropdown = (
+  item: PublicCompanyDropdownItem
+): CompanyDropdownItem => ({
+  ...normalizeCompanyDropdown(item),
+  _id: item.companyId || item._id,
+});
+
 export const createCompany = async <T = unknown>(payload: CompanyPayload) =>
   nextServerFetch<ApiResponse<T>>("/company/create-company", {
     method: "POST",
@@ -22,27 +67,65 @@ export const createCompany = async <T = unknown>(payload: CompanyPayload) =>
     updateTag: "companies",
   });
 
-export const getCompanies = async (params: TQuery = {}) =>
-  nextServerFetch<ApiResponse<CompanyListData>>(`/company${buildQueryString(params)}`, {
+export const getCompanies = async (
+  params: TQuery = {}
+): Promise<ApiResponse<CompanyListData>> => {
+  const response = await nextServerFetch<ApiResponse<CompanyApiListData>>(
+    `/company${buildQueryString(params)}`,
+    {
     tags: ["companies"],
-  });
+    }
+  );
 
-export const getCompanyDropdown = async (params: TQuery = {}) =>
-  nextServerFetch<ApiResponse<CompanyDropdownItem[]>>(
+  return {
+    ...response,
+    data: {
+      meta: response.data.meta,
+      result: response.data.result.map(normalizeCompany),
+    },
+  };
+};
+
+export const getCompanyDropdown = async (params: TQuery = {}) => {
+  const response = await nextServerFetch<ApiResponse<PublicCompanyDropdownItem[]>>(
     `/company/dropdown${buildQueryString(params)}`,
     { tags: ["companies"] }
   );
 
-export const getPublicCompanyDropdown = async () =>
-  nextServerFetch<ApiResponse<PublicCompanyDropdownItem[]>>("/company/dropdown", {
+  return {
+    ...response,
+    data: response.data.map(normalizeCompanyDropdown),
+  };
+};
+
+export const getPublicCompanyDropdown = async () => {
+  const response = await nextServerFetch<ApiResponse<PublicCompanyDropdownItem[]>>(
+    "/company/dropdown",
+    {
     isPublic: true,
     revalidate: 300,
-  });
+    }
+  );
 
-export const getCompany = async (companyId: string) =>
-  nextServerFetch<ApiResponse<Company>>(`/company/${companyId}`, {
+  return {
+    ...response,
+    data: response.data.map(normalizePublicCompanyDropdown),
+  };
+};
+
+export const getCompany = async (companyId: string) => {
+  const response = await nextServerFetch<ApiResponse<CompanyApiItem>>(
+    `/company/${companyId}`,
+    {
     tags: ["companies", `company-${companyId}`],
-  });
+    }
+  );
+
+  return {
+    ...response,
+    data: normalizeCompany(response.data),
+  };
+};
 
 export const updateCompany = async <T = unknown>(
   companyId: string,

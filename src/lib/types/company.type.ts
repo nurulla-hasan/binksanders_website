@@ -29,6 +29,7 @@ export type CompanyUserSummary = {
 
 export type Company = {
   _id: string;
+  companyId?: string;
   name: string;
   email: string;
   address: string;
@@ -44,12 +45,30 @@ export type Company = {
   id?: string;
 };
 
+export type CompanyApiItem = Partial<Company> & {
+  _id: string;
+  firstName?: string;
+  fullName?: string;
+  image?: string;
+  companyId?: string;
+  authType?: string;
+  role?: string;
+  isOtpVerified?: boolean;
+  fcmToken?: string | null;
+  lastActiveAt?: string;
+};
+
+export type CompanyApiListData = {
+  meta: TMeta;
+  result: CompanyApiItem[];
+};
+
 export type CompanyListData = {
   meta: TMeta;
   result: Company[];
 };
 
-export type CompanyDropdownItem = Pick<Company, "_id" | "name">;
+export type CompanyDropdownItem = Pick<Company, "_id" | "name" | "companyId">;
 
 export type PublicCompanyDropdownItem = {
   _id: string;

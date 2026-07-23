@@ -1,4 +1,8 @@
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { BrandingForm } from "@/components/super-admin/branding/BrandingForm";
+import { BrandingCompanySelect } from "@/components/super-admin/branding/BrandingCompanySelect";
+import { Button } from "@/components/ui/button";
 import { DashboardHeader } from "@/components/ui/custom/DashboardHeader";
 import DashboardPageLayout from "@/components/ui/custom/DashboardPageLayout";
 import type { TSearchParams } from "@/lib/types/global.type";
@@ -19,15 +23,28 @@ export default async function ClientBrandingPage({
   const requestedId = typeof params.companyId === "string" ? params.companyId : "";
   const companyId = dropdownResponse.data.some((item) => item._id === requestedId)
     ? requestedId
-    : dropdownResponse.data[0]?._id;
+    : "";
 
   if (!companyId) {
     return (
       <DashboardPageLayout>
         <DashboardHeader
           title="Client Branding Settings"
-          description="Create a client company before configuring branding."
-        />
+          description="Configure custom logos, brand colors, and onboarding videos."
+        >
+          <Button asChild variant="outline" size="sm">
+            <Link href="/super-admin/clients">
+              <ArrowLeft />
+              Back to Clients
+            </Link>
+          </Button>
+        </DashboardHeader>
+        <div className="max-w-4xl rounded-md border border-border bg-card p-4">
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-foreground">Client Company</p>
+            <BrandingCompanySelect companies={dropdownResponse.data} />
+          </div>
+        </div>
       </DashboardPageLayout>
     );
   }
@@ -43,11 +60,19 @@ export default async function ClientBrandingPage({
       <DashboardHeader
         title="Client Branding Settings"
         description="Configure custom logos, brand colors, and onboarding videos."
-      />
+      >
+        <Button asChild variant="outline" size="sm">
+          <Link href={`/super-admin/clients/${companyId}`}>
+            <ArrowLeft />
+            Back to Company
+          </Link>
+        </Button>
+      </DashboardHeader>
       <BrandingForm
-        key={companyResponse.data._id}
+        key={companyId}
         company={companyResponse.data}
         companies={dropdownResponse.data}
+        selectedCompanyId={companyId}
       />
     </DashboardPageLayout>
   );

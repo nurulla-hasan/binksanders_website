@@ -3,12 +3,11 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ImageIcon, Video } from "lucide-react";
+import { BrandingCompanySelect } from "@/components/super-admin/branding/BrandingCompanySelect";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useNextFilter } from "@/hooks/useNextFilter";
 import type { Company, CompanyBrandingData, CompanyDropdownItem } from "@/lib/types/company.type";
 import { ErrorToast, SuccessToast } from "@/lib/utils";
 import { updateCompanyBranding } from "@/services/company.service";
@@ -16,12 +15,13 @@ import { updateCompanyBranding } from "@/services/company.service";
 export function BrandingForm({
   company,
   companies,
+  selectedCompanyId,
 }: {
   company: Company;
   companies: CompanyDropdownItem[];
+  selectedCompanyId: string;
 }) {
   const router = useRouter();
-  const { updateFilter } = useNextFilter<"companyId">();
   const [isPending, setIsPending] = useState(false);
   const [logo, setLogo] = useState<File>();
   const [video, setVideo] = useState<File>();
@@ -45,16 +45,19 @@ export function BrandingForm({
     setIsPending(true);
 
     try {
-      const response = await updateCompanyBranding(company._id, {
+      const response = await updateCompanyBranding(
+        company.companyId || company._id,
+        {
         data: form,
         logo,
         video,
-      });
+        },
+      );
       if (!response.success) throw new Error(response.message);
       SuccessToast(response.message || "Branding updated successfully");
       setLogo(undefined);
       setVideo(undefined);
-      router.refresh();
+      router.push(`/super-admin/clients/${company._id}`);
     } catch (error: unknown) {
       ErrorToast(error instanceof Error ? error.message : "Unable to update branding");
     } finally {
@@ -77,12 +80,10 @@ export function BrandingForm({
       <div className="flex flex-col gap-3 rounded-md border border-border bg-card p-4 sm:flex-row sm:items-end sm:justify-between">
         <Field>
           <FieldLabel>Client Company</FieldLabel>
-          <Select value={company._id} onValueChange={(value) => updateFilter("companyId", value)}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {companies.map((item) => <SelectItem key={item._id} value={item._id}>{item.name}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <BrandingCompanySelect
+            companies={companies}
+            value={selectedCompanyId}
+          />
         </Field>
         <Button type="submit" disabled={isPending}>
           {isPending ? "Applying..." : "Apply Branding"}

@@ -154,18 +154,20 @@ export const columns: ColumnDef<Company>[] = [
       <span className="text-muted-foreground">{row.original.address || "—"}</span>
     ),
   },
-  {
-    id: "users",
-    header: "Users",
-    cell: ({ row }) => {
-      const userCount =
-        row.original.users?.filter((user) => user.role === "user").length ?? 0;
+  // {
+  //   id: "users",
+  //   header: "Users",
+  //   cell: ({ row }) => {
+  //     const userCount =
+  //       row.original.users?.filter((user) => user.role === "user").length;
 
-      return (
-        <span className="font-medium text-muted-foreground">{userCount}</span>
-      );
-    },
-  },
+  //     return (
+  //       <span className="font-medium text-muted-foreground">
+  //         {userCount ?? "—"}
+  //       </span>
+  //     );
+  //   },
+  // },
   {
     accessorKey: "status",
     header: "Status",

@@ -60,8 +60,11 @@ export type CompanyUser = {
   email: string;
   authType: string;
   role: string;
+  companyId: string;
+  teamId: string;
+  employeeId?: string;
+  guestId?: string;
   status: string;
-  slug: string;
   address: string;
   isOtpVerified: boolean;
   isDeleted: boolean;
@@ -69,7 +72,7 @@ export type CompanyUser = {
   branding: CompanyBranding;
   createdAt: string;
   updatedAt: string;
-  lastActiveAt: string;
+  lastActiveAt?: string;
 };
 
 export type CompanyUserListData = {

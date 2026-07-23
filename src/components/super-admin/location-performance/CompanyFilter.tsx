@@ -18,7 +18,10 @@ export function CompanyFilter({ companies }: { companies: CompanyDropdownItem[] 
       <SelectContent>
         <SelectItem value="all">All companies</SelectItem>
         {companies.map((company) => (
-          <SelectItem key={company._id} value={company._id}>
+          <SelectItem
+            key={company._id}
+            value={company.companyId || company._id}
+          >
             {company.name}
           </SelectItem>
         ))}

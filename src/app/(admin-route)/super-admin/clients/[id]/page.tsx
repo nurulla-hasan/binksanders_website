@@ -27,10 +27,11 @@ export default async function CompanyDetailsPage({
   }
 
   const company = response.data;
+  const companyId = company.companyId || company._id;
   const [modulesResult, assignedResult, teamsResult] = await Promise.allSettled([
     getModules({ limit: 100 }),
-    getCompanyModules(id),
-    getCompanyTeams(id, { limit: 100 }),
+    getCompanyModules(companyId),
+    getCompanyTeams(companyId, { limit: 100 }),
   ]);
 
   const modules =
@@ -104,7 +105,7 @@ export default async function CompanyDetailsPage({
         </section>
 
         <AssignedModulesCompliance
-          companyId={company._id}
+          companyId={companyId}
           modules={assignedModules}
           action={
             <AssignModulesModal
