@@ -1,4 +1,5 @@
 import type { ProfilePayload } from "./api.type";
+import type { CompanyBranding } from "./company.type";
 import type { TMeta } from "./global.type";
 
 export type CurrentUser = {
@@ -48,4 +49,30 @@ export type UserAccount = {
 export type UserListData = {
   meta: TMeta;
   result: UserAccount[];
+};
+
+export type CompanyUser = {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  image: string;
+  email: string;
+  authType: string;
+  role: string;
+  status: string;
+  slug: string;
+  address: string;
+  isOtpVerified: boolean;
+  isDeleted: boolean;
+  fcmToken: string | null;
+  branding: CompanyBranding;
+  createdAt: string;
+  updatedAt: string;
+  lastActiveAt: string;
+};
+
+export type CompanyUserListData = {
+  meta: TMeta;
+  result: CompanyUser[];
 };

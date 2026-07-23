@@ -16,6 +16,17 @@ export type CompanyBranding = {
   videoUrl: string;
 };
 
+export type CompanyUserSummary = {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email?: string;
+  role: "company" | "user" | string;
+  employeeId?: string;
+  companyId: string;
+  status: string;
+};
+
 export type Company = {
   _id: string;
   name: string;
@@ -29,6 +40,8 @@ export type Company = {
   createdAt: string;
   updatedAt: string;
   __v: number;
+  users?: CompanyUserSummary[];
+  id?: string;
 };
 
 export type CompanyListData = {
@@ -37,6 +50,13 @@ export type CompanyListData = {
 };
 
 export type CompanyDropdownItem = Pick<Company, "_id" | "name">;
+
+export type PublicCompanyDropdownItem = {
+  _id: string;
+  name?: string;
+  firstName?: string;
+  companyId?: string;
+};
 
 export type CompanyStatus = "active" | "inactive" | "suspended";
 

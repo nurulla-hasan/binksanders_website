@@ -7,6 +7,7 @@ import type { ApiResponse } from "@/lib/types/api.type";
 import type { TQuery } from "@/lib/types/global.type";
 import type {
   CurrentUser,
+  CompanyUserListData,
   UserListData,
   UpdateUserProfilePayload,
 } from "@/lib/types/user.type";
@@ -15,6 +16,12 @@ export const getUsers = async (params: TQuery = {}) =>
   nextServerFetch<ApiResponse<UserListData>>(`/user${buildQueryString(params)}`, {
     tags: ["users"],
   });
+
+export const getCompanyUsers = async (params: TQuery = {}) =>
+  nextServerFetch<ApiResponse<CompanyUserListData>>(
+    `/user/company-users${buildQueryString(params)}`,
+    { tags: ["company-users"] },
+  );
 
 export const getMyProfile = async () =>
   nextServerFetch<ApiResponse<CurrentUser>>("/user/me", { revalidate: 0 });

@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { CompanyDropdownItem } from "@/lib/types/company.type";
+import type { PublicCompanyDropdownItem } from "@/lib/types/company.type";
 import type { TeamDropdownItem } from "@/lib/types/team.type";
 import { ErrorToast } from "@/lib/utils";
 import { getPublicCompanyDropdown } from "@/services/company.service";
@@ -30,7 +30,7 @@ export function CompanyTeamSelect({
   onTeamChange,
   showLabels = false,
 }: CompanyTeamSelectProps) {
-  const [companies, setCompanies] = useState<CompanyDropdownItem[]>([]);
+  const [companies, setCompanies] = useState<PublicCompanyDropdownItem[]>([]);
   const [teams, setTeams] = useState<TeamDropdownItem[]>([]);
   const [isLoadingCompanies, setIsLoadingCompanies] = useState(true);
   const [isLoadingTeams, setIsLoadingTeams] = useState(false);
@@ -105,7 +105,6 @@ export function CompanyTeamSelect({
           value={companyId}
           onValueChange={handleCompanyChange}
           disabled={isLoadingCompanies}
-          required
         >
           <SelectTrigger className="w-full">
             <SelectValue
@@ -115,11 +114,16 @@ export function CompanyTeamSelect({
             />
           </SelectTrigger>
           <SelectContent>
-            {companies.map((company) => (
-              <SelectItem key={company._id} value={company._id}>
-                {company.name}
-              </SelectItem>
-            ))}
+            {companies.map((company) => {
+              const value = company.companyId || company._id;
+              const label = company.name || company.firstName;
+
+              return label ? (
+                <SelectItem key={company._id} value={value}>
+                  {label}
+                </SelectItem>
+              ) : null;
+            })}
           </SelectContent>
         </Select>
       </Field>
@@ -130,7 +134,6 @@ export function CompanyTeamSelect({
           value={teamId}
           onValueChange={onTeamChange}
           disabled={!companyId || isLoadingTeams}
-          required
         >
           <SelectTrigger className="w-full">
             <SelectValue

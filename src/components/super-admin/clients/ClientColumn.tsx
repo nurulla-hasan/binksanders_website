@@ -155,6 +155,18 @@ export const columns: ColumnDef<Company>[] = [
     ),
   },
   {
+    id: "users",
+    header: "Users",
+    cell: ({ row }) => {
+      const userCount =
+        row.original.users?.filter((user) => user.role === "user").length ?? 0;
+
+      return (
+        <span className="font-medium text-muted-foreground">{userCount}</span>
+      );
+    },
+  },
+  {
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => (

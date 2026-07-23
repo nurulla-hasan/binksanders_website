@@ -9,6 +9,7 @@ import type {
   Company,
   CompanyListData,
   CompanyDropdownItem,
+  PublicCompanyDropdownItem,
   CompanyStatus,
   UpdateCompanyBrandingPayload,
 } from "@/lib/types/company.type";
@@ -33,7 +34,7 @@ export const getCompanyDropdown = async (params: TQuery = {}) =>
   );
 
 export const getPublicCompanyDropdown = async () =>
-  nextServerFetch<ApiResponse<CompanyDropdownItem[]>>("/company/dropdown", {
+  nextServerFetch<ApiResponse<PublicCompanyDropdownItem[]>>("/company/dropdown", {
     isPublic: true,
     revalidate: 300,
   });

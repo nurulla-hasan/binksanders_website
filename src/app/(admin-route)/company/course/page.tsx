@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { BookOpen, CircleHelp, Layers3 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -122,7 +121,7 @@ export default async function CompanyCourseDirectoryPage() {
 function ModuleCard({ module }: { module: LearningModule }) {
   return (
     <Card className="gap-0 py-0 transition-transform hover:-translate-y-0.5">
-      <div className="relative aspect-[16/8] overflow-hidden bg-muted">
+      <div className="relative aspect-16/8 overflow-hidden bg-muted">
         {module.thumbnailImage ? (
           <Image
             src={module.thumbnailImage}
@@ -136,12 +135,6 @@ function ModuleCard({ module }: { module: LearningModule }) {
             <BookOpen className="size-8" />
           </div>
         )}
-        <Badge
-          variant={module.status === "published" ? "success" : "progress"}
-          className="absolute right-3 top-3 capitalize"
-        >
-          {module.status}
-        </Badge>
       </div>
 
       <CardHeader className="pt-5">
