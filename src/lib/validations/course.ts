@@ -4,13 +4,22 @@ const baseQuestionSchema = z.object({
   id: z.string(),
   content: z.string().min(1, "Question content is required"),
   isScored: z.boolean(),
+  explanation: z.string().trim().optional(),
+  image: z
+    .union([z.literal(""), z.string().url("Enter a valid image URL")])
+    .optional(),
 });
+
+const requiredStringList = (minimum: number, message: string) =>
+  z
+    .array(z.string().trim())
+    .transform((values) => values.filter(Boolean))
+    .pipe(z.array(z.string().min(1)).min(minimum, message));
 
 const mcqSchema = baseQuestionSchema.extend({
   type: z.literal("MCQ"),
-  options: z.array(z.string().min(1)).min(2),
+  options: requiredStringList(2, "Add at least two options"),
   correctAnswer: z.string().min(1, "Correct answer is required"),
-  explanation: z.string().optional(),
 });
 
 const swipeSchema = baseQuestionSchema.extend({
@@ -22,7 +31,7 @@ const swipeSchema = baseQuestionSchema.extend({
 
 const orderingSchema = baseQuestionSchema.extend({
   type: z.literal("Ordering"),
-  items: z.array(z.string().min(1)).min(2),
+  items: requiredStringList(2, "Add at least two ordering items"),
 });
 
 const chatScenarioSchema = baseQuestionSchema.extend({
@@ -30,11 +39,25 @@ const chatScenarioSchema = baseQuestionSchema.extend({
   messages: z
     .array(
       z.object({
-        sender: z.string().min(1),
-        text: z.string().min(1),
+        sender: z.string().trim(),
+        text: z.string().trim(),
       }),
     )
-    .min(1),
+    .transform((messages) =>
+      messages.filter((message) => message.sender || message.text),
+    )
+    .pipe(
+      z
+        .array(
+          z.object({
+            sender: z.string().min(1, "Sender is required"),
+            text: z.string().min(1, "Message is required"),
+          }),
+        )
+        .min(1, "Add at least one message"),
+    ),
+  options: requiredStringList(2, "Add at least two response options"),
+  correctAnswer: z.string().min(1, "Correct answer is required"),
 });
 
 const videoSchema = baseQuestionSchema.extend({
@@ -84,7 +107,6 @@ export const getDefaultQuestionValues = (
         type,
         options: ["", "", "", ""],
         correctAnswer: "",
-        explanation: "",
       };
     case "Swipe":
       return {
@@ -105,6 +127,8 @@ export const getDefaultQuestionValues = (
           { sender: "", text: "" },
           { sender: "", text: "" },
         ],
+        options: ["", ""],
+        correctAnswer: "",
       };
     case "Video":
       return { ...base, type, isScored: false, videoUrl: "" };

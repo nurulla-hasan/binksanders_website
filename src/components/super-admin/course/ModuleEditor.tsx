@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, Upload } from "lucide-react";
 import { FormProvider, useForm } from "react-hook-form";
+import type { FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import DashboardPageLayout from "@/components/ui/custom/DashboardPageLayout";
@@ -49,6 +50,18 @@ export function ModuleEditor({ module }: { module?: LearningModule }) {
                 items.length >= 4
                   ? items
                   : [...items, ...Array(4 - items.length).fill("")],
+            };
+          }
+
+          if (question.type === "Chat Scenario") {
+            const options = question.options || [];
+            return {
+              ...question,
+              options:
+                options.length >= 2
+                  ? options
+                  : [...options, ...Array(2 - options.length).fill("")],
+              correctAnswer: question.correctAnswer || "",
             };
           }
 
@@ -97,11 +110,34 @@ export function ModuleEditor({ module }: { module?: LearningModule }) {
     }
   };
 
+  const onInvalid = (errors: FieldErrors<CreateModuleFormValues>) => {
+    const findMessage = (value: unknown): string | undefined => {
+      if (!value || typeof value !== "object") return undefined;
+      if (
+        "message" in value &&
+        typeof (value as { message?: unknown }).message === "string"
+      ) {
+        return (value as { message: string }).message;
+      }
+
+      for (const nestedValue of Object.values(value)) {
+        const message = findMessage(nestedValue);
+        if (message) return message;
+      }
+
+      return undefined;
+    };
+
+    ErrorToast(
+      findMessage(errors) || "Please complete all required module fields",
+    );
+  };
+
   return (
     <div className="animate-fadeIn">
       <DashboardPageLayout>
         <FormProvider {...methods}>
-          <form onSubmit={methods.handleSubmit(onSubmit)}>
+          <form onSubmit={methods.handleSubmit(onSubmit, onInvalid)}>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <Button asChild variant="ghost">
                 <Link href="/super-admin/course">

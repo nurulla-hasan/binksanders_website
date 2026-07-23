@@ -112,6 +112,30 @@ export function QuestionBlock({
     );
   };
 
+  const addChatOption = () => {
+    if (currentQuestion.type !== "Chat Scenario") return;
+    setValue(`questions.${index}.options`, [...currentQuestion.options, ""], {
+      shouldDirty: true,
+    });
+  };
+
+  const removeChatOption = (optionIndex: number) => {
+    if (
+      currentQuestion.type !== "Chat Scenario" ||
+      currentQuestion.options.length <= 2
+    )
+      return;
+    const removed = currentQuestion.options[optionIndex];
+    setValue(
+      `questions.${index}.options`,
+      currentQuestion.options.filter((_, index) => index !== optionIndex),
+      { shouldDirty: true, shouldValidate: true },
+    );
+    if (currentQuestion.correctAnswer === removed) {
+      setValue(`questions.${index}.correctAnswer`, "", { shouldDirty: true });
+    }
+  };
+
   return (
     <div className="space-y-6 rounded-md border border-border bg-card p-6 shadow-sm">
       <div className="grid gap-4 sm:grid-cols-[1fr_12rem]">
@@ -203,10 +227,6 @@ export function QuestionBlock({
                 </Select>
               )}
             />
-          </Field>
-          <Field>
-            <FieldLabel>Explanation</FieldLabel>
-            <Input {...register(`questions.${index}.explanation`)} />
           </Field>
         </FieldGroup>
       )}
@@ -326,6 +346,64 @@ export function QuestionBlock({
               </Button>
             </div>
           ))}
+
+          <div className="flex items-center justify-between gap-3 pt-2">
+            <FieldLabel>Response Options</FieldLabel>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addChatOption}
+            >
+              <Plus /> Add Response
+            </Button>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {currentQuestion.options.map((_, optionIndex) => (
+              <Field key={optionIndex}>
+                <div className="flex items-center justify-between gap-2">
+                  <FieldLabel>Response {optionIndex + 1}</FieldLabel>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-xs"
+                    className="text-destructive"
+                    disabled={currentQuestion.options.length <= 2}
+                    onClick={() => removeChatOption(optionIndex)}
+                    aria-label={`Remove response ${optionIndex + 1}`}
+                  >
+                    <X />
+                  </Button>
+                </div>
+                <Input
+                  {...register(
+                    `questions.${index}.options.${optionIndex}` as const,
+                  )}
+                />
+              </Field>
+            ))}
+          </div>
+          <Field>
+            <FieldLabel>Correct Answer</FieldLabel>
+            <Controller
+              control={control}
+              name={`questions.${index}.correctAnswer`}
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select correct response" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {currentQuestion.options.filter(Boolean).map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </Field>
         </div>
       )}
 
@@ -352,21 +430,81 @@ export function QuestionBlock({
         </Field>
       )}
 
-      <div className="flex items-center justify-between border-t border-border pt-4">
-        <Field orientation="horizontal">
-          <Controller
-            control={control}
-            name={`questions.${index}.isScored`}
-            render={({ field }) => (
-              <Checkbox
-                id={`scored-${question.id}`}
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
-            )}
+      {currentQuestion.explanation !== undefined && (
+        <Field>
+          <FieldLabel>Explanation</FieldLabel>
+          <Input
+            placeholder="Explain the correct answer or add feedback"
+            {...register(`questions.${index}.explanation`)}
           />
-          <FieldLabel htmlFor={`scored-${question.id}`}>Scored question</FieldLabel>
         </Field>
+      )}
+
+      {currentQuestion.image !== undefined && (
+        <Field>
+          <FieldLabel>Question Image URL</FieldLabel>
+          <Input
+            type="url"
+            placeholder="https://example.com/question-image.jpg"
+            {...register(`questions.${index}.image`)}
+          />
+        </Field>
+      )}
+
+      <div className="flex flex-col justify-between gap-4 border-t border-border pt-4 sm:flex-row sm:items-center">
+        <div className="flex flex-wrap items-center gap-5">
+          <Field orientation="horizontal">
+            <Controller
+              control={control}
+              name={`questions.${index}.isScored`}
+              render={({ field }) => (
+                <Checkbox
+                  id={`scored-${question.id}`}
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              )}
+            />
+            <FieldLabel htmlFor={`scored-${question.id}`}>
+              Scored question
+            </FieldLabel>
+          </Field>
+
+          <Field orientation="horizontal">
+            <Checkbox
+              id={`explanation-${question.id}`}
+              checked={currentQuestion.explanation !== undefined}
+              onCheckedChange={(checked) =>
+                setValue(
+                  `questions.${index}.explanation`,
+                  checked === true ? "" : undefined,
+                  { shouldDirty: true },
+                )
+              }
+            />
+            <FieldLabel htmlFor={`explanation-${question.id}`}>
+              Add explanation
+            </FieldLabel>
+          </Field>
+
+          <Field orientation="horizontal">
+            <Checkbox
+              id={`image-${question.id}`}
+              checked={currentQuestion.image !== undefined}
+              onCheckedChange={(checked) =>
+                setValue(
+                  `questions.${index}.image`,
+                  checked === true ? "" : undefined,
+                  { shouldDirty: true },
+                )
+              }
+            />
+            <FieldLabel htmlFor={`image-${question.id}`}>
+              Add image
+            </FieldLabel>
+          </Field>
+        </div>
+
         <Button type="button" variant="destructive" onClick={onDelete}>
           <Trash2 /> Delete
         </Button>

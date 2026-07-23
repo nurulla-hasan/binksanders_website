@@ -21,6 +21,7 @@ export type ModuleQuestion = {
   content: string;
   isScored: boolean;
   explanation?: string;
+  image?: string;
   options?: string[];
   correctAnswer?: string;
   leftLabel?: string;
@@ -84,4 +85,84 @@ export type AssignModulesPayload = {
   moduleIds: string[];
   companyId: string;
   teamId: string;
+};
+
+export type UserModuleAnswer = {
+  questionId: string;
+  answer: string | number | string[];
+  isCorrect?: boolean;
+  score?: number;
+};
+
+export type UserModuleProgress = {
+  _id: string;
+  userId: string;
+  companyId: string;
+  teamId: string;
+  moduleId: string;
+  status: "not_started" | "in_progress" | "completed" | string;
+  progressPercentage: number;
+  completedQuestions: number;
+  totalQuestions: number;
+  answers: UserModuleAnswer[];
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+};
+
+export type UserModuleDetails = {
+  module: LearningModule;
+  userProgress: UserModuleProgress;
+};
+
+export type LearningPathStats = {
+  totalModules: number;
+  completedModules: number;
+  inProgressModules: number;
+  notStartedModules: number;
+  overallProgressPercentage: number;
+  averageScore: number;
+};
+
+export type LearningPathUser = {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+};
+
+export type LearningPathModule = Partial<LearningModule> & {
+  moduleId?: string | LearningModule;
+  module?: LearningModule;
+  progress?: UserModuleProgress;
+  userProgress?: UserModuleProgress;
+  progressPercentage?: number;
+  completedQuestions?: number;
+  totalQuestions?: number;
+  score?: number;
+};
+
+export type LearningPathData = {
+  overallStats: LearningPathStats;
+  user: LearningPathUser;
+  modules: LearningPathModule[];
+};
+
+export type SubmitModuleAnswerPayload = {
+  moduleId: string;
+  questionId: string;
+  answer: string | number | string[];
+};
+
+export type SubmitModuleAnswerResult = {
+  questionId: string;
+  isCorrect: boolean | null;
+  score: number;
+  correctAnswer?: string | string[];
+  explanation?: string;
+  completedQuestions: number;
+  totalQuestions: number;
+  progressPercentage: number;
+  moduleScore: number;
+  moduleStatus: "not_started" | "in_progress" | "completed" | string;
 };
