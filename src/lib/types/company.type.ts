@@ -29,7 +29,6 @@ export type CompanyUserSummary = {
 
 export type Company = {
   _id: string;
-  companyId?: string;
   name: string;
   email: string;
   address: string;
@@ -50,7 +49,6 @@ export type CompanyApiItem = Partial<Company> & {
   firstName?: string;
   fullName?: string;
   image?: string;
-  companyId?: string;
   authType?: string;
   role?: string;
   isOtpVerified?: boolean;
@@ -68,13 +66,12 @@ export type CompanyListData = {
   result: Company[];
 };
 
-export type CompanyDropdownItem = Pick<Company, "_id" | "name" | "companyId">;
+export type CompanyDropdownItem = Pick<Company, "_id" | "name">;
 
 export type PublicCompanyDropdownItem = {
   _id: string;
   name?: string;
   firstName?: string;
-  companyId?: string;
 };
 
 export type CompanyStatus = "active" | "inactive" | "suspended";

@@ -27,7 +27,7 @@ export default async function CompanyDetailsPage({
   }
 
   const company = response.data;
-  const companyId = company.companyId || company._id;
+  const companyId = company._id;
   const [modulesResult, assignedResult, teamsResult] = await Promise.allSettled([
     getModules({ limit: 100 }),
     getCompanyModules(companyId),

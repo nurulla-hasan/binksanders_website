@@ -16,11 +16,7 @@ export default async function CompanyProfilePage() {
   }
 
   const profile = profileResponse.data;
-  if (!profile.companyId) {
-    throw new Error("Company account is not linked to a company");
-  }
-
-  const companyResponse = await getCompany(profile.companyId);
+  const companyResponse = await getCompany(profile._id);
 
   if (!companyResponse.success) {
     throw new Error(companyResponse.message || "Unable to load company");

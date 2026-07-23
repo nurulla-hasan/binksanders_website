@@ -46,7 +46,7 @@ export function BrandingForm({
 
     try {
       const response = await updateCompanyBranding(
-        company.companyId || company._id,
+        company._id,
         {
         data: form,
         logo,

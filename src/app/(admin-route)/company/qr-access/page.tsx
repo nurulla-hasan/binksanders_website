@@ -15,13 +15,11 @@ export default async function CompanyQrAccessPage() {
     const profileResponse = await getMyProfile();
 
     if (profileResponse.success) {
-      companyId = profileResponse.data.companyId || "";
+      companyId = profileResponse.data._id;
       companyName = profileResponse.data.fullName || companyName;
-    }
 
-    if (companyId) {
       const [companyResult, teamsResult] = await Promise.allSettled([
-        getCompany(companyId),
+        getCompany(profileResponse.data._id),
         getTeams({ limit: 100 }),
       ]);
 

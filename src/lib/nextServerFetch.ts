@@ -157,7 +157,7 @@ export const nextServerFetch = async <T = any>(
     body: rawBody,
     headers,
     method = "GET",
-    revalidate = method.toUpperCase() === "GET" ? 3600 : 0,
+    revalidate = method.toUpperCase() === "GET" ? 60 : 0,
     updateTag: tagsToInvalidate,
     invalidateMode = "updateTag",
     tags,

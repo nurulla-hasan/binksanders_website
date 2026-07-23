@@ -29,7 +29,6 @@ const defaultBranding = {
 
 const normalizeCompany = (item: CompanyApiItem): Company => ({
   _id: item._id,
-  companyId: item.companyId,
   name: item.name || item.fullName || item.firstName || "Unnamed company",
   email: item.email || "",
   address: item.address || "",
@@ -49,15 +48,7 @@ const normalizeCompanyDropdown = (
   item: PublicCompanyDropdownItem
 ): CompanyDropdownItem => ({
   _id: item._id,
-  companyId: item.companyId,
   name: item.name || item.firstName || "Unnamed company",
-});
-
-const normalizePublicCompanyDropdown = (
-  item: PublicCompanyDropdownItem
-): CompanyDropdownItem => ({
-  ...normalizeCompanyDropdown(item),
-  _id: item.companyId || item._id,
 });
 
 export const createCompany = async <T = unknown>(payload: CompanyPayload) =>
@@ -109,7 +100,7 @@ export const getPublicCompanyDropdown = async () => {
 
   return {
     ...response,
-    data: response.data.map(normalizePublicCompanyDropdown),
+    data: response.data.map(normalizeCompanyDropdown),
   };
 };
 

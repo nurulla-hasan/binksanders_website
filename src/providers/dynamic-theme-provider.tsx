@@ -78,7 +78,9 @@ export function DynamicThemeProvider() {
       try {
         const profileResponse = await getMyProfile();
         const companyId = profileResponse.success
-          ? profileResponse.data.companyId
+          ? profileResponse.data.role === "company"
+            ? profileResponse.data._id
+            : profileResponse.data.companyId
           : undefined;
 
         if (!companyId) {

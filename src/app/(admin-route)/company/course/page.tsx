@@ -47,7 +47,7 @@ export default async function CompanyCourseDirectoryPage() {
   try {
     const profileResponse = await getMyProfile();
     const companyId = profileResponse.success
-      ? profileResponse.data.companyId
+      ? profileResponse.data._id
       : undefined;
 
     if (companyId) {

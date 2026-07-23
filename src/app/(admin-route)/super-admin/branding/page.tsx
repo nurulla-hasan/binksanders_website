@@ -1,10 +1,8 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { BrandingForm } from "@/components/super-admin/branding/BrandingForm";
 import { BrandingCompanySelect } from "@/components/super-admin/branding/BrandingCompanySelect";
-import { Button } from "@/components/ui/button";
 import { DashboardHeader } from "@/components/ui/custom/DashboardHeader";
 import DashboardPageLayout from "@/components/ui/custom/DashboardPageLayout";
+import { HistoryBackButton } from "@/components/ui/custom/HistoryBackButton";
 import type { TSearchParams } from "@/lib/types/global.type";
 import { getCompany, getCompanyDropdown } from "@/services/company.service";
 
@@ -32,12 +30,7 @@ export default async function ClientBrandingPage({
           title="Client Branding Settings"
           description="Configure custom logos, brand colors, and onboarding videos."
         >
-          <Button asChild variant="outline" size="sm">
-            <Link href="/super-admin/clients">
-              <ArrowLeft />
-              Back to Clients
-            </Link>
-          </Button>
+          <HistoryBackButton />
         </DashboardHeader>
         <div className="max-w-4xl rounded-md border border-border bg-card p-4">
           <div className="space-y-2">
@@ -61,12 +54,7 @@ export default async function ClientBrandingPage({
         title="Client Branding Settings"
         description="Configure custom logos, brand colors, and onboarding videos."
       >
-        <Button asChild variant="outline" size="sm">
-          <Link href={`/super-admin/clients/${companyId}`}>
-            <ArrowLeft />
-            Back to Company
-          </Link>
-        </Button>
+        <HistoryBackButton />
       </DashboardHeader>
       <BrandingForm
         key={companyId}

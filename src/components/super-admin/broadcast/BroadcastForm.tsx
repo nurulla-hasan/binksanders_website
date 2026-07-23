@@ -115,7 +115,7 @@ export function BroadcastForm({
                       {companies.map((company) => (
                         <SelectItem
                           key={company._id}
-                          value={company.companyId || company._id}
+                          value={company._id}
                         >
                           {company.name}
                         </SelectItem>

@@ -115,11 +115,10 @@ export function CompanyTeamSelect({
           </SelectTrigger>
           <SelectContent>
             {companies.map((company) => {
-              const value = company.companyId || company._id;
               const label = company.name || company.firstName;
 
               return label ? (
-                <SelectItem key={company._id} value={value}>
+                <SelectItem key={company._id} value={company._id}>
                   {label}
                 </SelectItem>
               ) : null;

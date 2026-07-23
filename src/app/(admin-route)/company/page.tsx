@@ -1,4 +1,4 @@
-import { DashboardHeader } from "@/components/ui/custom/DashboardHeader";
+// import { DashboardHeader } from "@/components/ui/custom/DashboardHeader";
 import DashboardPageLayout from "@/components/ui/custom/DashboardPageLayout";
 import { DashboardStats } from "@/components/super-admin/dashboard/DashboardStats";
 import { BehavioralChart } from "@/components/super-admin/dashboard/BehavioralChart";
@@ -8,10 +8,10 @@ export default function AdminDashboardPage() {
   return (
     <div className="animate-fadeIn">
       <DashboardPageLayout>
-        <DashboardHeader 
+        {/* <DashboardHeader 
           title="Welcome back, Company" 
           description="Real-time overview of your organization's" 
-        />
+        /> */}
         <DashboardStats />
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-125">
