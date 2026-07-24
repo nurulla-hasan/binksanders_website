@@ -200,13 +200,27 @@ export const nextServerFetch = async <T>(
   const normalizedBaseUrl = baseUrl.replace(/\/+$/, "");
   const normalizedEndpoint = endpoint.replace(/^\/+/, "");
 
-  const response = await fetch(`${normalizedBaseUrl}/${normalizedEndpoint}`, {
-    ...requestOptions,
-    method: normalizedMethod,
-    headers,
-    ...(body !== undefined ? { body } : {}),
-    ...(next ? { next } : {}),
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${normalizedBaseUrl}/${normalizedEndpoint}`, {
+      ...requestOptions,
+      method: normalizedMethod,
+      headers,
+      ...(body !== undefined ? { body } : {}),
+      ...(next ? { next } : {}),
+    });
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Network error";
+    throw new ApiError(
+      `Unable to connect to backend server (${normalizedBaseUrl}): ${message}`,
+      503,
+      {
+        success: false,
+        message: `Network request failed: ${message}`,
+      },
+    );
+  }
 
   const responseData = await parseJsonResponse(response);
 
