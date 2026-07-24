@@ -16,13 +16,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ErrorToast, getInitials, SuccessToast } from "@/lib/utils";
-import { getMyProfile, updateProfile } from "@/services/user.service";
-import { useAuthStore } from "@/stores/auth.store";
+import { updateProfile } from "@/services/user.service";
+import { useUserContext } from "@/providers/UserProvider";
 import { SettingsButton } from "./SettingsButton";
 
 export function EditProfileDrawer() {
-  const user = useAuthStore((state) => state.user);
-  const setUser = useAuthStore((state) => state.setUser);
+  const { user } = useUserContext();
   const [open, setOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [imagePreview, setImagePreview] = useState("");
@@ -59,8 +58,6 @@ export function EditProfileDrawer() {
       });
       if (!response.success) throw new Error(response.message);
 
-      const profileResponse = await getMyProfile();
-      if (profileResponse.success) setUser(profileResponse.data);
       SuccessToast(response.message || "Profile updated successfully");
       setOpen(false);
       setImagePreview("");

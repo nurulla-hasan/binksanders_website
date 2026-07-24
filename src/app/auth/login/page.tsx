@@ -18,7 +18,6 @@ import {
   guestLogin,
   login,
 } from "@/services/auth.service";
-import { useAuthStore } from "@/stores/auth.store";
 
 type LoginMode = "email" | "employee" | "guest" | "scan";
 
@@ -31,7 +30,6 @@ const loginTabs: { value: LoginMode; label: string }[] = [
 
 export default function LoginPage() {
   const router = useRouter();
-  const setUser = useAuthStore((state) => state.setUser);
   const [mode, setMode] = useState<LoginMode>("email");
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
@@ -58,9 +56,7 @@ export default function LoginPage() {
       if (mode === "email") {
         const response = await login({ identifier: email, password });
         if (!response.success) throw new Error(response.message);
-        const { password: storedPassword, ...user } = response.data.user;
-        void storedPassword;
-        setUser(user);
+        const user = response.data.user;
         SuccessToast(response.message || "Logged in successfully");
         router.replace(user.role === "company" ? "/company" : "/");
       } else if (mode === "employee") {

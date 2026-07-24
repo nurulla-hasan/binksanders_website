@@ -24,7 +24,7 @@ export const getCompanyUsers = async (params: TQuery = {}) =>
   );
 
 export const getMyProfile = async () =>
-  nextServerFetch<ApiResponse<CurrentUser>>("/user/me", { revalidate: 0 });
+  nextServerFetch<ApiResponse<CurrentUser>>("/user/me", { tags: ["me"] });
 
 export const updateProfile = async <T = unknown>({
   data,
@@ -33,7 +33,7 @@ export const updateProfile = async <T = unknown>({
   nextServerFetch<ApiResponse<T>>("/user/update-me", {
     method: "PATCH",
     body: createMultipartBody(data, { image }),
-    updateTag: "users",
+    updateTag: ["users", "me"],
   });
 
 export const setupProfile = async <T = unknown>({
@@ -43,5 +43,5 @@ export const setupProfile = async <T = unknown>({
   nextServerFetch<ApiResponse<T>>("/user/setup-profile", {
     method: "PATCH",
     body: createMultipartBody(data, { image }),
-    updateTag: "users",
+    updateTag: ["users", "me"],
   });

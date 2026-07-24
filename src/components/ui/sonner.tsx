@@ -1,7 +1,19 @@
 "use client";
 
 import { Toaster as Sonner } from "sonner";
+import { useTheme } from "next-themes";
 
-export function Toaster() {
-  return <Sonner closeButton position="top-right" />;
+type ToasterProps = React.ComponentProps<typeof Sonner>;
+
+export function Toaster({ ...props }: ToasterProps) {
+  const { theme = "system" } = useTheme();
+
+  return (
+    <Sonner
+      theme={theme as ToasterProps["theme"]}
+      closeButton
+      position="top-right"
+      {...props}
+    />
+  );
 }

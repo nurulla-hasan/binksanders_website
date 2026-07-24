@@ -11,6 +11,9 @@ export type BaseUser = {
   teamId: string;
   authType: string;
   branding: CompanyBranding;
+  email?: string;
+  phone?: string;
+  image?: string;
 };
 
 export type EmployeeProfile = BaseUser & {
@@ -34,7 +37,14 @@ export type GuestProfile = BaseUser & {
   role: "guest";
 };
 
-export type CurrentUser = EmployeeProfile | GuestProfile;
+export type AdminProfile = BaseUser & {
+  role: "superAdmin" | "company";
+  email: string;
+  phone?: string;
+  image?: string;
+};
+
+export type CurrentUser = EmployeeProfile | GuestProfile | AdminProfile;
 
 export type UpdateUserProfilePayload = {
   data: ProfilePayload;

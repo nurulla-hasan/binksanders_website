@@ -8,12 +8,10 @@ import { LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ErrorToast, SuccessToast } from "@/lib/utils";
 import { qrLogin } from "@/services/auth.service";
-import { useAuthStore } from "@/stores/auth.store";
 
 function QrLoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const setUser = useAuthStore((state) => state.setUser);
   const hasAttempted = useRef(false);
   const qrToken = searchParams.get("token");
   const [errorMessage, setErrorMessage] = useState(() =>
@@ -35,14 +33,13 @@ function QrLoginContent() {
         return;
       }
 
-      setUser(result.data.user);
       SuccessToast(result.message);
       router.replace("/");
       router.refresh();
     };
 
     void authenticate();
-  }, [qrToken, router, setUser]);
+  }, [qrToken, router]);
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-sm flex-col items-center justify-center px-6 text-center">

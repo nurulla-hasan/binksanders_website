@@ -4,17 +4,12 @@ import { useState } from "react";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { logout } from "@/services/auth.service";
-import { useAuthStore } from "@/stores/auth.store";
 
 export function ProfileLogoutButton() {
   const [isPending, setIsPending] = useState(false);
-  const clearAuth = useAuthStore((state) => state.clearAuth);
-  const setIsLoggingOut = useAuthStore((state) => state.setIsLoggingOut);
 
   const handleLogout = async () => {
     setIsPending(true);
-    setIsLoggingOut(true);
-    clearAuth();
     await logout("/auth/login");
   };
 

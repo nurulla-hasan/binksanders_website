@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 import { ScrollArea } from "../ui/scroll-area";
 import { logout } from "@/services/auth.service";
-import { useAuthStore } from "@/stores/auth.store";
 
 interface SidebarProps {
   isSidebarOpen: boolean;
@@ -49,8 +48,6 @@ const companyNavItems = [
 export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) {
   const pathname = usePathname();
   const [isLoggingOut, setIsLoggingOutState] = useState(false);
-  const clearAuth = useAuthStore((state) => state.clearAuth);
-  const setIsLoggingOut = useAuthStore((state) => state.setIsLoggingOut);
   
   const isSuperAdmin = pathname?.startsWith("/super-admin");
   const navItems = isSuperAdmin ? superAdminNavItems : companyNavItems;
@@ -58,8 +55,6 @@ export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }: SidebarProp
 
   const handleLogout = async () => {
     setIsLoggingOutState(true);
-    setIsLoggingOut(true);
-    clearAuth();
     setIsSidebarOpen(false);
     await logout(isSuperAdmin ? "/auth/admin-login" : "/auth/login");
   };

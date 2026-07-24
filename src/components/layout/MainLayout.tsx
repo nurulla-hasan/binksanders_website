@@ -1,46 +1,11 @@
 "use client";
 
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useState } from "react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
-import { getMyProfile } from "@/services/user.service";
-import { useAuthStore } from "@/stores/auth.store";
 
-
-
-const MainLayout = ({ children }: { children: ReactNode }) => {
+export default function MainLayout({ children }: { children: ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const hasStartedProfileLoad = useRef(false);
-  const isInitialized = useAuthStore((state) => state.isInitialized);
-  const setUser = useAuthStore((state) => state.setUser);
-  const setLoading = useAuthStore((state) => state.setLoading);
-  const setInitialized = useAuthStore((state) => state.setInitialized);
-
-  useEffect(() => {
-    if (isInitialized || hasStartedProfileLoad.current) return;
-
-    hasStartedProfileLoad.current = true;
-    setLoading(true);
-
-    const loadProfile = async () => {
-      try {
-        const response = await getMyProfile();
-        if (response.success) setUser(response.data);
-      } catch {
-        setUser(null);
-      } finally {
-        setLoading(false);
-        setInitialized(true);
-      }
-    };
-
-    void loadProfile();
-  }, [
-    isInitialized,
-    setInitialized,
-    setLoading,
-    setUser,
-  ]);
 
   return (
     <div className="flex h-dvh overflow-hidden bg-background">
@@ -66,6 +31,4 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
       )}
     </div>
   );
-};
-
-export default MainLayout;
+}

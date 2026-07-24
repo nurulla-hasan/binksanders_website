@@ -13,12 +13,10 @@ import {
   changeAdminPassword,
   updateAdminProfile,
 } from "@/services/admin.service";
-import { getMyProfile } from "@/services/user.service";
-import { useAuthStore } from "@/stores/auth.store";
+import { useUserContext } from "@/providers/UserProvider";
 
 export default function ProfilePage() {
-  const user = useAuthStore((state) => state.user);
-  const setUser = useAuthStore((state) => state.setUser);
+  const { user } = useUserContext();
   const [profileDraft, setProfileDraft] = useState<{
     firstName?: string;
     lastName?: string;
@@ -59,8 +57,6 @@ export default function ProfilePage() {
       });
       if (!response.success) throw new Error(response.message);
 
-      const profileResponse = await getMyProfile();
-      if (profileResponse.success) setUser(profileResponse.data);
       setProfileDraft({});
       setImage(undefined);
       setImagePreview("");

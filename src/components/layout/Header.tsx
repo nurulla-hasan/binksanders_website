@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { getInitials } from "@/lib/utils";
-import { useAuthStore } from "@/stores/auth.store";
+import { useUserContext } from "@/providers/UserProvider";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -13,7 +13,7 @@ interface HeaderProps {
 
 export default function Header({ onMenuClick }: HeaderProps) {
   const pathname = usePathname();
-  const user = useAuthStore((state) => state.user);
+  const { user } = useUserContext();
   const isSuperAdmin = pathname?.startsWith("/super-admin");
   const roleTitle =
     user?.role === "superAdmin"

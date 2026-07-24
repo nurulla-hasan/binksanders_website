@@ -67,7 +67,7 @@ export default async function CompanyProfilePage() {
           </h2>
           <div className="mt-6 grid gap-6 sm:grid-cols-2">
             <ProfileDetail icon={<UserRound />} label="Account Name" value={profile.fullName} />
-            <ProfileDetail icon={<Mail />} label="Login Email" value={profile.email} />
+            <ProfileDetail icon={<Mail />} label="Login Email" value={profile.email || "—"} />
             <ProfileDetail icon={<ShieldCheck />} label="Role" value={profile.role} />
             <ProfileDetail icon={<ShieldCheck />} label="Authentication" value={profile.authType || "—"} />
           </div>
