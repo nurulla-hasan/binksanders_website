@@ -252,7 +252,7 @@ export const nextServerFetch = async <T = any>(
       const errorData = await res.json().catch(() => null);
       const errorMessage = buildApiErrorMessage(errorData, res.status);
       if (!suppressErrorLogging) {
-        console.error(`API Error (${res.status}):`, JSON.stringify(errorData, null, 2));
+        console.error(`API Error (${res.status}):`, errorMessage);
       }
       throw createApiError(errorMessage, res.status, errorData);
     }

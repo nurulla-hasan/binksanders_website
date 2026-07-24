@@ -2,26 +2,39 @@ import type { ProfilePayload } from "./api.type";
 import type { CompanyBranding } from "./company.type";
 import type { TMeta } from "./global.type";
 
-export type CurrentUser = {
+export type BaseUser = {
   _id: string;
   firstName: string;
   lastName: string;
   fullName: string;
+  companyId: string;
+  teamId: string;
+  authType: string;
+  branding: CompanyBranding;
+};
+
+export type EmployeeProfile = BaseUser & {
+  role: "user";
   email: string;
   phone?: string;
   image: string;
-  role: string;
-  authType?: string;
-  companyId?: string;
+  employeeId: string;
   status: string;
-  isOtpVerified?: boolean;
+  address?: string;
+  isOtpVerified: boolean;
   isDeleted: boolean;
   fcmToken?: string | null;
+  lastActiveAt?: string;
   createdAt: string;
   updatedAt: string;
-  lastActiveAt?: string;
   __v: number;
 };
+
+export type GuestProfile = BaseUser & {
+  role: "guest";
+};
+
+export type CurrentUser = EmployeeProfile | GuestProfile;
 
 export type UpdateUserProfilePayload = {
   data: ProfilePayload;

@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { getCompany } from "@/services/company.service";
+// import { getCompany } from "@/services/company.service";
 import { getMyProfile } from "@/services/user.service";
 
 const THEME_PROPERTIES = [
@@ -77,23 +77,18 @@ export function DynamicThemeProvider() {
     const loadCompanyTheme = async () => {
       try {
         const profileResponse = await getMyProfile();
-        const companyId = profileResponse.success
-          ? profileResponse.data.role === "company"
-            ? profileResponse.data._id
-            : profileResponse.data.companyId
-          : undefined;
-
-        if (!companyId) {
+        
+        if (!profileResponse.success || !profileResponse.data.branding) {
           if (!isCancelled) clearCompanyTheme();
           return;
         }
 
-        const companyResponse = await getCompany(companyId);
-        if (!companyResponse.success || isCancelled) return;
+        // Clear old theme first to prevent stale colors
+        clearCompanyTheme();
 
         applyCompanyTheme(
-          companyResponse.data.branding.primaryColor,
-          companyResponse.data.branding.secondaryColor
+          profileResponse.data.branding.primaryColor,
+          profileResponse.data.branding.secondaryColor
         );
       } catch {
         if (!isCancelled) clearCompanyTheme();
