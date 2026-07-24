@@ -1,5 +1,6 @@
 "use server";
 
+import { updateTag } from "next/cache";
 import { buildQueryString } from "@/lib/buildQueryString";
 import { createMultipartBody } from "@/lib/createMultipartBody";
 import { nextServerFetch } from "@/lib/nextServerFetch";
@@ -13,35 +14,53 @@ import type {
 } from "@/lib/types/user.type";
 
 export const getUsers = async (params: TQuery = {}) =>
-  nextServerFetch<ApiResponse<UserListData>>(`/user${buildQueryString(params)}`, {
-    tags: ["users"],
-  });
+  nextServerFetch<ApiResponse<UserListData>>(
+    `/user${buildQueryString(params)}`,
+    {
+      next: { tags: ["users"] },
+    },
+  );
 
 export const getCompanyUsers = async (params: TQuery = {}) =>
   nextServerFetch<ApiResponse<CompanyUserListData>>(
     `/user/company-users${buildQueryString(params)}`,
-    { tags: ["company-users"] },
+    { next: { tags: ["company-users"] } },
   );
 
 export const getMyProfile = async () =>
-  nextServerFetch<ApiResponse<CurrentUser>>("/user/me", { tags: ["me"] });
+  nextServerFetch<ApiResponse<CurrentUser>>("/user/me", {
+    next: { tags: ["me"] },
+  });
 
 export const updateProfile = async <T = unknown>({
   data,
   image,
-}: UpdateUserProfilePayload) =>
-  nextServerFetch<ApiResponse<T>>("/user/update-me", {
+}: UpdateUserProfilePayload) => {
+  const response = await nextServerFetch<ApiResponse<T>>("/user/update-me", {
     method: "PATCH",
     body: createMultipartBody(data, { image }),
-    updateTag: ["users", "me"],
   });
+  if (response && response.success) {
+    updateTag("users");
+    updateTag("me");
+  }
+  return response;
+};
 
 export const setupProfile = async <T = unknown>({
   data,
   image,
-}: UpdateUserProfilePayload) =>
-  nextServerFetch<ApiResponse<T>>("/user/setup-profile", {
-    method: "PATCH",
-    body: createMultipartBody(data, { image }),
-    updateTag: ["users", "me"],
-  });
+}: UpdateUserProfilePayload) => {
+  const response = await nextServerFetch<ApiResponse<T>>(
+    "/user/setup-profile",
+    {
+      method: "PATCH",
+      body: createMultipartBody(data, { image }),
+    },
+  );
+  if (response && response.success) {
+    updateTag("users");
+    updateTag("me");
+  }
+  return response;
+};

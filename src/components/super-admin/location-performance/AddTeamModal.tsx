@@ -58,7 +58,7 @@ export function AddTeamModal({ companies }: { companies: CompanyDropdownItem[] }
                     key={company._id}
                     value={company._id}
                   >
-                    {company.name}
+                    {company.firstName}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -30,7 +30,7 @@ export function BrandingCompanySelect({
       <SelectContent>
         {companies.map((company) => (
           <SelectItem key={company._id} value={company._id}>
-            {company.name}
+            {company.firstName}
           </SelectItem>
         ))}
       </SelectContent>

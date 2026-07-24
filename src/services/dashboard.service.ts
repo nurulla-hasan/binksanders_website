@@ -6,5 +6,5 @@ import type { AdminDashboardData } from "@/lib/types/dashboard.type";
 
 export const getAdminDashboard = async () =>
   nextServerFetch<ApiResponse<AdminDashboardData>>("/dashboard", {
-    revalidate: 0,
+    cache:"no-store",
   });

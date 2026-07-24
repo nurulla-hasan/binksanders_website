@@ -22,7 +22,7 @@ export function CompanyFilter({ companies }: { companies: CompanyDropdownItem[] 
             key={company._id}
             value={company._id}
           >
-            {company.name}
+            {company.firstName}
           </SelectItem>
         ))}
       </SelectContent>

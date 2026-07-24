@@ -27,7 +27,11 @@ export default async function CompanyQrAccessPage() {
         companyResult.status === "fulfilled" &&
         companyResult.value.success
       ) {
-        companyName = companyResult.value.data.name;
+        companyName =
+          companyResult.value.data.firstName ||
+          companyResult.value.data.fullName ||
+          companyResult.value.data.name ||
+          companyName;
       }
 
       if (teamsResult.status === "fulfilled" && teamsResult.value.success) {

@@ -32,7 +32,7 @@ export default async function TeamManagementPage({
   }
 
   const companyNames = new Map(
-    companyResponse.data.map((company) => [company._id, company.name]),
+    companyResponse.data.map((company) => [company._id, company.firstName]),
   );
   const teams: TeamRow[] = teamResponse.data.result.map((team) => ({
     ...team,

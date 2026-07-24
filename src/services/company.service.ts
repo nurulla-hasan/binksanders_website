@@ -1,5 +1,6 @@
 "use server";
 
+import { updateTag } from "next/cache";
 import { buildQueryString } from "@/lib/buildQueryString";
 import { createMultipartBody } from "@/lib/createMultipartBody";
 import { nextServerFetch } from "@/lib/nextServerFetch";
@@ -7,10 +8,7 @@ import type { ApiResponse } from "@/lib/types/api.type";
 import type {
   CompanyPayload,
   Company,
-  CompanyApiItem,
-  CompanyApiListData,
   CompanyListData,
-  CompanyDropdownItem,
   PublicCompanyDropdownItem,
   CompanyStatus,
   UpdateCompanyBrandingPayload,
@@ -18,149 +16,122 @@ import type {
 } from "@/lib/types/company.type";
 import type { TQuery } from "@/lib/types/global.type";
 
-const defaultBranding = {
-  primaryColor: "#8ACDDE",
-  secondaryColor: "#E9308F",
-  videoTitle: "",
-  videoDescription: "",
-  presenterName: "",
-  presenterDesignation: "",
-  videoUrl: "",
+export const createCompany = async <T = unknown>(payload: CompanyPayload) => {
+  const response = await nextServerFetch<ApiResponse<T>>(
+    "/company/create-company",
+    {
+      method: "POST",
+      body: payload,
+    },
+  );
+  if (response && response.success) {
+    updateTag("companies");
+  }
+  return response;
 };
 
-const normalizeCompany = (item: CompanyApiItem): Company => ({
-  _id: item._id,
-  name: item.name || item.fullName || item.firstName || "Unnamed company",
-  email: item.email || "",
-  address: item.address || "",
-  logo: item.logo || item.image || "",
-  slug: item.slug || "",
-  status: item.status || "active",
-  isDeleted: item.isDeleted ?? false,
-  branding: { ...defaultBranding, ...item.branding },
-  createdAt: item.createdAt || "",
-  updatedAt: item.updatedAt || "",
-  __v: item.__v ?? 0,
-  users: item.users,
-  id: item.id || item._id,
-});
-
-const normalizeCompanyDropdown = (
-  item: PublicCompanyDropdownItem
-): CompanyDropdownItem => ({
-  _id: item._id,
-  name: item.name || item.firstName || "Unnamed company",
-});
-
-export const createCompany = async <T = unknown>(payload: CompanyPayload) =>
-  nextServerFetch<ApiResponse<T>>("/company/create-company", {
-    method: "POST",
-    body: payload,
-    updateTag: "companies",
-  });
-
-export const getCompanies = async (
-  params: TQuery = {}
-): Promise<ApiResponse<CompanyListData>> => {
-  const response = await nextServerFetch<ApiResponse<CompanyApiListData>>(
+export const getCompanies = async (params: TQuery = {}) =>
+  nextServerFetch<ApiResponse<CompanyListData>>(
     `/company${buildQueryString(params)}`,
     {
-    tags: ["companies"],
-    }
+      next: { tags: ["companies"] },
+    },
   );
 
-  return {
-    ...response,
-    data: {
-      meta: response.data.meta,
-      result: response.data.result.map(normalizeCompany),
-    },
-  };
-};
-
-export const getCompanyDropdown = async (params: TQuery = {}) => {
-  const response = await nextServerFetch<ApiResponse<PublicCompanyDropdownItem[]>>(
+export const getCompanyDropdown = async (params: TQuery = {}) =>
+  nextServerFetch<ApiResponse<PublicCompanyDropdownItem[]>>(
     `/company/dropdown${buildQueryString(params)}`,
     {
       cache: "no-store",
     },
   );
 
-  return {
-    ...response,
-    data: response.data.map(normalizeCompanyDropdown),
-  };
-};
-
-export const getPublicCompanyDropdown = async () => {
-  const response = await nextServerFetch<ApiResponse<PublicCompanyDropdownItem[]>>(
+export const getPublicCompanyDropdown = async () =>
+  nextServerFetch<ApiResponse<PublicCompanyDropdownItem[]>>(
     "/company/dropdown",
     {
-      isPublic: true,
+      auth: "none",
       cache: "no-store",
     },
   );
 
-  return {
-    ...response,
-    data: response.data.map(normalizeCompanyDropdown),
-  };
-};
-
-export const getCompany = async (companyId: string) => {
-  const response = await nextServerFetch<ApiResponse<CompanyApiItem>>(
-    `/company/${companyId}`,
-    {
-    tags: ["companies", `company-${companyId}`],
-    }
-  );
-
-  return {
-    ...response,
-    data: normalizeCompany(response.data),
-  };
-};
+export const getCompany = async (companyId: string) =>
+  nextServerFetch<ApiResponse<Company>>(`/company/${companyId}`, {
+    next: { tags: ["companies", `company-${companyId}`] },
+  });
 
 export const getCompanyAnalytics = async (companyId: string) =>
   nextServerFetch<ApiResponse<CompanyAnalytics>>(
     `/company/${companyId}/details`,
     {
-      tags: ["companies", `company-${companyId}-analytics`],
+      next: { tags: ["companies", `company-${companyId}-analytics`] },
     },
   );
 
 export const updateCompany = async <T = unknown>(
   companyId: string,
-  payload: Partial<CompanyPayload>
-) =>
-  nextServerFetch<ApiResponse<T>>(`/company/${companyId}`, {
-    method: "PATCH",
-    body: payload,
-    updateTag: ["companies", `company-${companyId}`],
-  });
+  payload: Partial<CompanyPayload>,
+) => {
+  const response = await nextServerFetch<ApiResponse<T>>(
+    `/company/${companyId}`,
+    {
+      method: "PATCH",
+      body: payload,
+    },
+  );
+  if (response && response.success) {
+    updateTag("companies");
+    updateTag(`company-${companyId}`);
+  }
+  return response;
+};
 
 export const updateCompanyStatus = async <T = unknown>(
   companyId: string,
-  status: CompanyStatus
-) =>
-  nextServerFetch<ApiResponse<T>>(`/company/${companyId}/status`, {
-    method: "PATCH",
-    body: { status },
-    updateTag: ["companies", `company-${companyId}`],
-  });
+  status: CompanyStatus,
+) => {
+  const response = await nextServerFetch<ApiResponse<T>>(
+    `/company/${companyId}/status`,
+    {
+      method: "PATCH",
+      body: { status },
+    },
+  );
+  if (response && response.success) {
+    updateTag("companies");
+    updateTag(`company-${companyId}`);
+  }
+  return response;
+};
 
 export const updateCompanyBranding = async <T = unknown>(
   companyId: string,
-  { data, logo, video }: UpdateCompanyBrandingPayload
-) =>
-  nextServerFetch<ApiResponse<T>>(`/company/${companyId}/branding`, {
-    method: "PATCH",
-    body: createMultipartBody(data, { logo, video }),
-    updateTag: ["companies", `company-${companyId}`],
-  });
+  { data, logo, video }: UpdateCompanyBrandingPayload,
+) => {
+  const response = await nextServerFetch<ApiResponse<T>>(
+    `/company/${companyId}/branding`,
+    {
+      method: "PATCH",
+      body: createMultipartBody(data, { logo, video }),
+    },
+  );
+  if (response && response.success) {
+    updateTag("companies");
+    updateTag(`company-${companyId}`);
+  }
+  return response;
+};
 
-export const deleteCompany = async <T = unknown>(companyId: string) =>
-  nextServerFetch<ApiResponse<T>>(`/company/${companyId}`, {
-    method: "DELETE",
-    updateTag: ["companies", `company-${companyId}`],
-  });
+export const deleteCompany = async <T = unknown>(companyId: string) => {
+  const response = await nextServerFetch<ApiResponse<T>>(
+    `/company/${companyId}`,
+    {
+      method: "DELETE",
+    },
+  );
+  if (response && response.success) {
+    updateTag("companies");
+    updateTag(`company-${companyId}`);
+  }
+  return response;
+};

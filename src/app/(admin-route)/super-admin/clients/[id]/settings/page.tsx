@@ -64,15 +64,15 @@ export default async function CompanySettingsPage({
         <section className="overflow-hidden rounded-md border border-border bg-card shadow-sm">
           <div className="flex flex-col gap-5 border-b border-border p-6 sm:flex-row sm:items-center">
             <Avatar className="size-20">
-              {company.logo && (
-                <AvatarImage src={company.logo} alt={company.name} />
+              {(company.image || company.logo) && (
+                <AvatarImage src={company.image || company.logo} alt={company.firstName || company.fullName || company.name || "Company"} />
               )}
-              <AvatarFallback>{getInitials(company.name)}</AvatarFallback>
+              <AvatarFallback>{getInitials(company.firstName || company.fullName || company.name || "Company")}</AvatarFallback>
             </Avatar>
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-3">
                 <h2 className="font-heading text-2xl font-bold text-foreground">
-                  {company.name}
+                  {company.firstName || company.fullName || company.name || "Company"}
                 </h2>
                 <Badge variant={company.status === "active" ? "active" : "blocked"}>
                   {company.status}
@@ -106,19 +106,19 @@ export default async function CompanySettingsPage({
           <div className="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <ColorDetail
               label="Primary Color"
-              color={company.branding.primaryColor}
+              color={company.branding?.primaryColor || "#8ACDDE"}
             />
             <ColorDetail
               label="Secondary Color"
-              color={company.branding.secondaryColor}
+              color={company.branding?.secondaryColor || "#E9308F"}
             />
             <Detail
               label="Video Title"
-              value={company.branding.videoTitle || "Not set"}
+              value={company.branding?.videoTitle || "Not set"}
             />
             <Detail
               label="Presenter"
-              value={company.branding.presenterName || "Not set"}
+              value={company.branding?.presenterName || "Not set"}
             />
           </div>
         </section>

@@ -1,5 +1,6 @@
 "use server";
 
+import { updateTag } from "next/cache";
 import { buildQueryString } from "@/lib/buildQueryString";
 import { nextServerFetch } from "@/lib/nextServerFetch";
 import type { ApiResponse } from "@/lib/types/api.type";
@@ -11,16 +12,20 @@ import type {
   UpdateTeamPayload,
 } from "@/lib/types/team.type";
 
-export const createTeam = async <T = unknown>(payload: CreateTeamPayload) =>
-  nextServerFetch<ApiResponse<T>>("/team/create-team", {
+export const createTeam = async <T = unknown>(payload: CreateTeamPayload) => {
+  const response = await nextServerFetch<ApiResponse<T>>("/team/create-team", {
     method: "POST",
     body: payload,
-    updateTag: "teams",
   });
+  if (response && response.success) {
+    updateTag("teams");
+  }
+  return response;
+};
 
 export const getTeams = async (params: TQuery = {}) =>
   nextServerFetch<ApiResponse<TeamListData>>(`/team${buildQueryString(params)}`, {
-    tags: ["teams"],
+    next: { tags: ["teams"] },
   });
 
 export const getCompanyTeams = async (
@@ -29,7 +34,7 @@ export const getCompanyTeams = async (
 ) =>
   nextServerFetch<ApiResponse<TeamListData>>(
     `/team/company/${companyId}${buildQueryString(params)}`,
-    { tags: ["teams", `company-${companyId}-teams`] }
+    { next: { tags: ["teams", `company-${companyId}-teams`] } }
   );
 
 export const getCompanyTeamDropdown = async <T = unknown>(
@@ -47,7 +52,7 @@ export const getPublicCompanyTeamDropdown = async (companyId: string) =>
   nextServerFetch<ApiResponse<TeamDropdownItem[]>>(
     `/team/company/${companyId}/dropdown`,
     {
-      isPublic: true,
+      auth: "none",
       cache: "no-store",
     },
   );
@@ -55,15 +60,25 @@ export const getPublicCompanyTeamDropdown = async (companyId: string) =>
 export const updateTeam = async <T = unknown>(
   teamId: string,
   payload: UpdateTeamPayload
-) =>
-  nextServerFetch<ApiResponse<T>>(`/team/${teamId}`, {
+) => {
+  const response = await nextServerFetch<ApiResponse<T>>(`/team/${teamId}`, {
     method: "PATCH",
     body: payload,
-    updateTag: ["teams", `team-${teamId}`],
   });
+  if (response && response.success) {
+    updateTag("teams");
+    updateTag(`team-${teamId}`);
+  }
+  return response;
+};
 
-export const deleteTeam = async <T = unknown>(teamId: string) =>
-  nextServerFetch<ApiResponse<T>>(`/team/${teamId}`, {
+export const deleteTeam = async <T = unknown>(teamId: string) => {
+  const response = await nextServerFetch<ApiResponse<T>>(`/team/${teamId}`, {
     method: "DELETE",
-    updateTag: ["teams", `team-${teamId}`],
   });
+  if (response && response.success) {
+    updateTag("teams");
+    updateTag(`team-${teamId}`);
+  }
+  return response;
+};

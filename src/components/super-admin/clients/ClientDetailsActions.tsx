@@ -23,10 +23,11 @@ export function ClientDetailsActions({ company }: { company: Company }) {
   const [statusOpen, setStatusOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [activeAction, setActiveAction] = useState<"edit" | "status" | "delete">();
+  const companyDisplayName = company.firstName || company.fullName || company.name || "";
   const [form, setForm] = useState<CompanyPayload>({
-    name: company.name,
+    name: companyDisplayName,
     email: company.email,
-    address: company.address,
+    address: company.address || "",
   });
   const isActive = company.status === "active";
 
@@ -125,7 +126,7 @@ export function ClientDetailsActions({ company }: { company: Company }) {
         open={statusOpen}
         onOpenChange={setStatusOpen}
         title={`${isActive ? "Deactivate" : "Activate"} company?`}
-        description={`Are you sure you want to ${isActive ? "deactivate" : "activate"} ${company.name}?`}
+        description={`Are you sure you want to ${isActive ? "deactivate" : "activate"} ${companyDisplayName}?`}
         confirmText={isActive ? "Deactivate" : "Activate"}
         loadingText="Updating..."
         onConfirm={handleStatus}
@@ -143,7 +144,7 @@ export function ClientDetailsActions({ company }: { company: Company }) {
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         title="Delete company?"
-        description={`Are you sure you want to delete ${company.name}? This action cannot be undone.`}
+        description={`Are you sure you want to delete ${companyDisplayName}? This action cannot be undone.`}
         confirmText="Delete"
         loadingText="Deleting..."
         onConfirm={handleDelete}

@@ -1,5 +1,6 @@
 "use server";
 
+import { updateTag } from "next/cache";
 import { buildQueryString } from "@/lib/buildQueryString";
 import { createMultipartBody } from "@/lib/createMultipartBody";
 import { nextServerFetch } from "@/lib/nextServerFetch";
@@ -16,12 +17,12 @@ import type {
 
 export const getModules = async (params: TQuery = {}) =>
   nextServerFetch<ModuleListResponse>(`/module${buildQueryString(params)}`, {
-    tags: ["modules"],
+    next: { tags: ["modules"] },
   });
 
 export const getModule = async (moduleId: string) =>
   nextServerFetch<ApiResponse<LearningModule>>(`/module/${moduleId}`, {
-    tags: ["modules", `module-${moduleId}`],
+    next: { tags: ["modules", `module-${moduleId}`] },
   });
 
 export const getCompanyModules = async (
@@ -30,67 +31,101 @@ export const getCompanyModules = async (
 ) =>
   nextServerFetch<ApiResponse<LearningModule[]>>(
     `/module/company/${companyId}${buildQueryString(params)}`,
-    { tags: ["modules", `company-${companyId}-modules`] },
+    { next: { tags: ["modules", `company-${companyId}-modules`] } },
   );
 
 export const createModule = async <T = unknown>({
   data,
   thumbnailImage,
-}: CreateModulePayload) =>
-  nextServerFetch<ApiResponse<T>>("/module", {
+}: CreateModulePayload) => {
+  const response = await nextServerFetch<ApiResponse<T>>("/module", {
     method: "POST",
     body: createMultipartBody(data, { thumbnailImage }),
-    updateTag: "modules",
   });
+  if (response && response.success) {
+    updateTag("modules");
+  }
+  return response;
+};
 
 export const updateModule = async <T = unknown>(
   moduleId: string,
   payload: UpdateModulePayload,
-) =>
-  nextServerFetch<ApiResponse<T>>(`/module/${moduleId}`, {
-    method: "PATCH",
-    body: payload,
-    updateTag: ["modules", `module-${moduleId}`],
-  });
+) => {
+  const response = await nextServerFetch<ApiResponse<T>>(
+    `/module/${moduleId}`,
+    {
+      method: "PATCH",
+      body: payload,
+    },
+  );
+  if (response && response.success) {
+    updateTag("modules");
+    updateTag(`module-${moduleId}`);
+  }
+  return response;
+};
 
 export const duplicateModule = async <T = unknown>(
   moduleId: string,
   payload: DuplicateModulePayload,
-) =>
-  nextServerFetch<ApiResponse<T>>(`/module/duplicate/${moduleId}`, {
-    method: "POST",
-    body: payload,
-    updateTag: "modules",
-  });
+) => {
+  const response = await nextServerFetch<ApiResponse<T>>(
+    `/module/duplicate/${moduleId}`,
+    {
+      method: "POST",
+      body: payload,
+    },
+  );
+  if (response && response.success) {
+    updateTag("modules");
+  }
+  return response;
+};
 
-export const deleteModule = async <T = unknown>(moduleId: string) =>
-  nextServerFetch<ApiResponse<T>>(`/module/${moduleId}`, {
-    method: "DELETE",
-    updateTag: ["modules", `module-${moduleId}`],
-  });
+export const deleteModule = async <T = unknown>(moduleId: string) => {
+  const response = await nextServerFetch<ApiResponse<T>>(
+    `/module/${moduleId}`,
+    {
+      method: "DELETE",
+    },
+  );
+  if (response && response.success) {
+    updateTag("modules");
+    updateTag(`module-${moduleId}`);
+  }
+  return response;
+};
 
 export const assignModulesToCompany = async <T = unknown>(
   payload: AssignModulesPayload,
-) =>
-  nextServerFetch<ApiResponse<T>>("/module/assign", {
+) => {
+  const response = await nextServerFetch<ApiResponse<T>>("/module/assign", {
     method: "POST",
     body: payload,
-    updateTag: [
-      "modules",
-      `company-${payload.companyId}-modules`,
-      `company-${payload.companyId}-teams`,
-    ],
   });
+  if (response && response.success) {
+    updateTag("modules");
+    updateTag(`company-${payload.companyId}-modules`);
+    updateTag(`company-${payload.companyId}-teams`);
+  }
+  return response;
+};
 
 export const unassignModule = async <T = unknown>(
   moduleId: string,
   companyId: string,
-) =>
-  nextServerFetch<ApiResponse<T>>(`/module/unassign/${moduleId}`, {
-    method: "POST",
-    updateTag: [
-      "modules",
-      `module-${moduleId}`,
-      `company-${companyId}-modules`,
-    ],
-  });
+) => {
+  const response = await nextServerFetch<ApiResponse<T>>(
+    `/module/unassign/${moduleId}`,
+    {
+      method: "POST",
+    },
+  );
+  if (response && response.success) {
+    updateTag("modules");
+    updateTag(`module-${moduleId}`);
+    updateTag(`company-${companyId}-modules`);
+  }
+  return response;
+};

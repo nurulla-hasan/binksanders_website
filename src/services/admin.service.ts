@@ -3,6 +3,7 @@
 import { buildQueryString } from "@/lib/buildQueryString";
 import { createMultipartBody } from "@/lib/createMultipartBody";
 import { nextServerFetch } from "@/lib/nextServerFetch";
+import { updateTag } from "next/cache";
 import type {
   AdminLoginData,
   AdminLoginResult,
@@ -20,7 +21,7 @@ import type {
 import type { TQuery } from "@/lib/types/global.type";
 
 export const adminLogin = async (
-  payload: LoginPayload
+  payload: LoginPayload,
 ): Promise<AdminLoginResult> => {
   try {
     const response = await nextServerFetch<ApiResponse<AdminLoginData>>(
@@ -28,11 +29,8 @@ export const adminLogin = async (
       {
         method: "POST",
         body: payload,
-        isPublic: true,
-        setCookies: [
-          { responsePath: "data.accessToken", cookieName: "accessToken" },
-        ],
-      }
+        auth: "none",
+      },
     );
 
     if (!response.success) {
@@ -40,6 +38,17 @@ export const adminLogin = async (
         success: false,
         message: response.message || "Unable to log in",
       };
+    }
+
+    const { cookies } = await import("next/headers");
+    const cookieStore = await cookies();
+    if (response.data.accessToken) {
+      cookieStore.set("accessToken", response.data.accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+      });
     }
 
     return {
@@ -58,71 +67,110 @@ export const adminLogin = async (
   }
 };
 
-export const adminForgotPassword = async <T = unknown>(payload: IdentifierPayload) =>
+export const adminForgotPassword = async <T = unknown>(
+  payload: IdentifierPayload,
+) =>
   nextServerFetch<ApiResponse<T>>("/admin/forgot-password", {
     method: "POST",
     body: payload,
-    isPublic: true,
+    auth: "none",
   });
 
-export const adminResetPassword = async <T = unknown>(payload: ResetPasswordPayload) =>
+export const adminResetPassword = async <T = unknown>(
+  payload: ResetPasswordPayload,
+) =>
   nextServerFetch<ApiResponse<T>>("/admin/reset-password", {
     method: "POST",
     body: payload,
-    isPublic: true,
+    auth: "none",
   });
 
 export const updateAdminProfile = async <T = unknown>({
   data,
   image,
-}: UpdateAdminProfilePayload) =>
-  nextServerFetch<ApiResponse<T>>("/admin/update-profile", {
-    method: "PATCH",
-    body: createMultipartBody(data, { image }),
-    updateTag: "admins",
-  });
+}: UpdateAdminProfilePayload) => {
+  const response = await nextServerFetch<ApiResponse<T>>(
+    "/admin/update-profile",
+    {
+      method: "PATCH",
+      body: createMultipartBody(data, { image }),
+    },
+  );
+  if (response && response.success) {
+    updateTag("admins");
+  }
+  return response;
+};
 
 export const changeAdminPassword = async <T = unknown>(
-  payload: PasswordChangePayload
+  payload: PasswordChangePayload,
 ) =>
   nextServerFetch<ApiResponse<T>>("/admin/change-password", {
     method: "POST",
     body: payload,
   });
 
-export const createAdmin = async <T = unknown>(payload: CreateAdminPayload) =>
-  nextServerFetch<ApiResponse<T>>("/admin/create-admin", {
-    method: "POST",
-    body: payload,
-    updateTag: "admins",
-  });
+export const createAdmin = async <T = unknown>(payload: CreateAdminPayload) => {
+  const response = await nextServerFetch<ApiResponse<T>>(
+    "/admin/create-admin",
+    {
+      method: "POST",
+      body: payload,
+    },
+  );
+  if (response && response.success) {
+    updateTag("admins");
+  }
+  return response;
+};
 
 export const resendAdminOtp = async <T = unknown>(payload: IdentifierPayload) =>
   nextServerFetch<ApiResponse<T>>("/admin/resendOtp", {
     method: "POST",
     body: payload,
-    isPublic: true,
+    auth: "none",
   });
 
-export const toggleEmployeeBlock = async <T = unknown>(userId: string) =>
-  nextServerFetch<ApiResponse<T>>(`/admin/block-unblock/${userId}`, {
-    method: "PATCH",
-    updateTag: "users",
-  });
+export const toggleEmployeeBlock = async <T = unknown>(userId: string) => {
+  const response = await nextServerFetch<ApiResponse<T>>(
+    `/admin/block-unblock/${userId}`,
+    {
+      method: "PATCH",
+    },
+  );
+  if (response && response.success) {
+    updateTag("users");
+  }
+  return response;
+};
 
-export const deleteAdmin = async <T = unknown>(adminId: string) =>
-  nextServerFetch<ApiResponse<T>>(`/admin/${adminId}`, {
+export const deleteAdmin = async <T = unknown>(adminId: string) => {
+  const response = await nextServerFetch<ApiResponse<T>>(`/admin/${adminId}`, {
     method: "DELETE",
-    updateTag: "admins",
   });
+  if (response && response.success) {
+    updateTag("admins");
+  }
+  return response;
+};
 
-export const toggleAdminBlock = async <T = unknown>(adminId: string) =>
-  nextServerFetch<ApiResponse<T>>(`/admin/block-unblock-admin/${adminId}`, {
-    method: "PATCH",
-    updateTag: "admins",
-  });
+export const toggleAdminBlock = async <T = unknown>(adminId: string) => {
+  const response = await nextServerFetch<ApiResponse<T>>(
+    `/admin/block-unblock-admin/${adminId}`,
+    {
+      method: "PATCH",
+    },
+  );
+  if (response && response.success) {
+    updateTag("admins");
+  }
+  return response;
+};
 
 export const getAdmins = async (params: TQuery = { role: "admin" }) =>
-  nextServerFetch<ApiResponse<AdminListData>>(`/admin${buildQueryString(params)}`, {
-    tags: ["admins"],
-  });
+  nextServerFetch<ApiResponse<AdminListData>>(
+    `/admin${buildQueryString(params)}`,
+    {
+      next: { tags: ["admins"] },
+    },
+  );

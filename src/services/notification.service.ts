@@ -13,7 +13,7 @@ import type {
 export const getNotifications = async <T = unknown>(params: TQuery = {}) =>
   nextServerFetch<ApiResponse<T>>(
     `/notification${buildQueryString(params)}`,
-    { revalidate: 0 }
+    { cache:"no-store", }
   );
 
 export const markAllNotificationsRead = async <T = unknown>() =>

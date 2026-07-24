@@ -15,7 +15,7 @@ function ClientActions({ company }: { company: Company }) {
       <Button asChild type="button" variant="ghost" size="icon">
         <Link
           href={`/super-admin/clients/${company._id}`}
-          aria-label={`View ${company.name}`}
+          aria-label={`View ${company.firstName || company.fullName || company.name || "company"}`}
           title="View analytics"
         >
           <Eye />
@@ -24,7 +24,7 @@ function ClientActions({ company }: { company: Company }) {
       <Button asChild type="button" variant="ghost" size="icon">
         <Link
           href={`/super-admin/clients/${company._id}/settings`}
-          aria-label={`Manage ${company.name}`}
+          aria-label={`Manage ${company.firstName || company.fullName || company.name || "company"}`}
           title="Company settings"
           className="text-primary"
         >
@@ -42,13 +42,20 @@ export const columns: ColumnDef<Company>[] = [
     cell: ({ row }) => (
       <div className="flex items-center gap-3">
         <Avatar>
-          {row.original.logo && (
-            <AvatarImage src={row.original.logo} alt={row.original.name} />
-          )}
-          <AvatarFallback>{getInitials(row.original.name)}</AvatarFallback>
+          {row.original.image || row.original.logo ? (
+            <AvatarImage
+              src={row.original.image || row.original.logo}
+              alt={row.original.firstName || row.original.fullName || row.original.name || "Company"}
+            />
+          ) : null}
+          <AvatarFallback>
+            {getInitials(row.original.firstName || row.original.fullName || row.original.name || "Company")}
+          </AvatarFallback>
         </Avatar>
         <div>
-          <p className="font-medium text-foreground">{row.original.name}</p>
+          <p className="font-medium text-foreground">
+            {row.original.firstName || row.original.fullName || row.original.name || "Company"}
+          </p>
           <p className="text-xs text-muted-foreground">{row.original.slug}</p>
         </div>
       </div>

@@ -1,185 +1,191 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import "server-only";
-import { jwtDecode } from "jwt-decode";
-import { revalidateTag, updateTag } from "next/cache";
-import { cookies, headers } from "next/headers";
+
+import { cookies } from "next/headers";
 import { cache } from "react";
 
-type CookieMapping = {
-  /** dot-notation path in JSON response body, e.g. "data.accessToken" */
-  responsePath: string;
-  /** cookie name to store the value under, e.g. "accessToken" */
-  cookieName: string;
-};
+type AuthMode = "required" | "optional" | "none";
 
 type NextServerFetchOptions = Omit<RequestInit, "body"> & {
   body?: unknown;
-  isPublic?: boolean;
-  /**
-   * Persist cookies from JSON response body.
-   * e.g. [{ responsePath: "data.accessToken", cookieName: "accessToken" }]
-   */
-  setCookies?: CookieMapping[];
-  /**
-   * Persist cookies from Set-Cookie response header (for APIs that send tokens in headers).
-   * Only saves "accessToken" and "refreshToken" named cookies.
-   */
-  persistCookies?: boolean;
-  revalidate?: number | false;
-  tags?: string[];
-  /**
-   * "updateTag": immediate expiration, best for Server Actions.
-   * "revalidateTag": stale-while-revalidate, best for background updates.
-   */
-  invalidateMode?: "updateTag" | "revalidateTag";
-  updateTag?: string | string[];
+  auth?: AuthMode;
   next?: NextFetchRequestConfig;
-  responseType?: "json" | "text";
-  suppressErrorLogging?: boolean;
-};
-
-export type ApiError = Error & {
-  status: number;
-  data: unknown;
 };
 
 type ErrorSource = {
-  path?: string;
+  path?: string | number;
   message?: string;
 };
 
-const createApiError = (
-  message: string,
-  status: number,
-  data: unknown
-): ApiError => {
-  const error = new Error(message) as ApiError;
-  error.status = status;
-  error.data = data;
-  return error;
+type ErrorResponse = {
+  message?: string;
+  errorSources?: ErrorSource[];
 };
 
-const buildApiErrorMessage = (errorData: any, fallbackStatus: number): string => {
-  const baseMessage =
-    typeof errorData?.message === "string" && errorData.message.trim()
-      ? errorData.message.trim()
-      : `HTTP ${fallbackStatus}`;
+export class ApiError extends Error {
+  status: number;
+  data: unknown;
 
-  const sources = Array.isArray(errorData?.errorSources)
-    ? (errorData.errorSources as ErrorSource[])
+  constructor(message: string, status: number, data: unknown) {
+    super(message);
+
+    this.name = "ApiError";
+    this.status = status;
+    this.data = data;
+  }
+}
+
+const isObject = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === "object" && value !== null;
+};
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> => {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const prototype = Object.getPrototypeOf(value);
+
+  return prototype === Object.prototype || prototype === null;
+};
+
+const getAccessToken = cache(async (): Promise<string | null> => {
+  const cookieStore = await cookies();
+
+  return cookieStore.get("accessToken")?.value ?? null;
+});
+
+const parseJsonResponse = async (response: Response): Promise<unknown> => {
+  if (response.status === 204 || response.status === 205) {
+    return null;
+  }
+
+  const responseText = await response.text();
+
+  if (!responseText.trim()) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(responseText);
+  } catch {
+    throw new ApiError(
+      "API returned an invalid JSON response",
+      response.status,
+      {
+        rawResponse: responseText.slice(0, 500),
+      },
+    );
+  }
+};
+
+const buildErrorMessage = (errorData: unknown, status: number): string => {
+  if (!isObject(errorData)) {
+    return `Request failed with status ${status}`;
+  }
+
+  const data = errorData as ErrorResponse;
+
+  const baseMessage =
+    typeof data.message === "string" && data.message.trim()
+      ? data.message.trim()
+      : `Request failed with status ${status}`;
+
+  const errorSources = Array.isArray(data.errorSources)
+    ? data.errorSources
     : [];
 
-  const details = sources
+  const details = errorSources
     .map((source) => {
-      const sourceMessage = source?.message?.trim();
-      const sourcePath = source?.path?.trim();
+      const message =
+        typeof source.message === "string" ? source.message.trim() : "";
 
-      if (!sourceMessage) return null;
-      if (sourceMessage === baseMessage) return null;
+      if (!message || message === baseMessage) {
+        return null;
+      }
 
-      return sourcePath ? `${sourcePath} - ${sourceMessage}` : sourceMessage;
+      const path =
+        typeof source.path === "string" || typeof source.path === "number"
+          ? String(source.path).trim()
+          : "";
+
+      return path ? `${path} - ${message}` : message;
     })
-    .filter((value, index, arr): value is string => Boolean(value) && arr.indexOf(value) === index);
+    .filter(
+      (value, index, values): value is string =>
+        Boolean(value) && values.indexOf(value) === index,
+    );
 
-  return details.length > 0 ? `${baseMessage}: ${details.join(", ")}` : baseMessage;
+  return details.length ? `${baseMessage}: ${details.join(", ")}` : baseMessage;
 };
 
-const isTokenExpired = (token: string): boolean => {
-  try {
-    const decoded: { exp: number } = jwtDecode(token);
-    return decoded.exp * 1000 < Date.now();
-  } catch {
-    return true;
+const prepareBody = (
+  body: unknown,
+  headers: Headers,
+  method: string,
+): BodyInit | undefined => {
+  if (body === undefined || body === null) {
+    return undefined;
   }
+
+  if (method === "GET" || method === "HEAD") {
+    throw new TypeError(`${method} requests cannot include a body`);
+  }
+
+  if (
+    body instanceof FormData ||
+    body instanceof URLSearchParams ||
+    body instanceof Blob ||
+    body instanceof ArrayBuffer ||
+    ArrayBuffer.isView(body) ||
+    typeof body === "string"
+  ) {
+    return body as BodyInit;
+  }
+
+  if (isPlainObject(body) || Array.isArray(body)) {
+    if (!headers.has("Content-Type")) {
+      headers.set("Content-Type", "application/json");
+    }
+
+    return JSON.stringify(body);
+  }
+
+  throw new TypeError("Unsupported request body type");
 };
 
-const _getValidAccessTokenImpl = async (baseUrl: string): Promise<string | null> => {
-  const cookieStore = await cookies();
-  let accessToken = cookieStore.get("accessToken")?.value;
-
-  if (accessToken && !isTokenExpired(accessToken)) {
-    return accessToken;
-  }
-
-  const refreshToken = cookieStore.get("refreshToken")?.value;
-  if (!refreshToken) {
-    return null;
-  }
-
-  const rememberMe = cookieStore.get("rememberMe")?.value === "true";
-
-  const res = await fetch(`${baseUrl}/auth/refresh-token`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ refreshToken, rememberMe }),
-  });
-
-  if (!res.ok) {
-    return null;
-  }
-
-  const result = await res.json().catch(() => null);
-  accessToken = result?.data?.accessToken;
-
-  if (!accessToken) {
-    return null;
-  }
-
-  try {
-    cookieStore.set("accessToken", accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      ...(rememberMe ? { maxAge: 30 * 24 * 60 * 60 } : {}),
-    });
-  } catch {
-    // Some server contexts do not allow writing cookies.
-  }
-
-  return accessToken;
-};
-
-/**
- * Cached version of getValidAccessToken - memoized per request.
- * Ensures cookies() and token refresh logic runs only ONCE per render.
- */
-const getValidAccessToken = cache(_getValidAccessTokenImpl);
-
-export const nextServerFetch = async <T = any>(
+export const nextServerFetch = async <T>(
   endpoint: string,
-  options: NextServerFetchOptions = {}
+  options: NextServerFetchOptions = {},
 ): Promise<T> => {
   const {
-    isPublic = false,
+    auth = "required",
     body: rawBody,
     headers: customHeaders,
     method = "GET",
-    revalidate = method.toUpperCase() === "GET" ? 60 : 0,
-    updateTag: tagsToInvalidate,
-    invalidateMode = "updateTag",
-    tags,
     next,
-    setCookies,
-    persistCookies = false,
-    responseType = "json",
-    suppressErrorLogging = false,
-    ...rest
+    ...requestOptions
   } = options;
 
+  const normalizedMethod = method.toUpperCase();
+  const headers = new Headers(customHeaders);
+
+  /*
+   * Validate and prepare the body before reading cookies or
+   * making a network request. Invalid caller input therefore
+   * fails immediately.
+   */
+  const body = prepareBody(rawBody, headers, normalizedMethod);
+
   const baseUrl = process.env.NEXT_PUBLIC_BASE_API;
-  if (!baseUrl) throw new Error("NEXT_PUBLIC_BASE_API is not defined");
 
-  const defaultHeaders: Record<string, string> = {};
+  if (!baseUrl) {
+    throw new Error("NEXT_PUBLIC_BASE_API is not defined");
+  }
 
-  const accessToken = isPublic ? null : await getValidAccessToken(baseUrl);
+  const accessToken = auth === "none" ? null : await getAccessToken();
 
-  if (accessToken) {
-    defaultHeaders.Authorization = `Bearer ${accessToken}`;
-  } else if (!isPublic) {
-    throw createApiError("Authorization token is required", 401, {
+  if (auth === "required" && !accessToken) {
+    throw new ApiError("Authorization token is required", 401, {
       success: false,
       message: "Authorization token is required",
       statusCode: 401,
@@ -187,146 +193,30 @@ export const nextServerFetch = async <T = any>(
     });
   }
 
-  // Forward Client Headers for Device Fingerprinting
-  try {
-    const headersList = await headers();
-    const userAgent = headersList.get("user-agent");
-    const forwardedFor = headersList.get("x-forwarded-for");
-    const realIp = headersList.get("x-real-ip");
-
-    if (userAgent) defaultHeaders["User-Agent"] = userAgent;
-    if (forwardedFor) defaultHeaders["X-Forwarded-For"] = forwardedFor;
-    if (realIp) defaultHeaders["X-Real-IP"] = realIp;
-  } catch {
-    // headers() throws an error if called outside of a request context
+  if (accessToken) {
+    headers.set("Authorization", `Bearer ${accessToken}`);
   }
 
-  // Forward Cookies for Automatic Authentication
-  try {
-    const cookieStore = await cookies();
-    const allCookies = cookieStore.getAll();
-    const cookieString = allCookies.map(c => `${c.name}=${c.value}`).join("; ");
-    if (cookieString) {
-      defaultHeaders.Cookie = cookieString;
-    }
-  } catch {
-    // cookies() throws an error if called outside of a request context
+  const normalizedBaseUrl = baseUrl.replace(/\/+$/, "");
+  const normalizedEndpoint = endpoint.replace(/^\/+/, "");
+
+  const response = await fetch(`${normalizedBaseUrl}/${normalizedEndpoint}`, {
+    ...requestOptions,
+    method: normalizedMethod,
+    headers,
+    ...(body !== undefined ? { body } : {}),
+    ...(next ? { next } : {}),
+  });
+
+  const responseData = await parseJsonResponse(response);
+
+  if (!response.ok) {
+    throw new ApiError(
+      buildErrorMessage(responseData, response.status),
+      response.status,
+      responseData,
+    );
   }
 
-  let body = rawBody;
-  if (body && typeof body === "object" && !(body instanceof FormData)) {
-    body = JSON.stringify(body);
-    defaultHeaders["Content-Type"] = "application/json";
-  }
-
-  try {
-    const res = await fetch(`${baseUrl}${endpoint}`, {
-      ...rest,
-      method,
-      ...(body ? { body: body as BodyInit } : {}),
-      headers: { ...defaultHeaders, ...customHeaders },
-      next: {
-        revalidate,
-        tags,
-        ...next,
-      },
-    });
-
-    if (res.ok && tagsToInvalidate) {
-      const tagList = Array.isArray(tagsToInvalidate)
-        ? tagsToInvalidate
-        : [tagsToInvalidate];
-
-      tagList.forEach((tag) => {
-        try {
-          if (invalidateMode === "updateTag") {
-            updateTag(tag);
-          } else {
-            revalidateTag(tag, "max");
-          }
-        } catch {
-          revalidateTag(tag, "max");
-        }
-      });
-    }
-
-    // Persist tokens from Set-Cookie header (for APIs that send tokens in headers)
-    const setCookieHeader = res.headers.get("set-cookie");
-    if (persistCookies && setCookieHeader) {
-      const cookieStore = await cookies();
-      const cookiesArray = setCookieHeader.split(/,(?=[^;]+=[^;]+)/);
-      cookiesArray.forEach((cookieString) => {
-        if (!cookieString.includes("=")) return;
-        const parts = cookieString.split(";")[0].split("=");
-        const name = parts[0].trim();
-        const value = parts.slice(1).join("=");
-        if (name === "accessToken" || name === "refreshToken" || name === "guestId") {
-          try {
-            cookieStore.set(name, value, {
-              httpOnly: true,
-              secure: process.env.NODE_ENV === "production",
-              sameSite: "lax",
-              path: "/",
-            });
-          } catch {
-            // Some server contexts do not allow writing cookies.
-          }
-        }
-      });
-    }
-    if (!res.ok) {
-      const errorData = await res.json().catch(() => null);
-      const errorMessage = buildApiErrorMessage(errorData, res.status);
-      if (!suppressErrorLogging) {
-        console.error(`API Error (${res.status}):`, errorMessage);
-      }
-      throw createApiError(errorMessage, res.status, errorData);
-    }
-
-    if (res.status === 204 || res.headers.get("content-length") === "0") {
-      return null as T;
-    }
-
-    const responseText = await res.text();
-    let jsonResult: any = null;
-    try {
-      jsonResult = JSON.parse(responseText);
-    } catch {
-      // response is not valid JSON, skip
-    }
-
-    // Persist specific fields from the response body into cookies
-    if (setCookies && setCookies.length > 0 && jsonResult) {
-      const cookieStore = await cookies();
-      for (const { responsePath, cookieName } of setCookies) {
-        // Resolve dot-notation path, e.g. "data.accessToken"
-        const value = responsePath
-          .split(".")
-          .reduce((obj: any, key: string) => obj?.[key], jsonResult);
-
-        if (typeof value === "string" && value) {
-          try {
-            cookieStore.set(cookieName, value, {
-              httpOnly: true,
-              secure: process.env.NODE_ENV === "production",
-              sameSite: "lax",
-              path: "/",
-            });
-          } catch {
-            // Some server contexts do not allow writing cookies.
-          }
-        }
-      }
-    }
-
-    return responseType === "text"
-      ? (responseText as unknown as T)
-      : (jsonResult as T);
-  } catch (error: unknown) {
-    const apiError = error as ApiError;
-    if (apiError?.status !== 401 && !suppressErrorLogging) {
-      console.error("[nextServerFetch] Error:", apiError);
-    }
-    throw error;
-  }
+  return responseData as T;
 };

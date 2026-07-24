@@ -29,50 +29,45 @@ export type CompanyUserSummary = {
 
 export type Company = {
   _id: string;
-  name: string;
+  firstName: string;
+  lastName?: string;
+  fullName?: string;
+  name?: string;
+  image?: string;
+  logo?: string;
   email: string;
-  address: string;
-  logo: string;
-  slug: string;
+  authType?: string;
+  role?: string;
   status: CompanyStatus;
-  isDeleted: boolean;
+  slug?: string;
+  address?: string;
+  isOtpVerified?: boolean;
+  isDeleted?: boolean;
+  fcmToken?: string | null;
   branding: CompanyBranding;
   createdAt: string;
   updatedAt: string;
   __v: number;
+  lastActiveAt?: string;
   users?: CompanyUserSummary[];
-  id?: string;
+  companyId?: string;
 };
 
-export type CompanyApiItem = Partial<Company> & {
-  _id: string;
-  firstName?: string;
-  fullName?: string;
-  image?: string;
-  authType?: string;
-  role?: string;
-  isOtpVerified?: boolean;
-  fcmToken?: string | null;
-  lastActiveAt?: string;
-};
+export type CompanyApiItem = Company;
 
 export type CompanyApiListData = {
-  meta: TMeta;
-  result: CompanyApiItem[];
-};
-
-export type CompanyListData = {
   meta: TMeta;
   result: Company[];
 };
 
-export type CompanyDropdownItem = Pick<Company, "_id" | "name">;
+export type CompanyListData = CompanyApiListData;
 
-export type PublicCompanyDropdownItem = {
+export type CompanyDropdownItem = {
   _id: string;
-  name?: string;
-  firstName?: string;
+  firstName: string;
 };
+
+export type PublicCompanyDropdownItem = CompanyDropdownItem;
 
 export type CompanyStatus = "active" | "inactive" | "suspended";
 

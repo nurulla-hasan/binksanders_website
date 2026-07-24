@@ -12,13 +12,13 @@ import type {
 export const getMyLearningPath = async () =>
   nextServerFetch<ApiResponse<LearningPathData>>(
     "/user-progress/my-learning-path",
-    { revalidate: 0 },
+    { cache:"no-store", },
   );
 
 export const getUserModule = async (moduleId: string) =>
   nextServerFetch<ApiResponse<UserModuleDetails>>(
     `/user-progress/module/${moduleId}`,
-    { revalidate: 0 },
+    { cache:"no-store", },
   );
 
 export const submitModuleAnswer = async (
