@@ -11,10 +11,11 @@ import { useAuthStore } from "@/stores/auth.store";
 export default function ProfilePage() {
   const user = useAuthStore((state) => state.user);
   const setUser = useAuthStore((state) => state.setUser);
+  const isLoggingOut = useAuthStore((state) => state.isLoggingOut);
   const [isLoading, setIsLoading] = useState(!user);
 
   useEffect(() => {
-    if (user) return;
+    if (user || isLoggingOut) return;
 
     const loadProfile = async () => {
       try {
@@ -30,7 +31,7 @@ export default function ProfilePage() {
     };
 
     void loadProfile();
-  }, [setUser, user]);
+  }, [setUser, user, isLoggingOut]);
 
   return (
     <div className="-m-4 flex flex-1 animate-fadeIn flex-col pb-18">

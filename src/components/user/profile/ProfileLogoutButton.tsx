@@ -9,9 +9,11 @@ import { useAuthStore } from "@/stores/auth.store";
 export function ProfileLogoutButton() {
   const [isPending, setIsPending] = useState(false);
   const clearAuth = useAuthStore((state) => state.clearAuth);
+  const setIsLoggingOut = useAuthStore((state) => state.setIsLoggingOut);
 
   const handleLogout = async () => {
     setIsPending(true);
+    setIsLoggingOut(true);
     clearAuth();
     await logout("/auth/login");
   };

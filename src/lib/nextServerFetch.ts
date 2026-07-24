@@ -2,7 +2,7 @@
 import "server-only";
 import { jwtDecode } from "jwt-decode";
 import { revalidateTag, updateTag } from "next/cache";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { cache } from "react";
 
 type CookieMapping = {
@@ -155,7 +155,7 @@ export const nextServerFetch = async <T = any>(
   const {
     isPublic = false,
     body: rawBody,
-    headers,
+    headers: customHeaders,
     method = "GET",
     revalidate = method.toUpperCase() === "GET" ? 60 : 0,
     updateTag: tagsToInvalidate,
@@ -187,6 +187,32 @@ export const nextServerFetch = async <T = any>(
     });
   }
 
+  // Forward Client Headers for Device Fingerprinting
+  try {
+    const headersList = await headers();
+    const userAgent = headersList.get("user-agent");
+    const forwardedFor = headersList.get("x-forwarded-for");
+    const realIp = headersList.get("x-real-ip");
+
+    if (userAgent) defaultHeaders["User-Agent"] = userAgent;
+    if (forwardedFor) defaultHeaders["X-Forwarded-For"] = forwardedFor;
+    if (realIp) defaultHeaders["X-Real-IP"] = realIp;
+  } catch {
+    // headers() throws an error if called outside of a request context
+  }
+
+  // Forward Cookies for Automatic Authentication
+  try {
+    const cookieStore = await cookies();
+    const allCookies = cookieStore.getAll();
+    const cookieString = allCookies.map(c => `${c.name}=${c.value}`).join("; ");
+    if (cookieString) {
+      defaultHeaders.Cookie = cookieString;
+    }
+  } catch {
+    // cookies() throws an error if called outside of a request context
+  }
+
   let body = rawBody;
   if (body && typeof body === "object" && !(body instanceof FormData)) {
     body = JSON.stringify(body);
@@ -198,7 +224,7 @@ export const nextServerFetch = async <T = any>(
       ...rest,
       method,
       ...(body ? { body: body as BodyInit } : {}),
-      headers: { ...defaultHeaders, ...headers },
+      headers: { ...defaultHeaders, ...customHeaders },
       next: {
         revalidate,
         tags,
@@ -234,7 +260,7 @@ export const nextServerFetch = async <T = any>(
         const parts = cookieString.split(";")[0].split("=");
         const name = parts[0].trim();
         const value = parts.slice(1).join("=");
-        if (name === "accessToken" || name === "refreshToken") {
+        if (name === "accessToken" || name === "refreshToken" || name === "guestId") {
           try {
             cookieStore.set(name, value, {
               httpOnly: true,

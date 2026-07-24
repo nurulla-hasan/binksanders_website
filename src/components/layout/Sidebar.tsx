@@ -48,14 +48,16 @@ const companyNavItems = [
 
 export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) {
   const pathname = usePathname();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isLoggingOut, setIsLoggingOutState] = useState(false);
   const clearAuth = useAuthStore((state) => state.clearAuth);
+  const setIsLoggingOut = useAuthStore((state) => state.setIsLoggingOut);
   
   const isSuperAdmin = pathname?.startsWith("/super-admin");
   const navItems = isSuperAdmin ? superAdminNavItems : companyNavItems;
   const basePath = isSuperAdmin ? "/super-admin" : "/company";
 
   const handleLogout = async () => {
+    setIsLoggingOutState(true);
     setIsLoggingOut(true);
     clearAuth();
     setIsSidebarOpen(false);

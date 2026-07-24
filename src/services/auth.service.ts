@@ -27,6 +27,7 @@ import type {
 const tokenCookies = [
   { responsePath: "data.accessToken", cookieName: "accessToken" },
   { responsePath: "data.refreshToken", cookieName: "refreshToken" },
+  { responsePath: "data.user.guestId", cookieName: "guestId" },
 ];
 
 const postPublic = <T>(endpoint: string, body: unknown) =>
@@ -42,6 +43,7 @@ const postPublicWithSession = <T>(endpoint: string, body: unknown) =>
     body,
     isPublic: true,
     setCookies: tokenCookies,
+    persistCookies: true,
   });
 
 export const login = async (payload: LoginPayload) =>
