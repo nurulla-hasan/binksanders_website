@@ -10,7 +10,6 @@ interface TokenPayload {
 }
 
 const PUBLIC_ROUTES = [
-  "/",
   "/qr-login",
 ];
 
