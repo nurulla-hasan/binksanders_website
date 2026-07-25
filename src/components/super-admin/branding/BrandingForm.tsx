@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { ImageIcon, Video } from "lucide-react";
+import { ImageIcon, Video, X } from "lucide-react";
 import { BrandingCompanySelect } from "@/components/super-admin/branding/BrandingCompanySelect";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
@@ -67,12 +67,20 @@ export function BrandingForm({
 
   const handleLogoChange = (file?: File) => {
     setLogo(file);
-    if (file) setLogoPreview(URL.createObjectURL(file));
+    if (file) {
+      setLogoPreview(URL.createObjectURL(file));
+    } else {
+      setLogoPreview("");
+    }
   };
 
   const handleVideoChange = (file?: File) => {
     setVideo(file);
-    if (file) setVideoPreview(URL.createObjectURL(file));
+    if (file) {
+      setVideoPreview(URL.createObjectURL(file));
+    } else {
+      setVideoPreview("");
+    }
   };
 
   return (
@@ -95,15 +103,32 @@ export function BrandingForm({
         <FieldDescription>Upload the company logo displayed on its client portal.</FieldDescription>
         <Field>
           <FieldLabel htmlFor="brandingLogo">Upload Logo</FieldLabel>
-          <label htmlFor="brandingLogo" className="flex h-40 cursor-pointer items-center justify-center overflow-hidden rounded-md border-2 border-dashed border-border bg-background">
-            <Input id="brandingLogo" type="file" accept="image/*" className="sr-only" onChange={(event) => handleLogoChange(event.target.files?.[0])} />
-            {logoPreview ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={logoPreview} alt="Company logo preview" className="h-full w-full object-contain p-4" />
-            ) : (
-              <span className="flex items-center gap-2 text-sm text-muted-foreground"><ImageIcon /> Upload logo</span>
+          <div className="relative h-40">
+            <label htmlFor="brandingLogo" className="flex h-full cursor-pointer items-center justify-center overflow-hidden rounded-md border-2 border-dashed border-border bg-background hover:bg-muted/50 transition-colors">
+              <Input id="brandingLogo" type="file" accept="image/*" className="hidden" onChange={(event) => handleLogoChange(event.target.files?.[0])} />
+              {logoPreview ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={logoPreview} alt="Company logo preview" className="h-full w-full object-contain p-4" />
+              ) : (
+                <span className="flex items-center gap-2 text-sm text-muted-foreground"><ImageIcon /> Upload logo</span>
+              )}
+            </label>
+            {logoPreview && (
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                className="absolute right-2 top-2 h-8 w-8 rounded-full shadow-sm"
+                onClick={() => {
+                  handleLogoChange(undefined);
+                  const input = document.getElementById("brandingLogo") as HTMLInputElement;
+                  if (input) input.value = "";
+                }}
+              >
+                <X className="h-4 w-4" />
+              </Button>
             )}
-          </label>
+          </div>
         </Field>
       </FieldSet>
 
@@ -146,14 +171,32 @@ export function BrandingForm({
           </div>
           <Field>
             <FieldLabel htmlFor="brandingVideo">Upload Video</FieldLabel>
-            <label htmlFor="brandingVideo" className="flex h-48 cursor-pointer items-center justify-center overflow-hidden rounded-md border-2 border-dashed border-border bg-background">
-              <Input id="brandingVideo" type="file" accept="video/*" className="sr-only" onChange={(event) => handleVideoChange(event.target.files?.[0])} />
-              {videoPreview ? (
-                <video src={videoPreview} controls className="h-full w-full object-contain" />
-              ) : (
-                <span className="flex items-center gap-2 text-sm text-muted-foreground"><Video /> Upload video</span>
+            <div className="relative h-48">
+              <label htmlFor="brandingVideo" className="flex h-full cursor-pointer items-center justify-center overflow-hidden rounded-md border-2 border-dashed border-border bg-background hover:bg-muted/50 transition-colors">
+                <Input id="brandingVideo" type="file" accept="video/*" className="hidden" onChange={(event) => handleVideoChange(event.target.files?.[0])} />
+                {videoPreview ? (
+                  <video src={videoPreview} controls className="h-full w-full object-contain" />
+                ) : (
+                  <span className="flex items-center gap-2 text-sm text-muted-foreground"><Video /> Upload video</span>
+                )}
+              </label>
+              {videoPreview && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="absolute right-2 top-2 h-8 w-8 rounded-full shadow-sm z-10"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleVideoChange(undefined);
+                    const input = document.getElementById("brandingVideo") as HTMLInputElement;
+                    if (input) input.value = "";
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               )}
-            </label>
+            </div>
           </Field>
         </FieldGroup>
       </FieldSet>

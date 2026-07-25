@@ -128,10 +128,11 @@ export default async function CompanySettingsPage({
           modules={assignedModules}
           action={
             <AssignModulesModal
+              key="assign-modules-action"
               companyId={company._id}
               teams={teams}
               modules={modules}
-              assignedModuleIds={assignedModules.map((module) => module._id)}
+              assignedModules={assignedModules}
             />
           }
         />

@@ -11,6 +11,7 @@ import {
 } from "@/components/super-admin/clients/LocationPerformanceTable";
 import { ModuleComplianceList } from "@/components/super-admin/clients/ModuleComplianceList";
 import { StatCards } from "@/components/super-admin/clients/StatCards";
+import { FooterActions } from "@/components/super-admin/clients/FooterActions";
 import type { TParams } from "@/lib/types/global.type";
 import { formatDate, getInitials } from "@/lib/utils";
 import { getCompanyAnalytics } from "@/services/company.service";
@@ -86,6 +87,8 @@ export default async function CompanyDetailsPage({
           <LocationPerformanceTable data={teams} />
           <ModuleComplianceList modules={analytics.moduleCompliance} />
         </div>
+
+        <FooterActions companyId={id} companyName={analytics.company.name} />
       </DashboardPageLayout>
     </div>
   );

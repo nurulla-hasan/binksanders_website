@@ -23,24 +23,28 @@ type AssignModulesModalProps = {
   companyId: string;
   teams: TeamDropdownItem[];
   modules: LearningModule[];
-  assignedModuleIds: string[];
+  assignedModules: LearningModule[];
 };
 
 export function AssignModulesModal({
   companyId,
   teams,
   modules,
-  assignedModuleIds,
+  assignedModules,
 }: AssignModulesModalProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const [teamId, setTeamId] = useState("");
   const [moduleIds, setModuleIds] = useState<string[]>([]);
-  const availableModules = useMemo(
-    () => modules.filter((module) => !assignedModuleIds.includes(module._id)),
-    [assignedModuleIds, modules],
-  );
+
+  const availableModules = useMemo(() => {
+    if (!teamId) return modules;
+    const teamAssignedIds = assignedModules
+      .filter((m) => m.teamId?._id === teamId)
+      .map((m) => m._id);
+    return modules.filter((module) => !teamAssignedIds.includes(module._id));
+  }, [teamId, assignedModules, modules]);
 
   const resetForm = () => {
     setTeamId("");

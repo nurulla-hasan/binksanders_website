@@ -1,6 +1,7 @@
 "use server";
 
 import { updateTag } from "next/cache";
+import { cookies } from "next/headers";
 import { buildQueryString } from "@/lib/buildQueryString";
 import { createMultipartBody } from "@/lib/createMultipartBody";
 import { nextServerFetch } from "@/lib/nextServerFetch";
@@ -134,4 +135,27 @@ export const deleteCompany = async <T = unknown>(companyId: string) => {
     updateTag(`company-${companyId}`);
   }
   return response;
+};
+
+export const downloadCompanyReport = async (companyId: string) => {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("accessToken")?.value;
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_API}/company/${companyId}/download-report`,
+    {
+      method: "GET",
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to download report");
+  }
+
+  const arrayBuffer = await response.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+  return buffer.toString("base64");
 };

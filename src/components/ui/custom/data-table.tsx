@@ -158,7 +158,7 @@ function DataTableInner<TData, TValue>({
                   <TableHead
                     key={header.id}
                     className={cn(
-                      "h-12 px-4 bg-accent",
+                      "h-12 px-4 bg-secondary",
                       header.column.columnDef.meta?.headerClassName,
                     )}
                   >
