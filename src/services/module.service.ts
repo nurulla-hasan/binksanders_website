@@ -17,12 +17,12 @@ import type {
 
 export const getModules = async (params: TQuery = {}) =>
   nextServerFetch<ModuleListResponse>(`/module${buildQueryString(params)}`, {
-    next: { tags: ["modules"] },
+    next: { tags: ["modules"], revalidate: 3600 },
   });
 
 export const getModule = async (moduleId: string) =>
   nextServerFetch<ApiResponse<LearningModule>>(`/module/${moduleId}`, {
-    next: { tags: ["modules", `module-${moduleId}`] },
+    next: { tags: ["modules", `module-${moduleId}`], revalidate: 3600 },
   });
 
 export const getCompanyModules = async (
@@ -31,7 +31,7 @@ export const getCompanyModules = async (
 ) =>
   nextServerFetch<ApiResponse<LearningModule[]>>(
     `/module/company/${companyId}${buildQueryString(params)}`,
-    { next: { tags: ["modules", `company-${companyId}-modules`] } },
+    { next: { tags: ["modules", `company-${companyId}-modules`], revalidate: 3600 } },
   );
 
 export const createModule = async <T = unknown>({

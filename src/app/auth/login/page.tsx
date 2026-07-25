@@ -102,34 +102,34 @@ export default function LoginPage() {
           ))}
         </TabsList>
 
-        <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center px-6 py-10">
-          <div className="mb-8 flex items-center justify-center gap-3">
-            <Image
-              src="/acme-logo.svg"
-              alt="Acme Inc Logo"
-              width={36}
-              height={36}
-              priority
-              style={{ height: "auto" }}
-            />
-            <span className="text-2xl font-bold font-heading tracking-tight text-foreground">
-              Acme Inc
-            </span>
-          </div>
+        <div className="flex w-full flex-col p-6 sm:p-10 flex-1 relative">
 
-          <TabsContent value="email" className="mt-0 flex-none">
-            <form
-              onSubmit={handleLoginSubmit}
-              className="space-y-8 animate-fadeIn"
-            >
-              <div className="space-y-2">
-                <h1 className="text-3xl font-bold font-heading tracking-tight text-foreground">
-                  Welcome Back
-                </h1>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Grow your skills, one quick lesson at a time.
-                </p>
-              </div>
+          
+          <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
+            <div className="mb-10 flex items-center justify-center">
+              <Image
+                src="/acme-inc.svg"
+                alt="Logo"
+                width={150}
+                height={50}
+                priority
+                className="h-auto w-37.5 max-w-full dark:invert"
+              />
+            </div>
+
+            <TabsContent value="email" className="mt-0 flex-none">
+              <form
+                onSubmit={handleLoginSubmit}
+                className="space-y-6 animate-fadeIn"
+              >
+                <div className="space-y-2 mb-6">
+                  <h1 className="text-3xl font-bold tracking-tight text-foreground">
+                    Sign in to your account
+                  </h1>
+                  <p className="text-sm text-muted-foreground">
+                    Don&apos;t have an account?
+                  </p>
+                </div>
 
               <FieldGroup>
                 <Field>
@@ -168,19 +168,23 @@ export default function LoginPage() {
                       )}
                     </button>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right mt-1">
                     <Link
                       href="/auth/forgot-password"
-                      className="text-xs font-semibold text-destructive hover:underline"
+                      className="text-xs font-medium text-muted-foreground hover:text-foreground underline underline-offset-2"
                     >
-                      Forgot Password
+                      Forgot Password?
                     </Link>
                   </div>
                 </Field>
               </FieldGroup>
 
-              <Button type="submit" size="lg-full" disabled={isPending}>
-                {isPending ? "Logging in..." : "Log In"}
+              <Button type="submit" size="lg-full" disabled={isPending} className="mt-4 text-base font-semibold tracking-wide uppercase">
+                {isPending ? "Logging in..." : (
+                  <>
+                    Log In <span className="ml-2">→</span>
+                  </>
+                )}
               </Button>
             </form>
           </TabsContent>
@@ -188,14 +192,14 @@ export default function LoginPage() {
           <TabsContent value="employee" className="mt-0 flex-none">
             <form
               onSubmit={handleLoginSubmit}
-              className="space-y-8 animate-fadeIn"
+              className="space-y-6 animate-fadeIn"
             >
-              <div className="space-y-2">
-                <h1 className="text-3xl font-bold font-heading tracking-tight text-foreground">
-                  Welcome Back
+              <div className="space-y-2 mb-6">
+                <h1 className="text-3xl font-bold tracking-tight text-foreground">
+                  Employee Access
                 </h1>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Grow your skills, one quick lesson at a time.
+                <p className="text-sm text-muted-foreground">
+                  Sign in with your employee ID.
                 </p>
               </div>
 
@@ -320,6 +324,7 @@ export default function LoginPage() {
           </TabsContent>
 
           <AuthPageLinks />
+        </div>
         </div>
 
         {/* Bottom Footer Section - Styled matching the screenshots */}

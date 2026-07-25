@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import type { TeamRow } from "@/lib/types/team.type";
 import { ErrorToast, formatDate, SuccessToast } from "@/lib/utils";
 import { deleteTeam, updateTeam } from "@/services/team.service";
+import { AssignTeamModuleModal } from "@/components/super-admin/location-performance/AssignTeamModuleModal";
 
 function TeamActions({ team }: { team: TeamRow }) {
   const router = useRouter();
@@ -61,6 +62,7 @@ function TeamActions({ team }: { team: TeamRow }) {
 
   return (
     <div className="flex items-center justify-end gap-2">
+      <AssignTeamModuleModal team={team} />
       <ModalWrapper open={editOpen} onOpenChange={setEditOpen} title="Edit Team" actionTrigger={<Button type="button" variant="outline" size="icon"><Pencil /></Button>}>
         <form onSubmit={handleEdit} className="space-y-6">
           <FieldGroup>
@@ -96,8 +98,24 @@ function TeamActions({ team }: { team: TeamRow }) {
 }
 
 export const columns: ColumnDef<TeamRow>[] = [
-  { accessorKey: "name", header: "Team", cell: ({ row }) => <span className="font-medium text-foreground">{row.original.name}</span> },
-  { accessorKey: "companyName", header: "Company", cell: ({ row }) => <span className="text-muted-foreground">{row.original.companyName}</span> },
-  { accessorKey: "createdAt", header: "Created", cell: ({ row }) => <span className="text-muted-foreground">{formatDate(row.original.createdAt)}</span> },
-  { id: "actions", header: () => <div className="text-right">Actions</div>, cell: ({ row }) => <TeamActions team={row.original} /> },
+  {
+    accessorKey: "companyName",
+    header: "Company",
+    cell: ({ row }) => <span className="text-muted-foreground">{row.original.companyName}</span>
+  },
+  {
+    accessorKey: "name",
+    header: "Team",
+    cell: ({ row }) => <span className="font-medium text-foreground">{row.original.name}</span>
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Created",
+    cell: ({ row }) => <span className="text-muted-foreground">{formatDate(row.original.createdAt)}</span>
+  },
+  {
+    id: "actions",
+    header: () => <div className="text-right">Actions</div>,
+    cell: ({ row }) => <TeamActions team={row.original} />
+  },
 ];
