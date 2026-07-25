@@ -77,8 +77,8 @@ function AdminResetPasswordForm() {
       <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center px-6 py-10">
         <div className="mb-10 flex flex-col items-center">
           <div className="flex items-center gap-3">
-            <Image src="/acme-logo.svg" alt="Acme Corp Logo" width={36} height={36} priority />
-            <span className="font-heading text-2xl font-bold tracking-tight">Acme Corp</span>
+            <Image src="/acme-logo.svg" alt="Acme Inc Logo" width={36} height={36} priority />
+            <span className="font-heading text-2xl font-bold tracking-tight">Acme Inc</span>
           </div>
         </div>
 

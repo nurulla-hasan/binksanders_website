@@ -29,7 +29,7 @@ export function TopNav() {
         <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
           <Image
             src="/acme-logo.svg"
-            alt="Acme Corp Logo"
+            alt="Acme Inc Logo"
             width={32}
             height={32}
             priority
@@ -37,7 +37,7 @@ export function TopNav() {
             className="dark:invert"
           />
           <span className="text-xl font-bold font-heading tracking-tight text-foreground">
-            Acme Corp
+            Acme Inc
           </span>
         </Link>
       </div>

@@ -106,14 +106,14 @@ export default function LoginPage() {
           <div className="mb-8 flex items-center justify-center gap-3">
             <Image
               src="/acme-logo.svg"
-              alt="Acme Corp Logo"
+              alt="Acme Inc Logo"
               width={36}
               height={36}
               priority
               style={{ height: "auto" }}
             />
             <span className="text-2xl font-bold font-heading tracking-tight text-foreground">
-              Acme Corp
+              Acme Inc
             </span>
           </div>
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import {
   ArrowDown,
   ArrowRight,
@@ -146,34 +147,36 @@ export function ModuleSurveyRunner({
 
   if (isCompleted) {
     return (
-      <div className="flex min-h-[75vh] flex-1 flex-col justify-between animate-fadeIn">
-        <div className="space-y-6">
-          <div className="rounded-lg bg-primary p-7 text-center text-primary-foreground shadow-sm">
-            <CheckCircle2 className="mx-auto mb-3 size-12" />
-            <h1 className="font-heading text-2xl font-bold">Module completed</h1>
-            <p className="mt-2 text-sm text-primary-foreground/85">
-              You completed all {totalQuestions} questions in {module.title}.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 rounded-lg border bg-card p-5 text-center">
-            <div>
-              <p className="text-2xl font-bold text-primary">
-                {finalResult?.moduleScore ?? 0}
+      <AnimationWrapper direction="up" duration={0.4}>
+        <div className="flex min-h-[70vh] flex-col justify-between p-6">
+          <div className="space-y-6">
+            <div className="rounded-lg bg-primary p-7 text-center text-primary-foreground shadow-sm">
+              <CheckCircle2 className="mx-auto mb-3 size-12" />
+              <h1 className="font-heading text-2xl font-bold">Module completed</h1>
+              <p className="mt-2 text-sm text-primary-foreground/85">
+                You completed all {totalQuestions} questions in {module.title}.
               </p>
-              <p className="text-xs text-muted-foreground">Module score</p>
             </div>
-            <div>
-              <p className="text-2xl font-bold text-primary">100%</p>
-              <p className="text-xs text-muted-foreground">Progress</p>
+
+            <div className="grid grid-cols-2 gap-3 rounded-lg border bg-card p-5 text-center">
+              <div>
+                <p className="text-2xl font-bold text-primary">
+                  {finalResult?.moduleScore ?? 0}
+                </p>
+                <p className="text-xs text-muted-foreground">Module score</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-primary">100%</p>
+                <p className="text-xs text-muted-foreground">Progress</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <Button size="lg" onClick={() => router.push("/modules")}>
-          Back to learning path <ArrowRight />
-        </Button>
-      </div>
+          <Button size="lg" onClick={() => router.push("/modules")}>
+            Back to learning path <ArrowRight />
+          </Button>
+        </div>
+      </AnimationWrapper>
     );
   }
 
@@ -353,8 +356,15 @@ export function QuestionAnswer({
     return (
       <div className="space-y-3">
         {items.map((item, index) => (
-          <div
-            key={`${item}-${index}`}
+          <motion.div
+            layout
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              layout: { type: "spring", stiffness: 300, damping: 30 },
+              opacity: { duration: 0.2 }
+            }}
+            key={item}
             className="flex items-center gap-3 rounded-lg border bg-background p-3"
           >
             <span className="flex size-8 shrink-0 items-center justify-center rounded bg-muted text-sm font-bold">
@@ -381,7 +391,7 @@ export function QuestionAnswer({
                 <ArrowDown />
               </Button>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
     );

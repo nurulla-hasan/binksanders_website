@@ -44,8 +44,8 @@ function QrLoginContent() {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-sm flex-col items-center justify-center px-6 text-center">
       <div className="mb-10 flex items-center gap-3">
-        <Image src="/acme-logo.svg" alt="Acme Corp" width={36} height={36} priority />
-        <span className="font-heading text-2xl font-bold">Acme Corp</span>
+        <Image src="/acme-logo.svg" alt="Acme Inc" width={36} height={36} priority />
+        <span className="font-heading text-2xl font-bold">Acme Inc</span>
       </div>
 
       {errorMessage ? (

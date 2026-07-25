@@ -49,13 +49,13 @@ export default function AdminLoginPage() {
         <div className="flex items-center gap-3">
           <Image
             src="/acme-logo.svg"
-            alt="Acme Corp Logo"
+            alt="Acme Inc Logo"
             width={36}
             height={36}
             priority
           />
           <span className="font-heading text-2xl font-bold tracking-tight">
-            Acme Corp
+            Acme Inc
           </span>
         </div>
       </div>
