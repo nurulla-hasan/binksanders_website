@@ -22,9 +22,9 @@ export const columns: ColumnDef<LearningModule>[] = [
           )}
           <AvatarFallback>{getInitials(row.original.title)}</AvatarFallback>
         </Avatar>
-        <div>
-          <p className="font-medium text-foreground">{row.original.title}</p>
-          <p className="line-clamp-1 text-xs text-muted-foreground">
+        <div className="min-w-0 flex-1">
+          <p className="font-medium text-foreground truncate">{row.original.title}</p>
+          <p className="truncate text-xs text-muted-foreground max-w-80">
             {row.original.description}
           </p>
         </div>
@@ -46,6 +46,7 @@ export const columns: ColumnDef<LearningModule>[] = [
     cell: ({ row }) => (
       <Badge
         variant={row.original.status === "published" ? "active" : "outline"}
+        className="capitalize"
       >
         {row.original.status}
       </Badge>

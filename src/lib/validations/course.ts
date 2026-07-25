@@ -63,6 +63,8 @@ const chatScenarioSchema = baseQuestionSchema.extend({
 const videoSchema = baseQuestionSchema.extend({
   type: z.literal("Video"),
   videoUrl: z.string().url("Enter a valid video URL"),
+  options: requiredStringList(2, "Add at least two options").optional(),
+  correctAnswer: z.string().optional(),
 });
 
 const ratingSchema = baseQuestionSchema.extend({
@@ -124,14 +126,20 @@ export const getDefaultQuestionValues = (
         type,
         isScored: false,
         messages: [
-          { sender: "", text: "" },
-          { sender: "", text: "" },
+          { sender: "", text: "" }
         ],
         options: ["", ""],
         correctAnswer: "",
       };
     case "Video":
-      return { ...base, type, isScored: false, videoUrl: "" };
+      return {
+        ...base,
+        type,
+        isScored: false,
+        videoUrl: "",
+        options: ["", ""],
+        correctAnswer: "",
+      };
     case "Rating":
       return { ...base, type, isScored: false, scale: 5 };
     case "Free Input":

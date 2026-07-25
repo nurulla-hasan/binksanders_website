@@ -22,15 +22,16 @@ import { cn, ErrorToast } from "@/lib/utils";
 import { submitModuleAnswer } from "@/services/user-progress.service";
 import { SurveyIntro } from "./SurveyIntro";
 import { ModuleSwipeQuestion } from "./question-types/ModuleSwipeQuestion";
+import AnimationWrapper from "@/components/ui/custom/animation-wrapper";
 
 type AnswerValue = string | number | string[];
 
-const initialAnswer = (question?: ModuleQuestion): AnswerValue | null => {
+export const initialAnswer = (question?: ModuleQuestion): AnswerValue | null => {
   if (question?.type === "Ordering") return [...(question.items ?? [])];
   return null;
 };
 
-const hasAnswer = (answer: AnswerValue | null) => {
+export const hasAnswer = (answer: AnswerValue | null) => {
   if (answer === null) return false;
   if (typeof answer === "string") return answer.trim().length > 0;
   if (Array.isArray(answer)) return answer.length > 0;
@@ -197,67 +198,71 @@ export function ModuleSurveyRunner({
         <Progress value={displayedProgress} className="h-1.5 flex-1" />
       </div>
 
-      <div className="flex-1 space-y-5 rounded-lg bg-background/45 p-4">
-        {question.type !== "Swipe" && (
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
-              {question.type}
-            </span>
-            <h1 className="mt-2 font-heading text-xl font-bold leading-snug">
-              {question.content}
-            </h1>
-            {question.image && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={question.image}
-                alt=""
-                className="mt-4 max-h-72 w-full rounded-lg border bg-background object-contain"
-              />
-            )}
-          </div>
-        )}
+      <AnimationWrapper key={currentIndex} direction="left" duration={0.4}>
+        <div className="flex-1 space-y-5 rounded-lg bg-background/45 p-4">
+          {question.type !== "Swipe" && (
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                {question.type}
+              </span>
+              <h1 className="mt-2 font-heading text-xl font-bold leading-snug">
+                {question.content}
+              </h1>
+              {question.image && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={question.image as string}
+                  alt=""
+                  className="mt-4 max-h-48 w-full rounded-lg border bg-background object-contain"
+                />
+              )}
+            </div>
+          )}
 
-        <QuestionAnswer
-          question={question}
-          answer={answer}
-          disabled={Boolean(result) || isSubmitting}
-          onAnswer={setAnswer}
-          onSwipe={(direction) => {
-            setAnswer(direction);
-            void handleSubmit(direction);
-          }}
-        />
+          <QuestionAnswer
+            question={question}
+            answer={answer}
+            disabled={Boolean(result) || isSubmitting}
+            onAnswer={setAnswer}
+            onSwipe={(direction) => {
+              setAnswer(direction);
+              void handleSubmit(direction);
+            }}
+          />
 
-        {result && (
-          <div
-            className={cn(
-              "rounded-lg border p-4 text-sm",
-              result.isCorrect === false
-                ? "border-destructive/30 bg-destructive/10"
-                : "border-success/30 bg-success/10",
-            )}
-          >
-            <p className="font-bold">
-              {result.isCorrect === false
-                ? "Not quite right"
-                : result.isCorrect === true
-                  ? "Correct answer"
-                  : "Answer submitted"}
-            </p>
-            {result.explanation && (
-              <p className="mt-1 text-muted-foreground">{result.explanation}</p>
-            )}
-            {result.isCorrect === false && result.correctAnswer && (
-              <p className="mt-2 font-medium">
-                Correct answer:{" "}
-                {Array.isArray(result.correctAnswer)
-                  ? result.correctAnswer.join(" → ")
-                  : result.correctAnswer}
-              </p>
-            )}
-          </div>
-        )}
-      </div>
+          {result && (
+            <AnimationWrapper direction="up" duration={0.3} delay={0.1}>
+              <div
+                className={cn(
+                  "rounded-lg border p-4 text-sm",
+                  result.isCorrect === false
+                    ? "border-destructive/30 bg-destructive/10"
+                    : "border-success/30 bg-success/10",
+                )}
+              >
+                <p className="font-bold">
+                  {result.isCorrect === false
+                    ? "Not quite right"
+                    : result.isCorrect === true
+                      ? "Correct answer"
+                      : "Answer submitted"}
+                </p>
+                {result.explanation && (
+                  <p className="mt-1 text-muted-foreground">{result.explanation}</p>
+                )}
+                {result.isCorrect === false && result.correctAnswer && (
+                  <p className="mt-2 font-medium">
+                    Correct answer:{" "}
+                    {Array.isArray(result.correctAnswer)
+                      ? result.correctAnswer.join(" → ")
+                      : result.correctAnswer}
+                  </p>
+                )}
+              </div>
+            </AnimationWrapper>
+          )}
+        </div>
+      </AnimationWrapper>
 
       <div className="mt-5">
         {result && question.type === "Swipe" ? (
@@ -288,7 +293,7 @@ export function ModuleSurveyRunner({
   );
 }
 
-function QuestionAnswer({
+export function QuestionAnswer({
   question,
   answer,
   disabled,
@@ -388,14 +393,11 @@ function QuestionAnswer({
     return (
       <div className="space-y-4">
         <div className="min-h-80 space-y-3 rounded-lg border bg-muted/30 p-4">
-          {(question.messages ?? []).map((message, index) => (
+          {(question.messages ?? []).filter(msg => msg.sender || msg.text).map((message, index) => (
             <div
               key={`${message.sender}-${index}`}
               className={cn(
-                "max-w-[85%] rounded-xl p-3 text-sm",
-                index % 2 === 0
-                  ? "bg-background"
-                  : "ml-auto bg-primary text-primary-foreground",
+                "max-w-[85%] rounded-xl p-3 text-sm bg-background",
               )}
             >
               <p className="mb-1 text-[10px] font-bold uppercase opacity-70">
@@ -452,6 +454,7 @@ function QuestionAnswer({
     const videoUrl = question.videoUrl ?? "";
     const youtubeId =
       videoUrl.match(/(?:youtu\.be\/|v=)([\w-]{11})/)?.[1] ?? undefined;
+    const hasOptions = Array.isArray(question.options) && question.options.length > 0;
 
     return (
       <div className="space-y-4">
@@ -468,15 +471,36 @@ function QuestionAnswer({
             <video src={videoUrl} controls className="size-full" />
           )}
         </div>
-        <Button
-          type="button"
-          variant={answer === "watched" ? "default" : "outline"}
-          disabled={disabled}
-          onClick={() => onAnswer("watched")}
-          className="w-full"
-        >
-          <Play /> Mark as watched
-        </Button>
+        {hasOptions ? (
+          <div className="space-y-3 pt-2">
+            {question.options?.map((option) => (
+              <button
+                key={option}
+                type="button"
+                disabled={disabled}
+                onClick={() => onAnswer(option)}
+                className={cn(
+                  "w-full rounded-lg border bg-background p-4 text-left text-sm transition-colors",
+                  answer === option
+                    ? "border-primary bg-primary/10 font-semibold"
+                    : "hover:border-primary/50",
+                )}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <Button
+            type="button"
+            variant={answer === "watched" ? "default" : "outline"}
+            disabled={disabled}
+            onClick={() => onAnswer("watched")}
+            className="w-full"
+          >
+            <Play /> Mark as watched
+          </Button>
+        )}
       </div>
     );
   }

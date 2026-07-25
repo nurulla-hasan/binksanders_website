@@ -19,6 +19,7 @@ import {
 import { createModule, updateModule } from "@/services/module.service";
 import { ModuleBasicInfo } from "./ModuleBasicInfo";
 import { QuestionnaireSection } from "./QuestionnaireSection";
+import { ModulePreview } from "./ModulePreview";
 
 export function ModuleEditor({ module }: { module?: LearningModule }) {
   const router = useRouter();
@@ -154,12 +155,19 @@ export function ModuleEditor({ module }: { module?: LearningModule }) {
               </Button>
             </div>
 
-            <div className="mt-6 max-w-4xl space-y-6">
-              <ModuleBasicInfo
-                existingThumbnail={module?.thumbnailImage}
-                allowThumbnail={!isEditing}
-              />
-              <QuestionnaireSection />
+            <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-12">
+              <div className="space-y-6 lg:col-span-7 xl:col-span-8">
+                <ModuleBasicInfo
+                  existingThumbnail={module?.thumbnailImage}
+                  allowThumbnail={!isEditing}
+                />
+                <QuestionnaireSection />
+              </div>
+              <div className="lg:col-span-5 xl:col-span-4">
+                <div className="sticky top-6">
+                  <ModulePreview existingThumbnail={module?.thumbnailImage} />
+                </div>
+              </div>
             </div>
           </form>
         </FormProvider>

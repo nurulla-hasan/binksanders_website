@@ -16,6 +16,8 @@ import type {
   QuestionDataSchemaType,
 } from "@/lib/validations/course";
 
+import { useId } from "react";
+
 interface QuestionBlockProps {
   question: QuestionDataSchemaType;
   index: number;
@@ -42,6 +44,7 @@ export function QuestionBlock({
   onChangeType,
   onDelete,
 }: QuestionBlockProps) {
+  const blockId = useId();
   const { control, register, setValue } =
     useFormContext<CreateModuleFormValues>();
   const currentQuestion = useWatch({
@@ -90,28 +93,6 @@ export function QuestionBlock({
     );
   };
 
-  const addChatMessage = () => {
-    if (currentQuestion.type !== "Chat Scenario") return;
-    setValue(
-      `questions.${index}.messages`,
-      [...currentQuestion.messages, { sender: "", text: "" }],
-      { shouldDirty: true },
-    );
-  };
-
-  const removeChatMessage = (messageIndex: number) => {
-    if (
-      currentQuestion.type !== "Chat Scenario" ||
-      currentQuestion.messages.length <= 1
-    )
-      return;
-    setValue(
-      `questions.${index}.messages`,
-      currentQuestion.messages.filter((_, index) => index !== messageIndex),
-      { shouldDirty: true, shouldValidate: true },
-    );
-  };
-
   const addChatOption = () => {
     if (currentQuestion.type !== "Chat Scenario") return;
     setValue(`questions.${index}.options`, [...currentQuestion.options, ""], {
@@ -138,11 +119,30 @@ export function QuestionBlock({
 
   return (
     <div className="space-y-6 rounded-md border border-border bg-card p-6 shadow-sm">
-      <div className="grid gap-4 sm:grid-cols-[1fr_12rem]">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+            {index + 1}
+          </div>
+          <h3 className="font-semibold">{currentQuestion.type}</h3>
+        </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+          onClick={onDelete}
+        >
+          <Trash2 className="mr-2" />
+          Delete
+        </Button>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-[1fr_200px]">
         <Field>
-          <FieldLabel htmlFor={`question-${question.id}`}>Content</FieldLabel>
+          <FieldLabel htmlFor={`question-${blockId}`}>Content</FieldLabel>
           <Input
-            id={`question-${question.id}`}
+            id={`question-${blockId}`}
             placeholder="Question or instruction"
             {...register(`questions.${index}.content`)}
           />
@@ -172,7 +172,7 @@ export function QuestionBlock({
         </Field>
       </div>
 
-      {currentQuestion.type === "MCQ" && (
+      {(currentQuestion.type === "MCQ" || currentQuestion.type === "Video") && (
         <FieldGroup>
           <div className="flex items-center justify-between gap-3">
             <FieldLabel>Options</FieldLabel>
@@ -181,7 +181,7 @@ export function QuestionBlock({
             </Button>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {currentQuestion.options.map((_, optionIndex) => (
+            {(currentQuestion.options || []).map((_, optionIndex) => (
               <Field key={optionIndex}>
                 <div className="flex items-center justify-between gap-2">
                   <FieldLabel>Option {optionIndex + 1}</FieldLabel>
@@ -191,7 +191,7 @@ export function QuestionBlock({
                     size="icon-xs"
                     className="text-destructive"
                     onClick={() => removeOption(optionIndex)}
-                    disabled={currentQuestion.options.length <= 2}
+                    disabled={(currentQuestion.options || []).length <= 2}
                     aria-label={`Remove option ${optionIndex + 1}`}
                   >
                     <X />
@@ -216,7 +216,7 @@ export function QuestionBlock({
                     <SelectValue placeholder="Select correct answer" />
                   </SelectTrigger>
                   <SelectContent>
-                    {currentQuestion.options
+                    {(currentQuestion.options || [])
                       .filter(Boolean)
                       .map((option) => (
                         <SelectItem key={option} value={option}>
@@ -302,50 +302,26 @@ export function QuestionBlock({
       {currentQuestion.type === "Chat Scenario" && (
         <div className="space-y-4">
           <div className="flex items-center justify-between gap-3">
-            <FieldLabel>Messages</FieldLabel>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={addChatMessage}
-            >
-              <Plus /> Add Message
-            </Button>
+            <FieldLabel>Message</FieldLabel>
           </div>
-          {currentQuestion.messages.map((_, messageIndex) => (
-            <div
-              key={messageIndex}
-              className="grid gap-4 rounded-md border p-3 sm:grid-cols-[1fr_2fr_auto]"
-            >
-              <Field>
-                <FieldLabel>Sender</FieldLabel>
-                <Input
-                  {...register(
-                    `questions.${index}.messages.${messageIndex}.sender` as const,
-                  )}
-                />
-              </Field>
-              <Field>
-                <FieldLabel>Message</FieldLabel>
-                <Input
-                  {...register(
-                    `questions.${index}.messages.${messageIndex}.text` as const,
-                  )}
-                />
-              </Field>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                className="self-end text-destructive"
-                onClick={() => removeChatMessage(messageIndex)}
-                disabled={currentQuestion.messages.length <= 1}
-                aria-label={`Remove message ${messageIndex + 1}`}
-              >
-                <Trash2 />
-              </Button>
-            </div>
-          ))}
+          <div className="grid gap-4 rounded-md border p-3 sm:grid-cols-[1fr_2fr]">
+            <Field>
+              <FieldLabel>Sender</FieldLabel>
+              <Input
+                {...register(
+                  `questions.${index}.messages.0.sender` as const,
+                )}
+              />
+            </Field>
+            <Field>
+              <FieldLabel>Message</FieldLabel>
+              <Input
+                {...register(
+                  `questions.${index}.messages.0.text` as const,
+                )}
+              />
+            </Field>
+          </div>
 
           <div className="flex items-center justify-between gap-3 pt-2">
             <FieldLabel>Response Options</FieldLabel>
@@ -459,20 +435,20 @@ export function QuestionBlock({
               name={`questions.${index}.isScored`}
               render={({ field }) => (
                 <Checkbox
-                  id={`scored-${question.id}`}
+                  id={`scored-${blockId}`}
                   checked={field.value}
                   onCheckedChange={field.onChange}
                 />
               )}
             />
-            <FieldLabel htmlFor={`scored-${question.id}`}>
+            <FieldLabel htmlFor={`scored-${blockId}`}>
               Scored question
             </FieldLabel>
           </Field>
 
           <Field orientation="horizontal">
             <Checkbox
-              id={`explanation-${question.id}`}
+              id={`explanation-${blockId}`}
               checked={currentQuestion.explanation !== undefined}
               onCheckedChange={(checked) =>
                 setValue(
@@ -482,14 +458,14 @@ export function QuestionBlock({
                 )
               }
             />
-            <FieldLabel htmlFor={`explanation-${question.id}`}>
+            <FieldLabel htmlFor={`explanation-${blockId}`}>
               Add explanation
             </FieldLabel>
           </Field>
 
           <Field orientation="horizontal">
             <Checkbox
-              id={`image-${question.id}`}
+              id={`image-${blockId}`}
               checked={currentQuestion.image !== undefined}
               onCheckedChange={(checked) =>
                 setValue(
@@ -499,7 +475,7 @@ export function QuestionBlock({
                 )
               }
             />
-            <FieldLabel htmlFor={`image-${question.id}`}>
+            <FieldLabel htmlFor={`image-${blockId}`}>
               Add image
             </FieldLabel>
           </Field>

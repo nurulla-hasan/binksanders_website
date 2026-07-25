@@ -65,10 +65,10 @@ export function SurveyIntro({
 
         {/* Buttons */}
         <div className="mt-auto space-y-3 pt-4">
-          <Button size="lg" className="w-full" onClick={onStart}>
+          <Button type="button" size="lg" className="w-full" onClick={onStart}>
             {startLabel} <ArrowRight />
           </Button>
-          <Button size="lg" variant="outline" className="w-full" onClick={onBack}>
+          <Button type="button" size="lg" variant="outline" className="w-full" onClick={onBack}>
             Back
           </Button>
         </div>
