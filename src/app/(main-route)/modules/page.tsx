@@ -18,8 +18,8 @@ export default async function ModulesPage() {
   const { overallStats, modules } = response.data;
 
   return (
-    <div className="-m-4 flex flex-1 flex-col pb-8 animate-fadeIn">
-      <section className="relative overflow-hidden border-b border-secondary/20 bg-secondary/80 p-4 text-secondary-foreground">
+    <div className="flex flex-1 min-h-0 flex-col gap-4 pb-8 animate-fadeIn overflow-y-auto pr-1">
+      <section className="relative shrink-0 overflow-hidden rounded-lg border border-secondary/20 bg-secondary p-4 text-secondary-foreground shadow-sm">
         <div className="pointer-events-none absolute -right-5 -top-7.5 size-28 rounded-full bg-secondary/70" />
         <div className="pointer-events-none absolute -right-11.25 -top-2.5 size-24 rounded-full bg-secondary/60" />
 
@@ -45,7 +45,7 @@ export default async function ModulesPage() {
         </div>
       </section>
 
-      <section className="flex-1 space-y-4 p-4">
+      <section className="flex-1 space-y-4">
         {modules.length === 0 ? (
           <div className="flex min-h-72 flex-col items-center justify-center rounded-lg border bg-card px-6 text-center">
             <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-primary/10 text-primary">

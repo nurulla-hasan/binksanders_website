@@ -4,14 +4,10 @@ import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
-const chartData = [
-  { name: "Teamwork", baseline: 45, followUp: 65 },
-  { name: "Communication", baseline: 50, followUp: 75 },
-  { name: "Leadership", baseline: 35, followUp: 60 },
-  { name: "Social Safety", baseline: 50, followUp: 80 },
-  { name: "Adaptability", baseline: 55, followUp: 85 },
-  { name: "Problem Solving", baseline: 40, followUp: 70 },
-];
+interface BehavioralChartProps {
+  data?: Array<{ name: string; baseline: number; followUp: number }>;
+  averageIncrease?: number;
+}
 
 const chartConfig = {
   baseline: {
@@ -24,7 +20,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function BehavioralChart() {
+export function BehavioralChart({ data = [], averageIncrease = 0 }: BehavioralChartProps) {
   return (
     <Card className="col-span-1 lg:col-span-2 bg-primary/5 border-none shadow-none">
       <CardHeader className="flex flex-row items-center justify-between pb-8">
@@ -45,7 +41,7 @@ export function BehavioralChart() {
       <CardContent>
         <div className="h-75 w-full">
           <ChartContainer config={chartConfig} className="h-full w-full">
-            <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }} barGap={0}>
+            <BarChart data={data} margin={{ top: 0, right: 0, left: -20, bottom: 0 }} barGap={0}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />
               <XAxis 
                 dataKey="name" 
@@ -64,7 +60,7 @@ export function BehavioralChart() {
         
         <div className="mt-6 inline-block">
           <div className="bg-secondary/40 text-secondary-foreground px-3 py-1.5 rounded-sm text-sm font-medium border border-secondary/20">
-            Average score increase: +22%
+            Average score increase: +{averageIncrease}%
           </div>
         </div>
       </CardContent>

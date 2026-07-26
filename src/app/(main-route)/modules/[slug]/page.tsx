@@ -1,6 +1,7 @@
 import { ModuleSurveyRunner } from "@/components/survey/ModuleSurveyRunner";
 import type { TParams } from "@/lib/types/global.type";
 import { getUserModule } from "@/services/user-progress.service";
+import { getMyProfile } from "@/services/user.service";
 
 export default async function UserModulePage({
   params,
@@ -8,11 +9,16 @@ export default async function UserModulePage({
   params: TParams<{ slug: string }>;
 }) {
   const { slug: moduleId } = await params;
-  const response = await getUserModule(moduleId);
+  const [moduleResponse, profileResponse] = await Promise.all([
+    getUserModule(moduleId),
+    getMyProfile(),
+  ]);
 
-  if (!response.success) {
-    throw new Error(response.message || "Unable to load this module");
+  if (!moduleResponse.success) {
+    throw new Error(moduleResponse.message || "Unable to load this module");
   }
 
-  return <ModuleSurveyRunner details={response.data} />;
+  const user = profileResponse.success ? profileResponse.data : null;
+
+  return <ModuleSurveyRunner details={moduleResponse.data} user={user} />;
 }

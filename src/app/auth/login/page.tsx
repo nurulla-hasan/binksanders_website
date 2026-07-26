@@ -42,6 +42,13 @@ export default function LoginPage() {
   const [passcode, setPasscode] = useState("");
   const [isPending, setIsPending] = useState(false);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleSuccessfulLogin = (user: any, message?: string) => {
+    SuccessToast(message || "Logged in successfully");
+    router.replace(user?.role === "company" ? "/company" : "/");
+    router.refresh();
+  };
+
   const handleLoginSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
@@ -56,11 +63,10 @@ export default function LoginPage() {
       if (mode === "email") {
         const response = await login({ identifier: email, password });
         if (!response.success) throw new Error(response.message);
-        const user = response.data.user;
-        SuccessToast(response.message || "Logged in successfully");
-        router.replace(user.role === "company" ? "/company" : "/");
+        handleSuccessfulLogin(response.data.user, response.message);
       } else if (mode === "employee") {
-        const response = await employeeIdLogin({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const response = await employeeIdLogin<any>({
           employeeId,
           companyId,
           teamId,
@@ -68,15 +74,13 @@ export default function LoginPage() {
           lastName,
         });
         if (!response.success) throw new Error(response.message);
-        SuccessToast(response.message || "Logged in successfully");
-        router.replace("/");
+        handleSuccessfulLogin(response.data.user, response.message);
       } else if (mode === "guest") {
-        const response = await guestLogin({ passcode, companyId, teamId });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const response = await guestLogin<any>({ passcode, companyId, teamId });
         if (!response.success) throw new Error(response.message);
-        SuccessToast(response.message || "Logged in successfully");
-        router.replace("/");
+        handleSuccessfulLogin(response.data.user, response.message);
       }
-      router.refresh();
     } catch (error: unknown) {
       ErrorToast(error instanceof Error ? error.message : "Unable to log in");
     } finally {

@@ -13,10 +13,10 @@ export default async function MainRouteLayout({
 
   return (
     <UserProvider user={user}>
-      <div className="flex flex-col min-h-dvh relative w-full max-w-120 mx-auto">
+      <div className="flex flex-col h-dvh relative w-full max-w-120 mx-auto overflow-hidden">
         <TopNav />
         {/* Main content area */}
-        <main className="flex-1 flex flex-col w-full p-4">
+        <main className="flex-1 min-h-0 flex flex-col w-full p-4 overflow-hidden">
           {children}
         </main>
       </div>

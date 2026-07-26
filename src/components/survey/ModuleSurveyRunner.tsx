@@ -24,6 +24,7 @@ import { submitModuleAnswer } from "@/services/user-progress.service";
 import { SurveyIntro } from "./SurveyIntro";
 import { ModuleSwipeQuestion } from "./question-types/ModuleSwipeQuestion";
 import AnimationWrapper from "@/components/ui/custom/animation-wrapper";
+import { WelcomeCallScreen } from "@/components/auth/WelcomeCallScreen";
 
 type AnswerValue = string | number | string[];
 
@@ -41,8 +42,11 @@ export const hasAnswer = (answer: AnswerValue | null) => {
 
 export function ModuleSurveyRunner({
   details,
+  user,
 }: {
   details: UserModuleDetails;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  user?: any;
 }) {
   const router = useRouter();
   const { module, userProgress } = details;
@@ -63,6 +67,15 @@ export function ModuleSurveyRunner({
   const [result, setResult] = useState<SubmitModuleAnswerResult>();
   const [finalResult, setFinalResult] = useState<SubmitModuleAnswerResult>();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [hasCompletedCall, setHasCompletedCall] = useState(false);
+  const [showCallScreen, setShowCallScreen] = useState(() => {
+    return Boolean(
+      user?.branding?.videoUrl &&
+        userProgress.completedQuestions === 0 &&
+        userProgress.status !== "completed",
+    );
+  });
 
   const question = module.questions[currentIndex];
   const totalQuestions = module.questions.length;
@@ -129,6 +142,19 @@ export function ModuleSurveyRunner({
     return () => window.clearTimeout(timer);
   }, [currentIndex, module.questions, question?.type, result, totalQuestions]);
 
+  if (showCallScreen && user) {
+    return (
+      <WelcomeCallScreen
+        user={user}
+        onComplete={() => {
+          setShowCallScreen(false);
+          setHasCompletedCall(true);
+          setIsStarted(true);
+        }}
+      />
+    );
+  }
+
   if (!isStarted && !isCompleted) {
     return (
       <SurveyIntro
@@ -139,7 +165,13 @@ export function ModuleSurveyRunner({
         questionCount={module.questions.length}
         format="Interactive"
         startLabel={userProgress.completedQuestions > 0 ? "Continue" : "Start"}
-        onStart={() => setIsStarted(true)}
+        onStart={() => {
+          if (user?.branding?.videoUrl && !hasCompletedCall) {
+            setShowCallScreen(true);
+          } else {
+            setIsStarted(true);
+          }
+        }}
         onBack={() => router.push("/modules")}
       />
     );
@@ -148,25 +180,25 @@ export function ModuleSurveyRunner({
   if (isCompleted) {
     return (
       <AnimationWrapper direction="up" duration={0.4}>
-        <div className="flex min-h-[70vh] flex-col justify-between p-6">
-          <div className="space-y-6">
-            <div className="rounded-lg bg-primary p-7 text-center text-primary-foreground shadow-sm">
-              <CheckCircle2 className="mx-auto mb-3 size-12" />
-              <h1 className="font-heading text-2xl font-bold">Module completed</h1>
-              <p className="mt-2 text-sm text-primary-foreground/85">
+        <div className="flex min-h-[50vh] flex-1 flex-col justify-between">
+          <div className="space-y-4">
+            <div className="rounded-lg bg-primary p-4 text-center text-primary-foreground shadow-sm">
+              <CheckCircle2 className="mx-auto mb-2.5 size-10" />
+              <h1 className="font-heading text-xl font-bold">Module completed</h1>
+              <p className="mt-1.5 text-xs text-primary-foreground/85">
                 You completed all {totalQuestions} questions in {module.title}.
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 rounded-lg border bg-card p-5 text-center">
+            <div className="grid grid-cols-2 gap-3 rounded-lg border bg-card p-3 text-center">
               <div>
-                <p className="text-2xl font-bold text-primary">
+                <p className="text-xl font-bold text-primary">
                   {finalResult?.moduleScore ?? 0}
                 </p>
                 <p className="text-xs text-muted-foreground">Module score</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-primary">100%</p>
+                <p className="text-xl font-bold text-primary">100%</p>
                 <p className="text-xs text-muted-foreground">Progress</p>
               </div>
             </div>
@@ -193,16 +225,16 @@ export function ModuleSurveyRunner({
     : Math.max(localProgress, (currentIndex / Math.max(totalQuestions, 1)) * 100);
 
   return (
-    <div className="flex flex-1 flex-col overflow-x-hidden rounded-lg border border-secondary/50 bg-secondary p-4 shadow-sm animate-fadeIn">
-      <div className="flex items-center gap-3 pb-4 pt-2">
+    <div className="flex flex-1 min-h-0 h-full flex-col overflow-hidden rounded-lg border border-secondary/50 bg-secondary p-3 shadow-sm animate-fadeIn">
+      <div className="flex shrink-0 items-center gap-3 pb-2.5 pt-1">
         <span className="whitespace-nowrap text-xs font-bold text-secondary-foreground/80">
           Q{currentIndex + 1}/{totalQuestions}
         </span>
         <Progress value={displayedProgress} className="h-1.5 flex-1" />
       </div>
 
-      <AnimationWrapper key={currentIndex} direction="left" duration={0.4}>
-        <div className="flex-1 space-y-5 rounded-lg bg-background/45 p-4">
+      <AnimationWrapper key={currentIndex} direction="left" duration={0.4} className="flex-1 min-h-0 flex flex-col overflow-hidden">
+        <div className="flex-1 min-h-0 space-y-4 rounded-lg bg-background/45 p-3 overflow-y-auto pr-1.5 scrollbar-thin">
           {question.type !== "Swipe" && (
             <div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
@@ -267,7 +299,7 @@ export function ModuleSurveyRunner({
         </div>
       </AnimationWrapper>
 
-      <div className="mt-5">
+      <div className="shrink-0 pt-3 mt-auto border-t border-secondary-foreground/10 bg-secondary">
         {result && question.type === "Swipe" ? (
           <div className="py-2 text-center text-sm font-medium text-muted-foreground">
             Loading next question...

@@ -31,7 +31,7 @@ export default async function HomePage() {
     ) ?? null;
 
   return (
-    <div className="flex-1 space-y-6 pb-8 animate-fadeIn">
+    <div className="flex-1 min-h-0 space-y-6 pb-8 animate-fadeIn overflow-y-auto pr-1">
       <section className="relative flex min-h-40 flex-col justify-between gap-6 overflow-hidden rounded-lg bg-primary p-6 text-primary-foreground shadow-sm">
         <div className="space-y-1">
           <h1 className="font-heading text-2xl font-bold tracking-tight">
@@ -63,7 +63,7 @@ export default async function HomePage() {
         <section className="relative flex flex-col justify-between gap-6 overflow-hidden rounded-lg border border-secondary/40 bg-secondary p-6 shadow-sm">
           <div className="flex items-start justify-between gap-4">
             <div className="relative z-10 flex-1 space-y-2">
-              <span className="inline-block rounded-lg bg-background px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-secondary-foreground shadow-sm">
+              <span className="inline-block rounded-lg bg-background px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-secondary shadow-sm">
                 {nextModule.progress.progressPercentage > 0
                   ? "Continue learning"
                   : "Your next step"}

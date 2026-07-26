@@ -1,10 +1,22 @@
-// import { DashboardHeader } from "@/components/ui/custom/DashboardHeader";
 import DashboardPageLayout from "@/components/ui/custom/DashboardPageLayout";
 import { DashboardStats } from "@/components/super-admin/dashboard/DashboardStats";
 import { BehavioralChart } from "@/components/super-admin/dashboard/BehavioralChart";
 import { Leaderboard } from "@/components/super-admin/dashboard/Leaderboard";
+import { getMyProfile } from "@/services/user.service";
+import { getCompanyAnalytics } from "@/services/company.service";
 
-export default function AdminDashboardPage() {
+export default async function AdminDashboardPage() {
+  const profileResponse = await getMyProfile();
+  const companyId = profileResponse.success ? profileResponse.data._id : "";
+  
+  let analytics = null;
+  if (companyId) {
+    const analyticsResponse = await getCompanyAnalytics(companyId);
+    if (analyticsResponse.success) {
+      analytics = analyticsResponse.data;
+    }
+  }
+
   return (
     <div className="animate-fadeIn">
       <DashboardPageLayout>
@@ -15,7 +27,10 @@ export default function AdminDashboardPage() {
         <DashboardStats />
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-125">
-          <BehavioralChart />
+          <BehavioralChart 
+            data={analytics?.barChart?.chartData || []} 
+            averageIncrease={analytics?.barChart?.averageIncreasePercentage || 0}
+          />
           <Leaderboard />
         </div>
       </DashboardPageLayout>

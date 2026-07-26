@@ -43,6 +43,7 @@ next-env.d.ts
 # pnpm files
 pnpm-lock.yaml
 pnpm-workspace.yaml
+package-lock.json
 docs
 .next-assignment-check
 .agents
