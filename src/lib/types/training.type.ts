@@ -35,7 +35,15 @@ export type TrainingModuleSummary = Pick<
   "_id" | "title" | "description" | "status"
 > & {
   thumbnailImage?: string;
+  totalQuestions?: number;
   questions?: LearningModule["questions"];
+  userProgress?: {
+    status: "not_started" | "in_progress" | "completed" | string;
+    progressPercentage: number;
+    score: number;
+    completedQuestions: number;
+    totalQuestions: number;
+  };
 };
 
 export type Training = {
@@ -53,6 +61,7 @@ export type Training = {
   createdBy?: string | TrainingCreator | null;
   topics?: Topic[];
   topicCount?: number;
+  totalModules?: number;
   createdAt?: string;
   updatedAt?: string;
   __v?: number;
@@ -62,7 +71,7 @@ export type Topic = {
   _id: string;
   title: string;
   description?: string;
-  trainingId: string;
+  trainingId?: string;
   moduleIds?: string[] | TrainingModuleSummary[];
   modules?: TrainingModuleSummary[];
   moduleCount?: number;
@@ -126,12 +135,25 @@ export type SendTrainingInvitePayload = {
   email: string;
 };
 
+export type TrainingAuthenticatePayload =
+  | {
+      authType: Exclude<TrainingAuthType, "guest">;
+      identifier: string;
+    }
+  | {
+      authType: "guest";
+      name: string;
+    };
+
 export type TrainingInviteLink = {
   token?: string;
   inviteToken?: string;
   link?: string;
+  trainingLink?: string;
+  shareLink?: string;
   url?: string;
   expiresAt?: string;
+  trainingTitle?: string;
 };
 
 export type UserTrainingView = Training & {
@@ -139,3 +161,8 @@ export type UserTrainingView = Training & {
   completedModules?: number;
   totalModules?: number;
 };
+
+
+
+
+

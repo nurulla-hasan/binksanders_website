@@ -11,6 +11,7 @@ interface TokenPayload {
 
 const PUBLIC_ROUTES = [
   "/qr-login",
+  "/training/join",
 ];
 
 const AUTH_ROUTES = [
@@ -90,7 +91,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
         request.url
       );
 
-      loginUrl.searchParams.set("callbackUrl", pathname);
+      loginUrl.searchParams.set("callbackUrl", `${pathname}${request.nextUrl.search}`);
 
       return NextResponse.redirect(loginUrl);
     }
@@ -123,3 +124,5 @@ export const config = {
     "/((?!api|_next/static|_next/image|favicon.ico|assets|.*\\..*).*)",
   ],
 };
+
+

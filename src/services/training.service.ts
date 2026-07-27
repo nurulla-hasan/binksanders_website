@@ -17,6 +17,7 @@ import type {
   Topic,
   TopicData,
   Training,
+  TrainingAuthenticatePayload,
   TrainingInviteLink,
   TrainingListResponse,
   UpdateTrainingPayload,
@@ -30,10 +31,26 @@ export const getTrainings = async (params: TQuery = {}) =>
     next: { tags: [TRAININGS_TAG], revalidate: 3600 },
   });
 
+export const getMyTrainings = async () =>
+  nextServerFetch<ApiResponse<Training[]>>("/training/my-trainings", {
+    cache: "no-store",
+  });
+
 export const getTraining = async (trainingId: string) =>
   nextServerFetch<ApiResponse<Training>>(`/training/${trainingId}`, {
     next: { tags: [TRAININGS_TAG, `training-${trainingId}`], revalidate: 3600 },
   });
+
+export const getTrainingTopics = async (trainingId: string) =>
+  nextServerFetch<ApiResponse<Topic[]>>(`/training/${trainingId}/topics`, {
+    cache: "no-store",
+  });
+
+export const getTrainingTopic = async (trainingId: string, topicId: string) =>
+  nextServerFetch<ApiResponse<Topic>>(
+    `/training/${trainingId}/topics/${topicId}`,
+    { cache: "no-store" },
+  );
 
 export const createTraining = async <T = Training>({
   data,
@@ -231,3 +248,40 @@ export const getUserTrainingView = async (trainingId: string) =>
     `/training/${trainingId}/user-view`,
     { cache: "no-store" },
   );
+
+
+export const authenticateTraining = async (
+  trainingId: string,
+  payload: TrainingAuthenticatePayload,
+): Promise<ApiResponse<UserTrainingView | null>> => {
+  const endpoint = `/training/${trainingId}/authenticate`;
+
+  console.log("[training-auth:server] request", {
+    endpoint,
+    trainingId,
+    payload,
+  });
+
+  try {
+    const response = await nextServerFetch<ApiResponse<UserTrainingView>>(
+      endpoint,
+      { method: "POST", body: payload, auth: "none" },
+    );
+
+    console.log("[training-auth:server] response", response);
+
+    return response;
+  } catch (error: unknown) {
+    console.error("[training-auth:server] error", error);
+
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Unable to join training",
+      data: null,
+    };
+  }
+};
+
+
+
+

@@ -1,0 +1,24 @@
+import Image from "next/image";
+import { JoinTrainingForm } from "@/components/training/JoinTrainingForm";
+import type { TParams, TSearchParams } from "@/lib/types/global.type";
+
+export default async function JoinTrainingPage({
+  params,
+  searchParams,
+}: {
+  params: TParams<{ trainingId: string }>;
+  searchParams: TSearchParams;
+}) {
+  const [{ trainingId }, query] = await Promise.all([params, searchParams]);
+  const authType = typeof query.authType === "string" ? query.authType : undefined;
+
+  return (
+    <main className="mx-auto flex min-h-screen w-full max-w-sm flex-col items-center justify-center px-6">
+      <div className="mb-10 flex items-center gap-3">
+        <Image src="/acme-logo.svg" alt="Act Inc" width={36} height={36} priority />
+        <span className="font-heading text-2xl font-bold">Act Inc</span>
+      </div>
+      <JoinTrainingForm trainingId={trainingId} authType={authType} />
+    </main>
+  );
+}
