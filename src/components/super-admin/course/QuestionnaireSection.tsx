@@ -19,7 +19,7 @@ export function QuestionnaireSection() {
 
   const addQuestion = () => {
     const newId = Math.random().toString(36).substr(2, 9);
-    append(getDefaultQuestionValues("MCQ", newId));
+    append(getDefaultQuestionValues("Information", newId));
   };
 
   const changeQuestionType = (
@@ -67,3 +67,4 @@ export function QuestionnaireSection() {
     </div>
   );
 }
+

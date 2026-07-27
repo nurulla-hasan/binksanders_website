@@ -29,6 +29,67 @@ import AnimationWrapper from "@/components/ui/custom/animation-wrapper";
 
 type AnswerValue = string | number | string[];
 
+
+type MediaValue = string | File;
+
+function MediaImage({
+  value,
+  alt = "",
+  className,
+}: {
+  value: MediaValue;
+  alt?: string;
+  className?: string;
+}) {
+  const [objectUrl, setObjectUrl] = useState<string>();
+  const src = value instanceof File ? objectUrl : value;
+
+  useEffect(() => {
+    if (!(value instanceof File)) return;
+
+    const nextUrl = URL.createObjectURL(value);
+    const timer = window.setTimeout(() => setObjectUrl(nextUrl), 0);
+
+    return () => {
+      window.clearTimeout(timer);
+      URL.revokeObjectURL(nextUrl);
+    };
+  }, [value]);
+
+  if (!src) return null;
+
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={src} alt={alt} className={className} />;
+}
+
+function MediaVideo({
+  value,
+  className,
+  autoPlay,
+}: {
+  value: MediaValue;
+  className?: string;
+  autoPlay?: boolean;
+}) {
+  const [objectUrl, setObjectUrl] = useState<string>();
+  const src = value instanceof File ? objectUrl : value;
+
+  useEffect(() => {
+    if (!(value instanceof File)) return;
+
+    const nextUrl = URL.createObjectURL(value);
+    const timer = window.setTimeout(() => setObjectUrl(nextUrl), 0);
+
+    return () => {
+      window.clearTimeout(timer);
+      URL.revokeObjectURL(nextUrl);
+    };
+  }, [value]);
+
+  if (!src) return null;
+
+  return <video src={src} controls autoPlay={autoPlay} playsInline className={className} />;
+}
 export const initialAnswer = (question?: ModuleQuestion): AnswerValue | null => {
   if (question?.type === "Ordering") return [...(question.items ?? [])];
   return null;
@@ -216,12 +277,8 @@ export function ModuleSurveyRunner({
                 {question.content}
               </h1>
               {question.image && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={question.image as string}
-                  alt=""
-                  className="mt-4 max-h-48 w-full rounded-lg border bg-background object-contain"
-                />
+                 
+                <MediaImage value={question.image as string | File} alt="" className="mt-4 max-h-48 w-full rounded-lg border bg-background object-contain" />
               )}
             </div>
           )}
@@ -317,12 +374,8 @@ export function QuestionAnswer({
     return (
       <div className="space-y-4 rounded-lg border bg-card p-4">
         {question.image && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={question.image}
-            alt=""
-            className="max-h-56 w-full rounded-lg border bg-background object-contain"
-          />
+           
+          <MediaImage value={question.image as string | File} alt="" className="max-h-56 w-full rounded-lg border bg-background object-contain" />
         )}
         <Button
           type="button"
@@ -339,9 +392,9 @@ export function QuestionAnswer({
   if (question.type === "MCQ") {
     return (
       <div className="space-y-3">
-        {(question.options ?? []).map((option) => (
+        {(question.options ?? []).map((option, optionIndex) => (
           <button
-            key={option}
+            key={`${option}-${optionIndex}`}
             type="button"
             disabled={disabled}
             onClick={() => onAnswer(option)}
@@ -391,7 +444,7 @@ export function QuestionAnswer({
               layout: { type: "spring", stiffness: 300, damping: 30 },
               opacity: { duration: 0.2 }
             }}
-            key={item}
+            key={`${item}-${index}`}
             className="flex items-center gap-3 rounded-lg border bg-background p-3"
           >
             <span className="flex size-8 shrink-0 items-center justify-center rounded bg-muted text-sm font-bold">
@@ -499,8 +552,11 @@ export function QuestionAnswer({
   }
   if (question.type === "Video") {
     const videoUrl = question.videoUrl ?? "";
+    const videoSrc = videoUrl as string | File;
     const youtubeId =
-      videoUrl.match(/(?:youtu\.be\/|v=)([\w-]{11})/)?.[1] ?? undefined;
+      typeof videoUrl === "string"
+        ? videoUrl.match(/(?:youtu\.be\/|v=)([\w-]{11})/)?.[1] ?? undefined
+        : undefined;
     const hasOptions = Array.isArray(question.options) && question.options.length > 0;
 
     return (
@@ -515,14 +571,14 @@ export function QuestionAnswer({
               allowFullScreen
             />
           ) : (
-            <video src={videoUrl} controls className="size-full" />
+            <MediaVideo value={videoSrc} className="size-full" />
           )}
         </div>
         {hasOptions ? (
           <div className="space-y-3 pt-2">
-            {question.options?.map((option) => (
+            {question.options?.map((option, optionIndex) => (
               <button
-                key={option}
+                key={`${option}-${optionIndex}`}
                 type="button"
                 disabled={disabled}
                 onClick={() => onAnswer(option)}
@@ -603,12 +659,8 @@ function SimulatedCallQuestion({
     return (
       <div className="relative flex min-h-[34rem] overflow-hidden rounded-lg border bg-foreground text-background shadow-sm">
         {question.callerPhoto && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={question.callerPhoto}
-            alt=""
-            className="absolute inset-0 size-full scale-110 object-cover opacity-45 blur-xl"
-          />
+           
+          <MediaImage value={question.callerPhoto as string | File} alt="" className="absolute inset-0 size-full scale-110 object-cover opacity-45 blur-xl" />
         )}
         <div className="absolute inset-0 bg-foreground/55" />
 
@@ -617,12 +669,8 @@ function SimulatedCallQuestion({
             <p className="text-lg text-background/80">Incoming call...</p>
             <div className="mx-auto flex size-40 items-center justify-center overflow-hidden rounded-full border border-background/80 bg-background/15 shadow-sm">
               {question.callerPhoto ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={question.callerPhoto}
-                  alt={callerName}
-                  className="size-full object-cover"
-                />
+                 
+                <MediaImage value={question.callerPhoto as string | File} alt={callerName} className="size-full object-cover" />
               ) : (
                 <UserRound className="size-16 text-background/80" />
               )}
@@ -677,13 +725,7 @@ function SimulatedCallQuestion({
     <div className="space-y-4 rounded-lg border bg-card p-4">
       {question.postCallVideoUrl && (
         <div className="aspect-video overflow-hidden rounded-lg bg-black">
-          <video
-            src={question.postCallVideoUrl}
-            controls
-            autoPlay
-            playsInline
-            className="size-full"
-          />
+          <MediaVideo value={question.postCallVideoUrl as string | File} autoPlay className="size-full" />
         </div>
       )}
 
@@ -711,5 +753,14 @@ function SimulatedCallQuestion({
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
 
 

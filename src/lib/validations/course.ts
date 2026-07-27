@@ -1,17 +1,13 @@
 import * as z from "zod";
 
-const optionalUrl = z
-  .union([z.literal(""), z.string().url("Enter a valid URL")])
-  .optional();
+const optionalMedia = z.union([z.literal(""), z.string().url("Enter a valid URL"), z.instanceof(File)]).optional();
 
 const baseQuestionSchema = z.object({
   id: z.string(),
   content: z.string().min(1, "Question content is required"),
   isScored: z.boolean(),
   explanation: z.string().trim().optional(),
-  image: z
-    .union([z.literal(""), z.string().url("Enter a valid image URL")])
-    .optional(),
+  image: optionalMedia,
 });
 
 const requiredStringList = (minimum: number, message: string) =>
@@ -69,7 +65,7 @@ const chatScenarioSchema = baseQuestionSchema.extend({
 
 const videoSchema = baseQuestionSchema.extend({
   type: z.literal("Video"),
-  videoUrl: z.string().url("Enter a valid video URL"),
+  videoUrl: z.union([z.string().url("Enter a valid video URL"), z.instanceof(File)]),
   options: requiredStringList(2, "Add at least two options").optional(),
   correctAnswer: z.string().optional(),
 });
@@ -77,8 +73,8 @@ const videoSchema = baseQuestionSchema.extend({
 const simulatedCallSchema = baseQuestionSchema.extend({
   type: z.literal("Simulated Call"),
   callerName: z.string().trim().min(1, "Caller name is required"),
-  callerPhoto: optionalUrl,
-  postCallVideoUrl: optionalUrl,
+  callerPhoto: optionalMedia,
+  postCallVideoUrl: optionalMedia,
   postCallMessage: z.string().trim().optional(),
   isScored: z.boolean(),
 });
@@ -174,3 +170,5 @@ export const getDefaultQuestionValues = (
       return { ...base, type, isScored: false };
   }
 };
+
+

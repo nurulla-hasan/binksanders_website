@@ -80,9 +80,13 @@ export type ModuleData = {
 export type CreateModulePayload = {
   data: ModuleData;
   thumbnailImage: Blob;
+  questionFiles?: Record<string, Blob | undefined>;
 };
 
-export type UpdateModulePayload = Partial<ModuleData>;
+export type UpdateModulePayload = Partial<ModuleData> & {
+  thumbnailImage?: Blob;
+  questionFiles?: Record<string, Blob | undefined>;
+};
 
 export type DuplicateModulePayload = {
   title: string;
@@ -173,3 +177,5 @@ export type SubmitModuleAnswerResult = {
   moduleScore: number;
   moduleStatus: "not_started" | "in_progress" | "completed" | string;
 };
+
+

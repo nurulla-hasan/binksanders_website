@@ -37,10 +37,11 @@ export const getCompanyModules = async (
 export const createModule = async <T = unknown>({
   data,
   thumbnailImage,
+  questionFiles = {},
 }: CreateModulePayload) => {
   const response = await nextServerFetch<ApiResponse<T>>("/module", {
     method: "POST",
-    body: createMultipartBody(data, { thumbnailImage }),
+    body: createMultipartBody(data, { thumbnailImage, ...questionFiles }),
   });
   if (response && response.success) {
     updateTag("modules");
@@ -50,13 +51,18 @@ export const createModule = async <T = unknown>({
 
 export const updateModule = async <T = unknown>(
   moduleId: string,
-  payload: UpdateModulePayload,
+  { thumbnailImage, questionFiles = {}, ...data }: UpdateModulePayload,
 ) => {
+  const body =
+    thumbnailImage || Object.keys(questionFiles).length > 0
+      ? createMultipartBody(data, { thumbnailImage, ...questionFiles })
+      : data;
+
   const response = await nextServerFetch<ApiResponse<T>>(
     `/module/${moduleId}`,
     {
       method: "PATCH",
-      body: payload,
+      body,
     },
   );
   if (response && response.success) {
@@ -129,3 +135,5 @@ export const unassignModule = async <T = unknown>(
   }
   return response;
 };
+
+

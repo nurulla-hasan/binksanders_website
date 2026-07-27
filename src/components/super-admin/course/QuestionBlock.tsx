@@ -53,6 +53,54 @@ export function QuestionBlock({
     control,
     name: `questions.${index}`,
   }) as QuestionDataSchemaType;
+  const getMediaLabel = (value: unknown) => {
+    if (value instanceof File) return value.name;
+    if (typeof value === "string" && value) return "Existing media selected";
+    return "No file chosen";
+  };
+
+  const setMediaValue = (
+    field: "image" | "videoUrl" | "callerPhoto" | "postCallVideoUrl",
+    file?: File,
+  ) => {
+    const value = file ?? "";
+    if (field === "image") {
+      setValue(`questions.${index}.image`, value, { shouldDirty: true, shouldValidate: true });
+    }
+    if (field === "videoUrl") {
+      setValue(`questions.${index}.videoUrl`, value, { shouldDirty: true, shouldValidate: true });
+    }
+    if (field === "callerPhoto") {
+      setValue(`questions.${index}.callerPhoto`, value, { shouldDirty: true, shouldValidate: true });
+    }
+    if (field === "postCallVideoUrl") {
+      setValue(`questions.${index}.postCallVideoUrl`, value, { shouldDirty: true, shouldValidate: true });
+    }
+  };
+
+  const renderMediaInput = ({
+    field,
+    label,
+    accept,
+  }: {
+    field: "image" | "videoUrl" | "callerPhoto" | "postCallVideoUrl";
+    label: string;
+    accept: string;
+  }) => {
+    const value = currentQuestion[field as keyof typeof currentQuestion];
+
+    return (
+      <Field>
+        <FieldLabel>{label}</FieldLabel>
+        <Input
+          type="file"
+          accept={accept}
+          onChange={(event) => setMediaValue(field, event.target.files?.[0])}
+        />
+        <p className="text-xs text-muted-foreground">{getMediaLabel(value)}</p>
+      </Field>
+    );
+  };
 
   const addOption = () => {
     if (currentQuestion.type !== "MCQ" && currentQuestion.type !== "Video")
@@ -223,8 +271,8 @@ export function QuestionBlock({
                   <SelectContent>
                     {(currentQuestion.options || [])
                       .filter(Boolean)
-                      .map((option) => (
-                        <SelectItem key={option} value={option}>
+                      .map((option, selectIndex) => (
+                        <SelectItem key={`${option}-${selectIndex}`} value={option}>
                           {option}
                         </SelectItem>
                       ))}
@@ -375,8 +423,8 @@ export function QuestionBlock({
                     <SelectValue placeholder="Select correct response" />
                   </SelectTrigger>
                   <SelectContent>
-                    {currentQuestion.options.filter(Boolean).map((option) => (
-                      <SelectItem key={option} value={option}>
+                    {currentQuestion.options.filter(Boolean).map((option, selectIndex) => (
+                      <SelectItem key={`${option}-${selectIndex}`} value={option}>
                         {option}
                       </SelectItem>
                     ))}
@@ -388,16 +436,7 @@ export function QuestionBlock({
         </div>
       )}
 
-      {currentQuestion.type === "Video" && (
-        <Field>
-          <FieldLabel>Video URL</FieldLabel>
-          <Input
-            type="url"
-            placeholder="https://example.com/video.mp4"
-            {...register(`questions.${index}.videoUrl`)}
-          />
-        </Field>
-      )}
+      {currentQuestion.type === "Video" && renderMediaInput({ field: "videoUrl", label: "Video", accept: "video/*" })}
 
       {currentQuestion.type === "Simulated Call" && (
         <div className="grid gap-4 sm:grid-cols-2">
@@ -408,22 +447,8 @@ export function QuestionBlock({
               {...register(`questions.${index}.callerName`)}
             />
           </Field>
-          <Field>
-            <FieldLabel>Caller Photo URL</FieldLabel>
-            <Input
-              type="url"
-              placeholder="https://example.com/caller.jpg"
-              {...register(`questions.${index}.callerPhoto`)}
-            />
-          </Field>
-          <Field>
-            <FieldLabel>Post-call Video URL</FieldLabel>
-            <Input
-              type="url"
-              placeholder="https://example.com/follow-up.mp4"
-              {...register(`questions.${index}.postCallVideoUrl`)}
-            />
-          </Field>
+          {renderMediaInput({ field: "callerPhoto", label: "Caller Photo", accept: "image/*" })}
+          {renderMediaInput({ field: "postCallVideoUrl", label: "Post-call Video", accept: "video/*" })}
           <Field>
             <FieldLabel>Post-call Message</FieldLabel>
             <Input
@@ -455,16 +480,7 @@ export function QuestionBlock({
         </Field>
       )}
 
-      {currentQuestion.image !== undefined && (
-        <Field>
-          <FieldLabel>Question Image URL</FieldLabel>
-          <Input
-            type="url"
-            placeholder="https://example.com/question-image.jpg"
-            {...register(`questions.${index}.image`)}
-          />
-        </Field>
-      )}
+      {currentQuestion.image !== undefined && renderMediaInput({ field: "image", label: "Question Image", accept: "image/*" })}
 
       <div className="flex flex-col justify-between gap-4 border-t border-border pt-4 sm:flex-row sm:items-center">
         <div className="flex flex-wrap items-center gap-5">
@@ -527,3 +543,6 @@ export function QuestionBlock({
     </div>
   );
 }
+
+
+

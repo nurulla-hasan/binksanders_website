@@ -21,6 +21,42 @@ import { ModuleBasicInfo } from "./ModuleBasicInfo";
 import { QuestionnaireSection } from "./QuestionnaireSection";
 import { ModulePreview } from "./ModulePreview";
 
+
+const mediaFields = [
+  "image",
+  "videoUrl",
+  "callerPhoto",
+  "postCallVideoUrl",
+] as const;
+
+const isFileValue = (value: unknown): value is File => value instanceof File;
+
+const prepareModulePayload = (values: CreateModuleFormValues) => {
+  const questionFiles: Record<string, File> = {};
+  const questions = values.questions.map((question, index) => {
+    const cleanQuestion = { ...question } as Record<string, unknown>;
+
+    mediaFields.forEach((field) => {
+      const value = cleanQuestion[field];
+      if (isFileValue(value)) {
+        questionFiles[`questions[${index}].${field}`] = value;
+        cleanQuestion[field] = "";
+      }
+    });
+
+    return cleanQuestion as ModuleData["questions"][number];
+  });
+
+  return {
+    data: {
+      title: values.title,
+      description: values.description,
+      questions,
+    },
+    questionFiles,
+  };
+};
+
 export function ModuleEditor({ module }: { module?: LearningModule }) {
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
@@ -77,20 +113,17 @@ export function ModuleEditor({ module }: { module?: LearningModule }) {
       return;
     }
 
-    const data: ModuleData = {
-      title: values.title,
-      description: values.description,
-      questions: values.questions,
-    };
+    const { data, questionFiles } = prepareModulePayload(values);
 
     setIsPending(true);
 
     try {
       const response = module
-        ? await updateModule(module._id, data)
+        ? await updateModule(module._id, { ...data, questionFiles })
         : await createModule({
             data,
             thumbnailImage: values.thumbnail as File,
+            questionFiles,
           });
 
       if (!response.success) throw new Error(response.message);
@@ -175,3 +208,7 @@ export function ModuleEditor({ module }: { module?: LearningModule }) {
     </div>
   );
 }
+
+
+
+
