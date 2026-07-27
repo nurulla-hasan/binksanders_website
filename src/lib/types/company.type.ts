@@ -7,6 +7,7 @@ export type CompanyPayload = {
 };
 
 export type CompanyBranding = {
+  logo?: string;
   primaryColor: string;
   secondaryColor: string;
   videoTitle: string;
@@ -125,3 +126,5 @@ export type CompanyAnalytics = {
     totalAssigned: number;
   }>;
 };
+
+

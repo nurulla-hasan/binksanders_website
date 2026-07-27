@@ -595,44 +595,80 @@ function SimulatedCallQuestion({
   onComplete: () => void;
 }) {
   const [hasAnswered, setHasAnswered] = useState(answer === "completed");
+  const [dragOffset, setDragOffset] = useState(0);
   const isComplete = answer === "completed";
   const callerName = question.callerName || "Training caller";
 
   if (!hasAnswered) {
     return (
-      <div className="flex min-h-96 flex-col items-center justify-between rounded-lg border bg-card p-6 text-center">
-        <div className="space-y-4">
-          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Incoming call
-          </p>
-          <div className="mx-auto flex size-28 items-center justify-center overflow-hidden rounded-full border bg-muted">
-            {question.callerPhoto ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={question.callerPhoto}
-                alt={callerName}
-                className="size-full object-cover"
-              />
-            ) : (
-              <UserRound className="size-12 text-muted-foreground" />
-            )}
+      <div className="relative flex min-h-[34rem] overflow-hidden rounded-lg border bg-foreground text-background shadow-sm">
+        {question.callerPhoto && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={question.callerPhoto}
+            alt=""
+            className="absolute inset-0 size-full scale-110 object-cover opacity-45 blur-xl"
+          />
+        )}
+        <div className="absolute inset-0 bg-foreground/55" />
+
+        <div className="relative z-10 flex min-h-full w-full flex-col items-center justify-between px-6 py-10 text-center">
+          <div className="space-y-8">
+            <p className="text-lg text-background/80">Incoming call...</p>
+            <div className="mx-auto flex size-40 items-center justify-center overflow-hidden rounded-full border border-background/80 bg-background/15 shadow-sm">
+              {question.callerPhoto ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={question.callerPhoto}
+                  alt={callerName}
+                  className="size-full object-cover"
+                />
+              ) : (
+                <UserRound className="size-16 text-background/80" />
+              )}
+            </div>
+            <div>
+              <h2 className="font-heading text-3xl font-bold text-background">
+                {callerName}
+              </h2>
+              <p className="mt-3 text-sm text-background/75">{question.content}</p>
+            </div>
           </div>
-          <div>
-            <h2 className="font-heading text-2xl font-bold">{callerName}</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {question.content}
+
+          <div className="flex flex-col items-center gap-6">
+            <div className="flex flex-col items-center text-background/35">
+              <ArrowUp className="size-8" />
+              <ArrowUp className="-mt-3 size-8 text-background/50" />
+              <ArrowUp className="-mt-3 size-8 text-background/75" />
+            </div>
+            <motion.button
+              type="button"
+              disabled={disabled}
+              drag="y"
+              dragConstraints={{ top: -120, bottom: 0 }}
+              dragElastic={0.08}
+              animate={{ y: dragOffset }}
+              whileTap={{ scale: disabled ? 1 : 0.96 }}
+              onDrag={(_, info) => setDragOffset(Math.min(0, info.offset.y))}
+              onDragEnd={(_, info) => {
+                if (disabled) return;
+                if (info.offset.y < -72) {
+                  setDragOffset(-120);
+                  window.setTimeout(() => setHasAnswered(true), 120);
+                  return;
+                }
+                setDragOffset(0);
+              }}
+              className="flex size-16 items-center justify-center rounded-full bg-success text-success-foreground shadow-lg shadow-foreground/30 ring-6 ring-background/15 disabled:opacity-60"
+              aria-label="Swipe up to answer call"
+            >
+              <Phone className="size-7" />
+            </motion.button>
+            <p className="text-xs font-semibold uppercase tracking-wider text-background/60">
+              Swipe up to answer
             </p>
           </div>
         </div>
-
-        <Button
-          type="button"
-          size="lg"
-          disabled={disabled}
-          onClick={() => setHasAnswered(true)}
-        >
-          <Phone /> Answer call
-        </Button>
       </div>
     );
   }
@@ -675,3 +711,5 @@ function SimulatedCallQuestion({
     </div>
   );
 }
+
+

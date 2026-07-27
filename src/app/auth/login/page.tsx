@@ -28,7 +28,7 @@ export default function LoginPage() {
       if (!response.success) throw new Error(response.message);
 
       SuccessToast(response.message || "Logged in successfully");
-      router.replace(response.data.user?.role === "company" ? "/company" : "/modules");
+      router.replace(response.data.user?.role === "company" ? "/company" : "/");
       router.refresh();
     } catch (error: unknown) {
       ErrorToast(error instanceof Error ? error.message : "Unable to log in");
@@ -133,3 +133,4 @@ export default function LoginPage() {
     </main>
   );
 }
+
