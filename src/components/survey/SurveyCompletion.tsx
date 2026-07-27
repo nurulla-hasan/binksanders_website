@@ -67,7 +67,7 @@ export function SurveyCompletion({ answers, onReturnHome }: SurveyCompletionProp
 
   if (step === "summary") {
     return (
-      <div className="flex-1 flex flex-col justify-between min-h-[80vh] animate-fadeIn">
+      <div className="flex-1 flex flex-col justify-between min-h-[80dvh] animate-fadeIn">
         <div className="space-y-6">
           {/* Top Header Card */}
           <div className="bg-primary border-none p-6 rounded-lg text-center shadow-sm">
@@ -119,7 +119,7 @@ export function SurveyCompletion({ answers, onReturnHome }: SurveyCompletionProp
 
   // RATING SCREEN
   return (
-    <div className="flex-1 flex flex-col justify-between min-h-[80vh] animate-fadeIn">
+    <div className="flex-1 flex flex-col justify-between min-h-[80dvh] animate-fadeIn">
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-extrabold font-heading text-foreground tracking-tight">

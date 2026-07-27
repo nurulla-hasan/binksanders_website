@@ -179,7 +179,7 @@ export function ModulePreview({
 
     if (isCompleted) {
       return (
-        <div className="flex min-h-[50vh] flex-1 flex-col justify-between animate-fadeIn p-4">
+        <div className="flex min-h-[50dvh] flex-1 flex-col justify-between animate-fadeIn p-4">
           <div className="space-y-6">
             <div className="rounded-lg bg-primary p-7 text-center text-primary-foreground shadow-sm">
               <CheckCircle2 className="mx-auto mb-3 size-12" />
@@ -334,7 +334,7 @@ export function ModulePreview({
         <span className="text-xs text-muted-foreground">Learner&apos;s View</span>
       </div>
 
-      <div className="rounded-xl border-4 border-muted bg-card shadow-lg overflow-hidden flex flex-col relative max-h-[85vh] overflow-y-auto">
+      <div className="rounded-xl border-4 border-muted bg-card shadow-lg overflow-hidden flex flex-col relative max-h-[85dvh] overflow-y-auto">
         {/* Fake mobile header/status bar for visual flair */}
         <div className="bg-muted/50 py-1.5 px-4 flex justify-between items-center text-[10px] font-medium text-muted-foreground">
           <span>9:41</span>

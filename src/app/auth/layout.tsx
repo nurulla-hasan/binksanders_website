@@ -7,7 +7,7 @@ export default function AuthLayout({
     children: ReactNode;
 }>) {
   return (
-    <div className="min-h-screen w-full bg-white flex flex-col md:flex-row relative">
+    <div className="min-h-dvh w-full bg-white flex flex-col md:flex-row relative">
       {/* Left Side: Image */}
       <div className="hidden md:block md:w-1/2 relative bg-zinc-200">
         <Image
@@ -24,7 +24,7 @@ export default function AuthLayout({
       </div>
 
       {/* Right Side: Auth Content */}
-      <div className="w-full md:w-1/2 flex flex-col relative bg-white overflow-y-auto h-screen">
+      <div className="w-full md:w-1/2 flex flex-col relative bg-white overflow-y-auto h-dvh">
         {children}
       </div>
     </div>

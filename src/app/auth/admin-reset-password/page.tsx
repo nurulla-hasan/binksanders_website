@@ -66,7 +66,7 @@ function AdminResetPasswordForm() {
   };
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col justify-between bg-background pb-10 font-sans text-foreground">
+    <div className="relative flex min-h-dvh w-full flex-col justify-between bg-background pb-10 font-sans text-foreground">
       <div className="w-full px-6 pt-8">
         <Link href="/auth/admin-forgot-password" className="inline-flex h-10 w-10 items-center justify-center rounded-sm bg-muted/40 hover:bg-muted/60">
           <ArrowLeft className="h-5 w-5" />
@@ -154,3 +154,4 @@ export default function AdminResetPasswordPage() {
     </Suspense>
   );
 }
+

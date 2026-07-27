@@ -79,12 +79,12 @@ export function WelcomeCallScreen({
                 controls
                 autoPlay
                 playsInline
-                className="w-full h-full max-h-[55vh] object-contain bg-black"
+                className="w-full h-full max-h-[55dvh] object-contain bg-black"
               />
             </div>
 
             {/* Bottom details card (System theme colors) */}
-            <div className="bg-card text-card-foreground border-t border-border p-5 flex flex-col gap-4 overflow-y-auto shrink-0 max-h-[50vh]">
+            <div className="bg-card text-card-foreground border-t border-border p-5 flex flex-col gap-4 overflow-y-auto shrink-0 max-h-[50dvh]">
               <div className="space-y-1.5">
                 <p
                   className="text-xs font-bold tracking-widest uppercase text-primary"

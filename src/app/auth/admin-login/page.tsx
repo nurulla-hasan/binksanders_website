@@ -44,7 +44,7 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col justify-between bg-background pb-10 font-sans text-foreground">
+    <div className="relative flex min-h-dvh w-full flex-col justify-between bg-background pb-10 font-sans text-foreground">
       <div className="flex flex-col items-center px-6 pt-16">
         <div className="flex items-center gap-3">
           <Image
@@ -143,3 +143,4 @@ export default function AdminLoginPage() {
     </div>
   );
 }
+

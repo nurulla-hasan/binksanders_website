@@ -10,7 +10,7 @@ export default async function TrainingTokenJoinPage({
   const { trainingId, token } = await params;
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-sm flex-col items-center justify-center px-6">
+    <main className="mx-auto flex min-h-dvh w-full max-w-sm flex-col items-center justify-center px-6">
       <div className="mb-10 flex items-center gap-3">
         <Image src="/acme-logo.svg" alt="Act Inc" width={36} height={36} priority />
         <span className="font-heading text-2xl font-bold">Act Inc</span>

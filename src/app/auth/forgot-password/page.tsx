@@ -33,7 +33,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground justify-between font-sans relative pb-10 w-full">
+    <div className="flex flex-col min-h-dvh bg-background text-foreground justify-between font-sans relative pb-10 w-full">
       
       {/* Top Header Section */}
       <div className="w-full pt-8 px-6 relative">
@@ -114,3 +114,4 @@ export default function ForgotPasswordPage() {
     </div>
   );
 }
+

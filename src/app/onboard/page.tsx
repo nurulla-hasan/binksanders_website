@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 
 export default function OnboardPage() {
   return (
-    <div className="flex flex-col min-h-screen dark bg-background text-foreground font-sans relative w-full overflow-hidden">
+    <div className="flex flex-col min-h-dvh dark bg-background text-foreground font-sans relative w-full overflow-hidden">
       
       {/* Top Video Section */}
-      <div className="relative w-full h-[55vh] min-h-100">
+      <div className="relative w-full h-[55dvh] min-h-100">
         {/* Background Video Placeholder Image */}
         <Image
           src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=600&auto=format&fit=crop"
@@ -99,3 +99,4 @@ export default function OnboardPage() {
     </div>
   );
 }
+

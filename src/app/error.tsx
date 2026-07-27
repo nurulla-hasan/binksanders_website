@@ -16,7 +16,7 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[80vh] px-6 text-center">
+    <div className="flex flex-col items-center justify-center min-h-[80dvh] px-6 text-center">
       <h2 className="text-4xl font-bold font-heading mb-4 text-foreground">
         Something went wrong!
       </h2>

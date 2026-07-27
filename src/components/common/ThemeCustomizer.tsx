@@ -177,7 +177,7 @@ export function ThemeCustomizerDrawer() {
                 <TabsTrigger value="secondary">Secondary</TabsTrigger>
               </TabsList>
               
-              <TabsContent value="primary" className="space-y-4 max-h-[60vh] overflow-y-auto outline-none">
+              <TabsContent value="primary" className="space-y-4 max-h-[60dvh] overflow-y-auto outline-none">
                 <div className="space-y-2">
                   <p className="text-sm font-semibold text-foreground mb-3">Primary Presets</p>
                   {THEME_PRESETS.map((theme) => (
@@ -221,7 +221,7 @@ export function ThemeCustomizerDrawer() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="secondary" className="space-y-4 max-h-[60vh] overflow-y-auto outline-none">
+              <TabsContent value="secondary" className="space-y-4 max-h-[60dvh] overflow-y-auto outline-none">
                 <div className="space-y-2">
                   <p className="text-sm font-semibold text-foreground mb-3">Secondary Presets</p>
                   {SECONDARY_PRESETS.map((theme) => (

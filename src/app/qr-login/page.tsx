@@ -42,7 +42,7 @@ function QrLoginContent() {
   }, [qrToken, router]);
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-sm flex-col items-center justify-center px-6 text-center">
+    <main className="mx-auto flex min-h-dvh w-full max-w-sm flex-col items-center justify-center px-6 text-center">
       <div className="mb-10 flex items-center gap-3">
         <Image src="/acme-logo.svg" alt="Acme Inc" width={36} height={36} priority />
         <span className="font-heading text-2xl font-bold">Acme Inc</span>
@@ -80,3 +80,4 @@ export default function QrLoginPage() {
     </Suspense>
   );
 }
+

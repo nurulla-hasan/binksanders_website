@@ -152,7 +152,7 @@ export function ModuleSurveyRunner({
   if (isCompleted) {
     return (
       <AnimationWrapper direction="up" duration={0.4}>
-        <div className="flex min-h-[50vh] flex-1 flex-col justify-between">
+        <div className="flex min-h-[50dvh] flex-1 flex-col justify-between">
           <div className="space-y-4">
             <div className="rounded-lg bg-primary p-4 text-center text-primary-foreground shadow-sm">
               <CheckCircle2 className="mx-auto mb-2.5 size-10" />
