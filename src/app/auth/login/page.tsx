@@ -38,7 +38,7 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="relative mx-auto flex min-h-dvh w-full max-w-lg flex-col justify-between bg-background px-6 py-10 font-sans text-foreground sm:px-10">
+    <main className="relative mx-auto flex min-h-dvh w-full flex-col justify-between bg-background px-6 py-10 font-sans text-foreground sm:px-10">
       <div />
 
       <section className="mx-auto flex w-full max-w-sm flex-col justify-center">

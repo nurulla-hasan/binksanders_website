@@ -1,5 +1,7 @@
 import Image from "next/image";
-import { BookOpen, CircleHelp, Layers3 } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, BookOpen, Layers3 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -9,92 +11,43 @@ import {
 } from "@/components/ui/card";
 import { DashboardHeader } from "@/components/ui/custom/DashboardHeader";
 import DashboardPageLayout from "@/components/ui/custom/DashboardPageLayout";
-import type { LearningModule } from "@/lib/types/module.type";
-import { getCompanyModules } from "@/services/module.service";
+import type { Training } from "@/lib/types/training.type";
+import { getCompanyTrainings } from "@/services/training.service";
 import { getMyProfile } from "@/services/user.service";
 
-type TeamModuleGroup = {
-  teamId: string;
-  teamName: string;
-  modules: LearningModule[];
-};
+const getCompanyId = async () => {
+  const profileResponse = await getMyProfile();
+  if (!profileResponse.success) return "";
 
-const groupModulesByTeam = (modules: LearningModule[]): TeamModuleGroup[] => {
-  const groups = new Map<string, TeamModuleGroup>();
-
-  modules.forEach((module) => {
-    const teamId = module.teamId?._id || "unassigned";
-    const currentGroup = groups.get(teamId);
-
-    if (currentGroup) {
-      currentGroup.modules.push(module);
-      return;
-    }
-
-    groups.set(teamId, {
-      teamId,
-      teamName: module.teamId?.name || "Other modules",
-      modules: [module],
-    });
-  });
-
-  return Array.from(groups.values());
+  const profile = profileResponse.data;
+  return profile.role === "company" ? profile._id : profile.companyId;
 };
 
 export default async function CompanyCourseDirectoryPage() {
-  let modules: LearningModule[] = [];
+  let trainings: Training[] = [];
 
   try {
-    const profileResponse = await getMyProfile();
-    const companyId = profileResponse.success
-      ? profileResponse.data._id
-      : undefined;
-
+    const companyId = await getCompanyId();
     if (companyId) {
-      const moduleResponse = await getCompanyModules(companyId);
-      if (moduleResponse.success) modules = moduleResponse.data;
+      const response = await getCompanyTrainings(companyId);
+      if (response.success) trainings = response.data;
     }
   } catch {
-    // A safe empty state is rendered if assigned modules cannot be loaded.
+    // A safe empty state is rendered if assigned trainings cannot be loaded.
   }
-
-  const teamGroups = groupModulesByTeam(modules);
 
   return (
     <div className="animate-fadeIn">
       <DashboardPageLayout>
         <DashboardHeader
-          title="Course Directory"
-          description="Explore the learning modules assigned to each of your teams."
+          title="Training Directory"
+          description="Explore trainings assigned to your company and teams."
         />
 
-        {teamGroups.length > 0 ? (
-          <div className="space-y-8">
-            {teamGroups.map((group) => (
-              <section key={group.teamId} className="space-y-4">
-                <div className="flex items-center justify-between gap-4 border-b pb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="flex size-9 items-center justify-center rounded-md bg-primary/10 text-primary">
-                      <Layers3 className="size-4" />
-                    </div>
-                    <div>
-                      <h2 className="font-heading text-lg font-bold">
-                        {group.teamName}
-                      </h2>
-                      <p className="text-xs text-muted-foreground">
-                        {group.modules.length}{" "}
-                        {group.modules.length === 1 ? "module" : "modules"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                  {group.modules.map((module) => (
-                    <ModuleCard key={module._id} module={module} />
-                  ))}
-                </div>
-              </section>
+        {trainings.length > 0 ? (
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {trainings.map((training) => (
+              <TrainingCard key={training._id} training={training} />
             ))}
           </div>
         ) : (
@@ -104,11 +57,10 @@ export default async function CompanyCourseDirectoryPage() {
                 <BookOpen className="size-6" />
               </div>
               <h2 className="font-heading text-lg font-bold">
-                No modules assigned yet
+                No trainings assigned yet
               </h2>
               <p className="mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
-                Learning modules assigned to your company and teams will appear
-                here.
+                Trainings assigned to your company and teams will appear here.
               </p>
             </CardContent>
           </Card>
@@ -118,41 +70,56 @@ export default async function CompanyCourseDirectoryPage() {
   );
 }
 
-function ModuleCard({ module }: { module: LearningModule }) {
+function TrainingCard({ training }: { training: Training }) {
   return (
-    <Card className="gap-0 py-0 transition-transform hover:-translate-y-0.5">
-      <div className="relative aspect-16/8 overflow-hidden bg-muted">
-        {module.thumbnailImage ? (
-          <Image
-            src={module.thumbnailImage}
-            alt={module.title}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
-            className="object-cover"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center text-muted-foreground">
-            <BookOpen className="size-8" />
-          </div>
-        )}
-      </div>
-
-      <CardHeader className="pt-5">
-        <CardTitle className="line-clamp-1 text-base font-bold">
-          {module.title}
-        </CardTitle>
-        <CardDescription className="line-clamp-2 min-h-10 leading-relaxed">
-          {module.description}
-        </CardDescription>
-      </CardHeader>
-
-      <CardContent className="pb-5 pt-4">
-        <div className="flex items-center gap-2 border-t pt-4 text-xs font-medium text-muted-foreground">
-          <CircleHelp className="size-4 text-primary" />
-          {module.questions.length}{" "}
-          {module.questions.length === 1 ? "question" : "questions"}
+    <Link href={`/company/course/${training._id}`} className="group block">
+      <Card className="gap-0 py-0 transition-transform hover:-translate-y-0.5">
+        <div className="relative aspect-16/8 overflow-hidden bg-muted">
+          {training.thumbnailImage ? (
+            <Image
+              src={training.thumbnailImage}
+              alt={training.title}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+              className="object-cover"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-muted-foreground">
+              <BookOpen className="size-8" />
+            </div>
+          )}
         </div>
-      </CardContent>
-    </Card>
+
+        <CardHeader className="pt-5">
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <Badge variant={training.status === "published" ? "active" : "outline"}>
+              {training.status}
+            </Badge>
+            <Badge variant="secondary">
+              {training.topicCount ?? training.topics?.length ?? 0} topics
+            </Badge>
+          </div>
+          <CardTitle className="line-clamp-1 text-base font-bold">
+            {training.title}
+          </CardTitle>
+          <CardDescription className="line-clamp-2 min-h-10 leading-relaxed">
+            {training.description || "Training overview"}
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent className="pb-5 pt-4">
+          <div className="flex items-center justify-between gap-3 border-t pt-4 text-xs font-medium text-muted-foreground">
+            <span className="flex items-center gap-2">
+              <Layers3 className="size-4 text-primary" />
+              {training.totalModules ?? 0} modules
+            </span>
+            <span className="flex items-center gap-1 font-bold text-primary">
+              View topics
+              <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }

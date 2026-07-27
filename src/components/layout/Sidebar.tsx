@@ -13,7 +13,6 @@ import {
   Users,
   UserPlus,
   LogOut,
-  QrCode,
   Rss,
   LayoutList,
   BookOpen
@@ -41,7 +40,6 @@ const superAdminNavItems = [
 
 const companyNavItems = [
   { name: "Dashboard", href: "/company", icon: LayoutDashboard },
-  { name: "QR Access", href: "/company/qr-access", icon: QrCode },
   { name: "Course", href: "/company/course", icon: GraduationCap },
   { name: "Location & Performance", href: "/company/location-performance", icon: LayoutList },
   { name: "All user", href: "/company/users", icon: Users },
