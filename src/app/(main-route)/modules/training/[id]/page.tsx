@@ -1,18 +1,12 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, BookOpen, Layers3 } from "lucide-react";
+import { ArrowRight, BookOpen, Layers3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import type { TParams } from "@/lib/types/global.type";
 import type { Topic, UserTrainingView } from "@/lib/types/training.type";
 import { getTrainingTopics, getUserTrainingView } from "@/services/training.service";
 
 const TrainingUnavailable = ({ message }: { message: string }) => (
   <div className="flex flex-1 min-h-0 flex-col gap-4 pb-8 animate-fadeIn overflow-y-auto pr-1">
-    <Button asChild variant="ghost">
-      <Link href="/">
-        <ArrowLeft /> Back to trainings
-      </Link>
-    </Button>
     <div className="flex min-h-72 flex-col items-center justify-center rounded-lg border bg-card px-6 text-center">
       <BookOpen className="mb-3 size-9 text-primary" />
       <h1 className="font-heading text-xl font-bold">Training unavailable</h1>
@@ -61,12 +55,6 @@ export default async function TrainingModulesPage({
 
   return (
     <div className="flex flex-1 min-h-0 flex-col gap-4 pb-8 animate-fadeIn overflow-y-auto pr-1">
-      <Button asChild variant="ghost">
-        <Link href="/">
-          <ArrowLeft /> Back to trainings
-        </Link>
-      </Button>
-
       <section className="overflow-hidden rounded-lg border bg-card shadow-sm">
         {training.thumbnailImage && (
           // eslint-disable-next-line @next/next/no-img-element

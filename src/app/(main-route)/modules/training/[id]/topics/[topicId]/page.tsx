@@ -1,18 +1,12 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, BookOpen, Layers3 } from "lucide-react";
+import { ArrowRight, BookOpen, Layers3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import type { TParams } from "@/lib/types/global.type";
 import { getTrainingTopic } from "@/services/training.service";
 
-const TopicUnavailable = ({ trainingId, message }: { trainingId: string; message: string }) => (
+const TopicUnavailable = ({ message }: { message: string }) => (
   <div className="flex flex-1 min-h-0 flex-col gap-4 pb-8 animate-fadeIn overflow-y-auto pr-1">
-    <Button asChild variant="ghost">
-      <Link href={`/modules/training/${trainingId}`}>
-        <ArrowLeft /> Back to topics
-      </Link>
-    </Button>
     <div className="flex min-h-72 flex-col items-center justify-center rounded-lg border bg-card px-6 text-center">
       <BookOpen className="mb-3 size-9 text-primary" />
       <h1 className="font-heading text-xl font-bold">Topic unavailable</h1>
@@ -36,7 +30,6 @@ export default async function TopicModulesPage({
   if (!response.success || !response.data) {
     return (
       <TopicUnavailable
-        trainingId={id}
         message={response.message || "Unable to load this topic."}
       />
     );
@@ -47,12 +40,6 @@ export default async function TopicModulesPage({
 
   return (
     <div className="flex flex-1 min-h-0 flex-col gap-4 pb-8 animate-fadeIn overflow-y-auto pr-1">
-      <Button asChild variant="ghost">
-        <Link href={`/modules/training/${id}`}>
-          <ArrowLeft /> Back to topics
-        </Link>
-      </Button>
-
       <section className="space-y-2 rounded-lg border bg-card p-5 shadow-sm">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="outline">Topic {(topic.order ?? 0) + 1}</Badge>
