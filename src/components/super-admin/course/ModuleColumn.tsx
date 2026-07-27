@@ -55,16 +55,22 @@ export const columns: ColumnDef<LearningModule>[] = [
   {
     id: "createdBy",
     header: "Created By",
-    cell: ({ row }) => (
-      <div>
-        <p className="text-sm text-foreground">
-          {`${row.original.createdBy.firstName} ${row.original.createdBy.lastName}`.trim()}
-        </p>
-        <p className="text-xs text-muted-foreground">
-          {row.original.createdBy.email}
-        </p>
-      </div>
-    ),
+    cell: ({ row }) => {
+      const creator = row.original.createdBy;
+
+      if (!creator) {
+        return <span className="text-sm text-muted-foreground">System</span>;
+      }
+
+      return (
+        <div>
+          <p className="text-sm text-foreground">
+            {`${creator.firstName} ${creator.lastName || ""}`.trim()}
+          </p>
+          <p className="text-xs text-muted-foreground">{creator.email}</p>
+        </div>
+      );
+    },
   },
   {
     accessorKey: "updatedAt",

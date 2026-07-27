@@ -9,7 +9,9 @@ import {
   ArrowUp,
   CheckCircle2,
   MessageCircle,
+  Phone,
   Play,
+  UserRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -311,6 +313,29 @@ export function QuestionAnswer({
   onAnswer: (answer: AnswerValue) => void;
   onSwipe: (direction: "left" | "right") => void;
 }) {
+  if (question.type === "Information") {
+    return (
+      <div className="space-y-4 rounded-lg border bg-card p-4">
+        {question.image && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={question.image}
+            alt=""
+            className="max-h-56 w-full rounded-lg border bg-background object-contain"
+          />
+        )}
+        <Button
+          type="button"
+          variant={answer === "reviewed" ? "default" : "outline"}
+          disabled={disabled}
+          onClick={() => onAnswer("reviewed")}
+          className="w-full"
+        >
+          <CheckCircle2 /> {answer === "reviewed" ? "Reviewed" : "Mark as reviewed"}
+        </Button>
+      </div>
+    );
+  }
   if (question.type === "MCQ") {
     return (
       <div className="space-y-3">
@@ -462,6 +487,16 @@ export function QuestionAnswer({
     );
   }
 
+  if (question.type === "Simulated Call") {
+    return (
+      <SimulatedCallQuestion
+        question={question}
+        answer={answer}
+        disabled={disabled}
+        onComplete={() => onAnswer("completed")}
+      />
+    );
+  }
   if (question.type === "Video") {
     const videoUrl = question.videoUrl ?? "";
     const youtubeId =
@@ -545,5 +580,98 @@ export function QuestionAnswer({
       className="min-h-36 bg-background"
       onChange={(event) => onAnswer(event.target.value)}
     />
+  );
+}
+
+function SimulatedCallQuestion({
+  question,
+  answer,
+  disabled,
+  onComplete,
+}: {
+  question: ModuleQuestion;
+  answer: AnswerValue | null;
+  disabled: boolean;
+  onComplete: () => void;
+}) {
+  const [hasAnswered, setHasAnswered] = useState(answer === "completed");
+  const isComplete = answer === "completed";
+  const callerName = question.callerName || "Training caller";
+
+  if (!hasAnswered) {
+    return (
+      <div className="flex min-h-96 flex-col items-center justify-between rounded-lg border bg-card p-6 text-center">
+        <div className="space-y-4">
+          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Incoming call
+          </p>
+          <div className="mx-auto flex size-28 items-center justify-center overflow-hidden rounded-full border bg-muted">
+            {question.callerPhoto ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={question.callerPhoto}
+                alt={callerName}
+                className="size-full object-cover"
+              />
+            ) : (
+              <UserRound className="size-12 text-muted-foreground" />
+            )}
+          </div>
+          <div>
+            <h2 className="font-heading text-2xl font-bold">{callerName}</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {question.content}
+            </p>
+          </div>
+        </div>
+
+        <Button
+          type="button"
+          size="lg"
+          disabled={disabled}
+          onClick={() => setHasAnswered(true)}
+        >
+          <Phone /> Answer call
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4 rounded-lg border bg-card p-4">
+      {question.postCallVideoUrl && (
+        <div className="aspect-video overflow-hidden rounded-lg bg-black">
+          <video
+            src={question.postCallVideoUrl}
+            controls
+            autoPlay
+            playsInline
+            className="size-full"
+          />
+        </div>
+      )}
+
+      <div className="space-y-2">
+        <p className="text-xs font-bold uppercase tracking-wider text-primary">
+          Call complete
+        </p>
+        <h2 className="font-heading text-xl font-bold">{callerName}</h2>
+        {question.postCallMessage && (
+          <p className="text-sm text-muted-foreground">
+            {question.postCallMessage}
+          </p>
+        )}
+      </div>
+
+      <Button
+        type="button"
+        variant={isComplete ? "default" : "outline"}
+        disabled={disabled}
+        onClick={onComplete}
+        className="w-full"
+      >
+        <CheckCircle2 /> {isComplete ? "Call reviewed" : "Mark call as reviewed"}
+      </Button>
+    </div>
   );
 }

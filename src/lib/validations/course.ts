@@ -1,5 +1,9 @@
 import * as z from "zod";
 
+const optionalUrl = z
+  .union([z.literal(""), z.string().url("Enter a valid URL")])
+  .optional();
+
 const baseQuestionSchema = z.object({
   id: z.string(),
   content: z.string().min(1, "Question content is required"),
@@ -16,6 +20,9 @@ const requiredStringList = (minimum: number, message: string) =>
     .transform((values) => values.filter(Boolean))
     .pipe(z.array(z.string().min(1)).min(minimum, message));
 
+const informationSchema = baseQuestionSchema.extend({
+  type: z.literal("Information"),
+});
 const mcqSchema = baseQuestionSchema.extend({
   type: z.literal("MCQ"),
   options: requiredStringList(2, "Add at least two options"),
@@ -67,6 +74,15 @@ const videoSchema = baseQuestionSchema.extend({
   correctAnswer: z.string().optional(),
 });
 
+const simulatedCallSchema = baseQuestionSchema.extend({
+  type: z.literal("Simulated Call"),
+  callerName: z.string().trim().min(1, "Caller name is required"),
+  callerPhoto: optionalUrl,
+  postCallVideoUrl: optionalUrl,
+  postCallMessage: z.string().trim().optional(),
+  isScored: z.boolean(),
+});
+
 const ratingSchema = baseQuestionSchema.extend({
   type: z.literal("Rating"),
   scale: z.coerce.number().int().min(2).max(10),
@@ -77,11 +93,13 @@ const freeInputSchema = baseQuestionSchema.extend({
 });
 
 export const questionSchema = z.discriminatedUnion("type", [
+  informationSchema,
   mcqSchema,
   swipeSchema,
   orderingSchema,
   chatScenarioSchema,
   videoSchema,
+  simulatedCallSchema,
   ratingSchema,
   freeInputSchema,
 ]);
@@ -103,6 +121,8 @@ export const getDefaultQuestionValues = (
   const base = { id, content: "", isScored: true };
 
   switch (type) {
+    case "Information":
+      return { ...base, type, isScored: false };
     case "MCQ":
       return {
         ...base,
@@ -125,9 +145,7 @@ export const getDefaultQuestionValues = (
         ...base,
         type,
         isScored: false,
-        messages: [
-          { sender: "", text: "" }
-        ],
+        messages: [{ sender: "", text: "" }],
         options: ["", ""],
         correctAnswer: "",
       };
@@ -139,6 +157,16 @@ export const getDefaultQuestionValues = (
         videoUrl: "",
         options: ["", ""],
         correctAnswer: "",
+      };
+    case "Simulated Call":
+      return {
+        ...base,
+        type,
+        isScored: false,
+        callerName: "",
+        callerPhoto: "",
+        postCallVideoUrl: "",
+        postCallMessage: "",
       };
     case "Rating":
       return { ...base, type, isScored: false, scale: 5 };

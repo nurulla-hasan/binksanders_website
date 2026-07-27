@@ -29,11 +29,13 @@ interface QuestionBlockProps {
 }
 
 const questionTypes: QuestionDataSchemaType["type"][] = [
+  "Information",
   "MCQ",
   "Swipe",
   "Ordering",
   "Chat Scenario",
   "Video",
+  "Simulated Call",
   "Rating",
   "Free Input",
 ];
@@ -53,19 +55,22 @@ export function QuestionBlock({
   }) as QuestionDataSchemaType;
 
   const addOption = () => {
-    if (currentQuestion.type !== "MCQ") return;
-    setValue(`questions.${index}.options`, [...currentQuestion.options, ""], {
+    if (currentQuestion.type !== "MCQ" && currentQuestion.type !== "Video")
+      return;
+    setValue(`questions.${index}.options`, [...(currentQuestion.options || []), ""], {
       shouldDirty: true,
     });
   };
-
   const removeOption = (optionIndex: number) => {
-    if (currentQuestion.type !== "MCQ" || currentQuestion.options.length <= 2)
+    if (
+      (currentQuestion.type !== "MCQ" && currentQuestion.type !== "Video") ||
+      (currentQuestion.options || []).length <= 2
+    )
       return;
-    const removed = currentQuestion.options[optionIndex];
+    const removed = currentQuestion.options?.[optionIndex];
     setValue(
       `questions.${index}.options`,
-      currentQuestion.options.filter((_, index) => index !== optionIndex),
+      (currentQuestion.options || []).filter((_, index) => index !== optionIndex),
       { shouldDirty: true, shouldValidate: true },
     );
     if (currentQuestion.correctAnswer === removed) {
@@ -106,10 +111,10 @@ export function QuestionBlock({
       currentQuestion.options.length <= 2
     )
       return;
-    const removed = currentQuestion.options[optionIndex];
+    const removed = currentQuestion.options?.[optionIndex];
     setValue(
       `questions.${index}.options`,
-      currentQuestion.options.filter((_, index) => index !== optionIndex),
+      (currentQuestion.options || []).filter((_, index) => index !== optionIndex),
       { shouldDirty: true, shouldValidate: true },
     );
     if (currentQuestion.correctAnswer === removed) {
@@ -394,6 +399,40 @@ export function QuestionBlock({
         </Field>
       )}
 
+      {currentQuestion.type === "Simulated Call" && (
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field>
+            <FieldLabel>Caller Name</FieldLabel>
+            <Input
+              placeholder="John Doe"
+              {...register(`questions.${index}.callerName`)}
+            />
+          </Field>
+          <Field>
+            <FieldLabel>Caller Photo URL</FieldLabel>
+            <Input
+              type="url"
+              placeholder="https://example.com/caller.jpg"
+              {...register(`questions.${index}.callerPhoto`)}
+            />
+          </Field>
+          <Field>
+            <FieldLabel>Post-call Video URL</FieldLabel>
+            <Input
+              type="url"
+              placeholder="https://example.com/follow-up.mp4"
+              {...register(`questions.${index}.postCallVideoUrl`)}
+            />
+          </Field>
+          <Field>
+            <FieldLabel>Post-call Message</FieldLabel>
+            <Input
+              placeholder="Good job staying calm."
+              {...register(`questions.${index}.postCallMessage`)}
+            />
+          </Field>
+        </div>
+      )}
       {currentQuestion.type === "Rating" && (
         <Field>
           <FieldLabel>Rating Scale</FieldLabel>

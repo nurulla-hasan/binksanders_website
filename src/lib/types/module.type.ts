@@ -2,11 +2,13 @@ import type { ApiResponse } from "./api.type";
 import type { TMeta } from "./global.type";
 
 export type ModuleQuestionType =
+  | "Information"
   | "MCQ"
   | "Swipe"
   | "Ordering"
   | "Chat Scenario"
   | "Video"
+  | "Simulated Call"
   | "Rating"
   | "Free Input";
 
@@ -30,6 +32,10 @@ export type ModuleQuestion = {
   items?: string[];
   messages?: ModuleMessage[];
   videoUrl?: string;
+  callerName?: string;
+  callerPhoto?: string;
+  postCallVideoUrl?: string;
+  postCallMessage?: string;
   scale?: number;
 };
 
@@ -52,11 +58,12 @@ export type LearningModule = {
   thumbnailImage: string;
   questions: ModuleQuestion[];
   status: "draft" | "published" | string;
-  createdBy: ModuleCreator;
+  createdBy: ModuleCreator | null;
   isDeleted: boolean;
   createdAt: string;
   updatedAt: string;
   companyId?: string;
+  topicId?: string;
   teamId?: ModuleTeam;
 };
 
