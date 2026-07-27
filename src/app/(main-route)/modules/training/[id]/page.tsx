@@ -4,7 +4,23 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import type { TParams } from "@/lib/types/global.type";
+import type { Topic, UserTrainingView } from "@/lib/types/training.type";
 import { getTrainingTopics, getUserTrainingView } from "@/services/training.service";
+
+const TrainingUnavailable = ({ message }: { message: string }) => (
+  <div className="flex flex-1 min-h-0 flex-col gap-4 pb-8 animate-fadeIn overflow-y-auto pr-1">
+    <Button asChild variant="ghost">
+      <Link href="/modules">
+        <ArrowLeft /> Back to trainings
+      </Link>
+    </Button>
+    <div className="flex min-h-72 flex-col items-center justify-center rounded-lg border bg-card px-6 text-center">
+      <BookOpen className="mb-3 size-9 text-primary" />
+      <h1 className="font-heading text-xl font-bold">Training unavailable</h1>
+      <p className="mt-2 max-w-sm text-sm text-muted-foreground">{message}</p>
+    </div>
+  </div>
+);
 
 export default async function TrainingModulesPage({
   params,
@@ -12,17 +28,37 @@ export default async function TrainingModulesPage({
   params: TParams<{ id: string }>;
 }) {
   const { id } = await params;
-  const [trainingResponse, topicsResponse] = await Promise.all([
+  const [trainingResult, topicsResult] = await Promise.allSettled([
     getUserTrainingView(id),
     getTrainingTopics(id),
   ]);
 
-  if (!trainingResponse.success) {
-    throw new Error(trainingResponse.message || "Unable to load training");
+  if (trainingResult.status === "rejected") {
+    const message =
+      trainingResult.reason instanceof Error
+        ? trainingResult.reason.message
+        : "Unable to load this training.";
+
+    return <TrainingUnavailable message={message} />;
   }
 
-  const training = trainingResponse.data;
-  const topics = topicsResponse.success ? topicsResponse.data : training.topics || [];
+  const trainingResponse = trainingResult.value;
+  const topicsResponse =
+    topicsResult.status === "fulfilled" ? topicsResult.value : undefined;
+
+  if (!trainingResponse?.success) {
+    return (
+      <TrainingUnavailable
+        message={trainingResponse?.message || "Unable to load this training."}
+      />
+    );
+  }
+
+  const training = trainingResponse.data as UserTrainingView;
+  const topics: Topic[] =
+    topicsResponse?.success && topicsResponse.data.length > 0
+      ? topicsResponse.data
+      : training.topics || [];
 
   return (
     <div className="flex flex-1 min-h-0 flex-col gap-4 pb-8 animate-fadeIn overflow-y-auto pr-1">
@@ -141,3 +177,6 @@ export default async function TrainingModulesPage({
     </div>
   );
 }
+
+
+

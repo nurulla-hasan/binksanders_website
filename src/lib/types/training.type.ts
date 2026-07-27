@@ -156,11 +156,23 @@ export type TrainingInviteLink = {
   trainingTitle?: string;
 };
 
+export type TrainingAuthData = {
+  accessToken?: string;
+  refreshToken?: string;
+  user?: {
+    guestId?: string;
+    [key: string]: unknown;
+  };
+  training?: UserTrainingView;
+  [key: string]: unknown;
+};
+
 export type UserTrainingView = Training & {
   progressPercentage?: number;
   completedModules?: number;
   totalModules?: number;
 };
+
 
 
 

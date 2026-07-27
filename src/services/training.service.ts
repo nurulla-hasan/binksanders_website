@@ -1,6 +1,7 @@
 "use server";
 
 import { updateTag } from "next/cache";
+import { cookies } from "next/headers";
 import { buildQueryString } from "@/lib/buildQueryString";
 import { createMultipartBody } from "@/lib/createMultipartBody";
 import { nextServerFetch } from "@/lib/nextServerFetch";
@@ -17,6 +18,7 @@ import type {
   Topic,
   TopicData,
   Training,
+  TrainingAuthData,
   TrainingAuthenticatePayload,
   TrainingInviteLink,
   TrainingListResponse,
@@ -25,6 +27,22 @@ import type {
 } from "@/lib/types/training.type";
 
 const TRAININGS_TAG = "trainings";
+
+const setTrainingSessionCookies = async (data: TrainingAuthData | null) => {
+  if (!data) return;
+
+  const cookieStore = await cookies();
+  const options = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    path: "/",
+  };
+
+  if (data.accessToken) cookieStore.set("accessToken", data.accessToken, options);
+  if (data.refreshToken) cookieStore.set("refreshToken", data.refreshToken, options);
+  if (data.user?.guestId) cookieStore.set("guestId", data.user.guestId, options);
+};
 
 export const getTrainings = async (params: TQuery = {}) =>
   nextServerFetch<TrainingListResponse>(`/training${buildQueryString(params)}`, {
@@ -253,7 +271,7 @@ export const getUserTrainingView = async (trainingId: string) =>
 export const authenticateTraining = async (
   trainingId: string,
   payload: TrainingAuthenticatePayload,
-): Promise<ApiResponse<UserTrainingView | null>> => {
+): Promise<ApiResponse<TrainingAuthData | null>> => {
   const endpoint = `/training/${trainingId}/authenticate`;
 
   console.log("[training-auth:server] request", {
@@ -263,10 +281,12 @@ export const authenticateTraining = async (
   });
 
   try {
-    const response = await nextServerFetch<ApiResponse<UserTrainingView>>(
+    const response = await nextServerFetch<ApiResponse<TrainingAuthData>>(
       endpoint,
       { method: "POST", body: payload, auth: "none" },
     );
+
+    if (response.success) await setTrainingSessionCookies(response.data);
 
     console.log("[training-auth:server] response", response);
 
@@ -281,6 +301,7 @@ export const authenticateTraining = async (
     };
   }
 };
+
 
 
 

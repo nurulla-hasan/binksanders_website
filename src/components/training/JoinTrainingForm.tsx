@@ -87,7 +87,7 @@ console.log("[training-auth] request", {
       if (!response.success) throw new Error(response.message);
 
       SuccessToast(response.message || "Training login successful");
-      router.replace(`/modules/training/${trainingId}`);
+      router.replace("/modules");
       router.refresh();
     } catch (error: unknown) {
       ErrorToast(error instanceof Error ? error.message : "Unable to join training");
@@ -134,4 +134,5 @@ console.log("[training-auth] request", {
     </form>
   );
 }
+
 
