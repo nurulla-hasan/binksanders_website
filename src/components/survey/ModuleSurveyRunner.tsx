@@ -24,7 +24,6 @@ import { submitModuleAnswer } from "@/services/user-progress.service";
 import { SurveyIntro } from "./SurveyIntro";
 import { ModuleSwipeQuestion } from "./question-types/ModuleSwipeQuestion";
 import AnimationWrapper from "@/components/ui/custom/animation-wrapper";
-import { WelcomeCallScreen } from "@/components/auth/WelcomeCallScreen";
 
 type AnswerValue = string | number | string[];
 
@@ -42,7 +41,6 @@ export const hasAnswer = (answer: AnswerValue | null) => {
 
 export function ModuleSurveyRunner({
   details,
-  user,
 }: {
   details: UserModuleDetails;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -67,15 +65,6 @@ export function ModuleSurveyRunner({
   const [result, setResult] = useState<SubmitModuleAnswerResult>();
   const [finalResult, setFinalResult] = useState<SubmitModuleAnswerResult>();
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const [hasCompletedCall, setHasCompletedCall] = useState(false);
-  const [showCallScreen, setShowCallScreen] = useState(() => {
-    return Boolean(
-      user?.branding?.videoUrl &&
-        userProgress.completedQuestions === 0 &&
-        userProgress.status !== "completed",
-    );
-  });
 
   const question = module.questions[currentIndex];
   const totalQuestions = module.questions.length;
@@ -142,19 +131,6 @@ export function ModuleSurveyRunner({
     return () => window.clearTimeout(timer);
   }, [currentIndex, module.questions, question?.type, result, totalQuestions]);
 
-  if (showCallScreen && user) {
-    return (
-      <WelcomeCallScreen
-        user={user}
-        onComplete={() => {
-          setShowCallScreen(false);
-          setHasCompletedCall(true);
-          setIsStarted(true);
-        }}
-      />
-    );
-  }
-
   if (!isStarted && !isCompleted) {
     return (
       <SurveyIntro
@@ -165,13 +141,7 @@ export function ModuleSurveyRunner({
         questionCount={module.questions.length}
         format="Interactive"
         startLabel={userProgress.completedQuestions > 0 ? "Continue" : "Start"}
-        onStart={() => {
-          if (user?.branding?.videoUrl && !hasCompletedCall) {
-            setShowCallScreen(true);
-          } else {
-            setIsStarted(true);
-          }
-        }}
+        onStart={() => setIsStarted(true)}
         onBack={() => router.push("/modules")}
       />
     );
