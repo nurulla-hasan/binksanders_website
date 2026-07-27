@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Copy,
+  Download,
   Link2,
   Mail,
   Pencil,
@@ -147,6 +148,30 @@ export function TrainingBuilder({ training, modules }: TrainingBuilderProps) {
     }
   };
 
+
+  const handleDownloadQr = async () => {
+    if (!training.qrCodeUrl) {
+      ErrorToast("No QR code available");
+      return;
+    }
+
+    const filename = `${training.title || "training"}-qr-code.png`
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+
+    try {
+      const link = document.createElement("a");
+      link.href = training.qrCodeUrl;
+      link.download = filename || "training-qr-code.png";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      SuccessToast("QR code download started");
+    } catch (error: unknown) {
+      ErrorToast(error instanceof Error ? error.message : "Unable to download QR code");
+    }
+  };
   const handleCopyLink = async () => {
     if (!generatedLink) {
       ErrorToast("Generate a link first");
@@ -326,10 +351,15 @@ export function TrainingBuilder({ training, modules }: TrainingBuilderProps) {
             </div>
           </div>
 
-          <div className="rounded-md border bg-background p-3 text-center">
+          <div className="space-y-3 rounded-md border bg-background p-3 text-center">
             {training.qrCodeUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={training.qrCodeUrl} alt="Training QR code" className="mx-auto size-36 object-contain" />
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={training.qrCodeUrl} alt="Training QR code" className="mx-auto size-36 object-contain" />
+                <Button type="button" variant="outline" size="sm" onClick={() => void handleDownloadQr()}>
+                  <Download /> Download QR
+                </Button>
+              </>
             ) : (
               <div className="flex h-36 items-center justify-center text-sm text-muted-foreground">
                 No QR code
