@@ -3,6 +3,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { TrainingActions } from "./TrainingActions";
+import type { CompanyDropdownItem } from "@/lib/types/company.type";
 import type { Training, TrainingCompany } from "@/lib/types/training.type";
 import { formatDate } from "@/lib/utils";
 
@@ -18,7 +19,7 @@ const getCreatorName = (creator: Training["createdBy"]) => {
   return `${creator.firstName} ${creator.lastName || ""}`.trim();
 };
 
-export const columns: ColumnDef<Training>[] = [
+export const getTrainingColumns = (companies: CompanyDropdownItem[]): ColumnDef<Training>[] => [
   {
     accessorKey: "title",
     header: "Training",
@@ -85,6 +86,6 @@ export const columns: ColumnDef<Training>[] = [
   {
     id: "actions",
     header: () => <div className="text-right">Actions</div>,
-    cell: ({ row }) => <TrainingActions training={row.original} />,
+    cell: ({ row }) => <TrainingActions training={row.original} companies={companies} />,
   },
 ];

@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { columns } from "@/components/super-admin/training/TrainingColumn";
+import { TrainingDirectoryTable } from "@/components/super-admin/training/TrainingDirectoryTable";
 import { Button } from "@/components/ui/button";
 import { DashboardHeader } from "@/components/ui/custom/DashboardHeader";
 import DashboardPageLayout from "@/components/ui/custom/DashboardPageLayout";
-import { DataTable } from "@/components/ui/custom/data-table";
 import type { TSearchParams } from "@/lib/types/global.type";
+import { getCompanyDropdown } from "@/services/company.service";
 import { getTrainings } from "@/services/training.service";
 
 export default async function TrainingPage({
@@ -14,11 +14,16 @@ export default async function TrainingPage({
   searchParams: TSearchParams;
 }) {
   const params = await searchParams;
-  const response = await getTrainings(params);
+  const [trainingResponse, companyResponse] = await Promise.all([
+    getTrainings(params),
+    getCompanyDropdown({ limit: 100 }),
+  ]);
 
-  if (!response.success) {
-    throw new Error(response.message || "Unable to load trainings");
+  if (!trainingResponse.success) {
+    throw new Error(trainingResponse.message || "Unable to load trainings");
   }
+
+  const companies = companyResponse.success ? companyResponse.data : [];
 
   return (
     <div className="animate-fadeIn">
@@ -35,22 +40,20 @@ export default async function TrainingPage({
         </DashboardHeader>
 
         <div className="rounded-md border border-border bg-card p-4 shadow-sm">
-          <DataTable
-            columns={columns}
-            data={response.data}
+          <TrainingDirectoryTable
+            trainings={trainingResponse.data}
+            companies={companies}
             meta={
-              response.meta
+              trainingResponse.meta
                 ? {
-                    page: response.meta.page,
-                    limit: response.meta.limit,
-                    total: response.meta.total,
-                    totalPages: response.meta.totalPage,
+                    page: trainingResponse.meta.page,
+                    limit: trainingResponse.meta.limit,
+                    total: trainingResponse.meta.total,
+                    totalPages: trainingResponse.meta.totalPage,
                   }
                 : undefined
             }
-            limit={response.meta?.limit ?? 10}
-            searchKey="searchTerm"
-            searchPlaceholder="Search trainings..."
+            limit={trainingResponse.meta?.limit ?? 10}
           />
         </div>
       </DashboardPageLayout>
