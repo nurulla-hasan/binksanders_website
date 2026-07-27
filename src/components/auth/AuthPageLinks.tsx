@@ -13,7 +13,7 @@ export function AuthPageLinks({ showUserLogin = false }: { showUserLogin?: boole
         href={showUserLogin ? "/auth/login" : "/auth/admin-login"}
         className="text-xs font-semibold text-primary hover:underline"
       >
-        {showUserLogin ? "User login" : "Admin login"}
+        {showUserLogin ? "Company login" : "Admin login"}
       </Link>
     </div>
   );
