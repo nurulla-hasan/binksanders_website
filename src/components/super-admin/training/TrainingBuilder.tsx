@@ -1,0 +1,291 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { LearningModule } from "@/lib/types/module.type";
+import type { Topic, Training, TrainingModuleSummary } from "@/lib/types/training.type";
+import { ErrorToast, SuccessToast } from "@/lib/utils";
+import {
+  addModuleToTopic,
+  addTopicToTraining,
+  removeModuleFromTopic,
+} from "@/services/training.service";
+
+type TrainingBuilderProps = {
+  training: Training;
+  modules: LearningModule[];
+};
+
+const isModuleSummary = (value: string | TrainingModuleSummary): value is TrainingModuleSummary =>
+  typeof value !== "string";
+
+const getTopicModules = (topic: Topic) => {
+  if (topic.modules?.length) return topic.modules;
+  return (topic.moduleIds || []).filter(isModuleSummary);
+};
+
+export function TrainingBuilder({ training, modules }: TrainingBuilderProps) {
+  const router = useRouter();
+  const [isAddingTopic, setIsAddingTopic] = useState(false);
+  const [pendingTopicId, setPendingTopicId] = useState<string>();
+  const [selectedModules, setSelectedModules] = useState<Record<string, string>>({});
+
+  const companyName =
+    typeof training.companyId === "object" && training.companyId
+      ? training.companyId.firstName
+      : "Unassigned";
+
+  const moduleById = useMemo(
+    () => new Map(modules.map((module) => [module._id, module])),
+    [modules],
+  );
+
+  const handleAddTopic = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const title = String(formData.get("title") || "").trim();
+    const description = String(formData.get("description") || "").trim();
+
+    if (!title) {
+      ErrorToast("Topic title is required");
+      return;
+    }
+
+    setIsAddingTopic(true);
+    try {
+      const response = await addTopicToTraining(training._id, {
+        title,
+        description,
+      });
+      if (!response.success) throw new Error(response.message);
+      SuccessToast(response.message || "Topic added successfully");
+      event.currentTarget.reset();
+      router.refresh();
+    } catch (error: unknown) {
+      ErrorToast(error instanceof Error ? error.message : "Unable to add topic");
+    } finally {
+      setIsAddingTopic(false);
+    }
+  };
+
+  const handleAttachModule = async (topicId: string) => {
+    const moduleId = selectedModules[topicId];
+    if (!moduleId) {
+      ErrorToast("Select a module first");
+      return;
+    }
+
+    setPendingTopicId(topicId);
+    try {
+      const response = await addModuleToTopic(training._id, topicId, { moduleId });
+      if (!response.success) throw new Error(response.message);
+      SuccessToast(response.message || "Module added to topic");
+      setSelectedModules((current) => ({ ...current, [topicId]: "" }));
+      router.refresh();
+    } catch (error: unknown) {
+      ErrorToast(error instanceof Error ? error.message : "Unable to add module");
+    } finally {
+      setPendingTopicId(undefined);
+    }
+  };
+
+  const handleRemoveModule = async (topicId: string, moduleId: string) => {
+    setPendingTopicId(topicId);
+    try {
+      const response = await removeModuleFromTopic(training._id, topicId, moduleId);
+      if (!response.success) throw new Error(response.message);
+      SuccessToast(response.message || "Module removed from topic");
+      router.refresh();
+    } catch (error: unknown) {
+      ErrorToast(error instanceof Error ? error.message : "Unable to remove module");
+    } finally {
+      setPendingTopicId(undefined);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <Button asChild variant="ghost">
+          <Link href="/super-admin/training">
+            <ArrowLeft /> Back to Training
+          </Link>
+        </Button>
+      </div>
+
+      <section className="rounded-md border border-border bg-card p-5 shadow-sm">
+        <div className="grid gap-5 lg:grid-cols-[1fr_180px]">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant={training.status === "published" ? "active" : "outline"}>
+                  {training.status}
+                </Badge>
+                <Badge variant="outline">{training.authType || "auth not set"}</Badge>
+              </div>
+              <h1 className="font-heading text-2xl font-bold">{training.title}</h1>
+              <p className="text-sm text-muted-foreground">
+                {training.description || "No description"}
+              </p>
+            </div>
+
+            <div className="grid gap-3 text-sm sm:grid-cols-3">
+              <div className="rounded-md border bg-background p-3">
+                <p className="text-xs text-muted-foreground">Company</p>
+                <p className="mt-1 font-medium">{companyName}</p>
+              </div>
+              <div className="rounded-md border bg-background p-3">
+                <p className="text-xs text-muted-foreground">Team</p>
+                <p className="mt-1 font-medium">{training.teamId || "Unassigned"}</p>
+              </div>
+              <div className="rounded-md border bg-background p-3">
+                <p className="text-xs text-muted-foreground">Passcode</p>
+                <p className="mt-1 font-medium">{training.passcode || "Not required"}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-md border bg-background p-3 text-center">
+            {training.qrCodeUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={training.qrCodeUrl} alt="Training QR code" className="mx-auto size-36 object-contain" />
+            ) : (
+              <div className="flex h-36 items-center justify-center text-sm text-muted-foreground">
+                No QR code
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-md border border-border bg-card p-5 shadow-sm">
+        <form onSubmit={handleAddTopic} className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field>
+              <FieldLabel htmlFor="topic-title">Topic Title</FieldLabel>
+              <Input id="topic-title" name="title" placeholder="Emotion & Aggression" />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="topic-description">Description</FieldLabel>
+              <Input id="topic-description" name="description" placeholder="Understanding behavior" />
+            </Field>
+          </div>
+          <div className="flex justify-end">
+            <Button type="submit" disabled={isAddingTopic}>
+              <Plus /> {isAddingTopic ? "Adding..." : "Add Topic"}
+            </Button>
+          </div>
+        </form>
+      </section>
+
+      <div className="space-y-4">
+        {(training.topics || []).length > 0 ? (
+          training.topics?.map((topic) => {
+            const topicModules = getTopicModules(topic);
+            const attachedIds = new Set(topicModules.map((module) => module._id));
+            const availableModules = modules.filter((module) => !attachedIds.has(module._id));
+
+            return (
+              <section key={topic._id} className="rounded-md border border-border bg-card p-5 shadow-sm">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline">Topic {topic.order ?? "-"}</Badge>
+                      <Badge variant="secondary">{topic.moduleCount ?? topicModules.length} modules</Badge>
+                    </div>
+                    <h2 className="font-heading text-xl font-bold">{topic.title}</h2>
+                    <p className="text-sm text-muted-foreground">
+                      {topic.description || "No description"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto]">
+                  <Select
+                    value={selectedModules[topic._id] || ""}
+                    onValueChange={(value) =>
+                      setSelectedModules((current) => ({ ...current, [topic._id]: value }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Attach existing module" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableModules.map((module) => (
+                        <SelectItem key={module._id} value={module._id}>
+                          {module.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={pendingTopicId === topic._id || availableModules.length === 0}
+                    onClick={() => void handleAttachModule(topic._id)}
+                  >
+                    <Plus /> Attach Module
+                  </Button>
+                </div>
+
+                <div className="mt-5 space-y-3">
+                  {topicModules.length > 0 ? (
+                    topicModules.map((module) => {
+                      const fullModule = moduleById.get(module._id);
+                      return (
+                        <div key={module._id} className="flex flex-col gap-3 rounded-md border bg-background p-3 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="min-w-0 space-y-1">
+                            <p className="font-medium">{module.title}</p>
+                            <p className="line-clamp-1 text-xs text-muted-foreground">
+                              {module.description || fullModule?.description || "No description"}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={module.status === "published" ? "active" : "outline"}>
+                              {module.status}
+                            </Badge>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              disabled={pendingTopicId === topic._id}
+                              onClick={() => void handleRemoveModule(topic._id, module._id)}
+                              title="Remove module"
+                            >
+                              <Trash2 />
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
+                      No modules attached to this topic yet.
+                    </div>
+                  )}
+                </div>
+              </section>
+            );
+          })
+        ) : (
+          <div className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
+            Add the first topic to start building this training.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

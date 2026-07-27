@@ -3,8 +3,8 @@ import type { TMeta } from "./global.type";
 import type { LearningModule } from "./module.type";
 
 export type TrainingStatus = "draft" | "published" | string;
-
 export type TrainingAuthType = "passcode" | "email" | "employeeId" | "guest";
+
 export type TrainingCreator = {
   _id: string;
   firstName: string;
@@ -30,12 +30,20 @@ export type TrainingCompany = {
   };
 };
 
+export type TrainingModuleSummary = Pick<
+  LearningModule,
+  "_id" | "title" | "description" | "status"
+> & {
+  thumbnailImage?: string;
+  questions?: LearningModule["questions"];
+};
+
 export type Training = {
   _id: string;
   title: string;
   description?: string;
   thumbnailImage?: string;
-  companyId?: string | TrainingCompany;
+  companyId?: string | TrainingCompany | null;
   teamId?: string;
   status: TrainingStatus;
   authType?: TrainingAuthType;
@@ -55,8 +63,8 @@ export type Topic = {
   title: string;
   description?: string;
   trainingId: string;
-  moduleIds?: string[] | LearningModule[];
-  modules?: LearningModule[];
+  moduleIds?: string[] | TrainingModuleSummary[];
+  modules?: TrainingModuleSummary[];
   moduleCount?: number;
   order?: number;
   isDeleted?: boolean;

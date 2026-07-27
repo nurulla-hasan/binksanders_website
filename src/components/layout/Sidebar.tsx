@@ -15,7 +15,8 @@ import {
   LogOut,
   QrCode,
   Rss,
-  LayoutList
+  LayoutList,
+  BookOpen
 } from "lucide-react";
 import { ScrollArea } from "../ui/scroll-area";
 import { logout } from "@/services/auth.service";
@@ -27,6 +28,7 @@ interface SidebarProps {
 
 const superAdminNavItems = [
   { name: "Dashboard", href: "/super-admin", icon: LayoutDashboard },
+  { name: "Training Builder", href: "/super-admin/training", icon: BookOpen },
   { name: "Module Builder", href: "/super-admin/course", icon: GraduationCap },
   { name: "Client Branding", href: "/super-admin/branding", icon: Megaphone },
   { name: "Location & Team", href: "/super-admin/location-performance", icon: MapPin },
