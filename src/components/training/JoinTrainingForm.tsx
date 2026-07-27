@@ -13,9 +13,13 @@ import { authenticateTraining } from "@/services/training.service";
 type JoinTrainingFormProps = {
   trainingId: string;
   authType?: string;
+  inviteToken?: string;
 };
 
-const authLabels: Record<TrainingAuthType, { title: string; label: string; placeholder: string }> = {
+const authLabels: Record<
+  TrainingAuthType,
+  { title: string; label: string; placeholder: string }
+> = {
   passcode: {
     title: "Passcode Login",
     label: "Passcode",
@@ -39,10 +43,19 @@ const authLabels: Record<TrainingAuthType, { title: string; label: string; place
 };
 
 const isTrainingAuthType = (value?: string): value is TrainingAuthType => {
-  return value === "passcode" || value === "email" || value === "employeeId" || value === "guest";
+  return (
+    value === "passcode" ||
+    value === "email" ||
+    value === "employeeId" ||
+    value === "guest"
+  );
 };
 
-export function JoinTrainingForm({ trainingId, authType }: JoinTrainingFormProps) {
+export function JoinTrainingForm({
+  trainingId,
+  authType,
+  inviteToken,
+}: JoinTrainingFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const selectedAuthType = isTrainingAuthType(authType) ? authType : undefined;
@@ -74,10 +87,11 @@ export function JoinTrainingForm({ trainingId, authType }: JoinTrainingFormProps
           ? { authType: selectedAuthType, name: value }
           : { authType: selectedAuthType, identifier: value };
 
-console.log("[training-auth] request", {
+      console.log("[training-auth] request", {
         endpoint: `/training/${trainingId}/authenticate`,
         trainingId,
         authType: selectedAuthType,
+        inviteToken,
         payload,
       });
 
@@ -90,7 +104,9 @@ console.log("[training-auth] request", {
       router.replace("/");
       router.refresh();
     } catch (error: unknown) {
-      ErrorToast(error instanceof Error ? error.message : "Unable to join training");
+      ErrorToast(
+        error instanceof Error ? error.message : "Unable to join training",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -99,7 +115,9 @@ console.log("[training-auth] request", {
   if (!selectedAuthType || !copy) {
     return (
       <div className="space-y-3 text-center">
-        <h1 className="font-heading text-2xl font-bold">Invalid Training Link</h1>
+        <h1 className="font-heading text-2xl font-bold">
+          Invalid Training Link
+        </h1>
         <p className="text-sm text-muted-foreground">
           This link is missing a supported auth type.
         </p>
@@ -128,12 +146,15 @@ console.log("[training-auth] request", {
       </Field>
 
       <Button type="submit" size="lg-full" disabled={isSubmitting}>
-        {isSubmitting ? <LoaderCircle className="animate-spin" /> : <ArrowRight />}
+        {isSubmitting ? (
+          <LoaderCircle className="animate-spin" />
+        ) : (
+          <ArrowRight />
+        )}
         {isSubmitting ? "Joining..." : "Join Training"}
       </Button>
     </form>
   );
 }
-
 
 
