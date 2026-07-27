@@ -3,9 +3,10 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Pencil, Plus, Save, Trash2, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ConfirmationModal } from "@/components/ui/custom/confirmation-modal";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
@@ -21,7 +22,9 @@ import { ErrorToast, SuccessToast } from "@/lib/utils";
 import {
   addModuleToTopic,
   addTopicToTraining,
+  deleteTopic,
   removeModuleFromTopic,
+  updateTopic,
 } from "@/services/training.service";
 
 type TrainingBuilderProps = {
@@ -41,6 +44,7 @@ export function TrainingBuilder({ training, modules }: TrainingBuilderProps) {
   const router = useRouter();
   const [isAddingTopic, setIsAddingTopic] = useState(false);
   const [pendingTopicId, setPendingTopicId] = useState<string>();
+  const [editingTopicId, setEditingTopicId] = useState<string>();
   const [selectedModules, setSelectedModules] = useState<Record<string, string>>({});
 
   const companyName =
@@ -55,7 +59,8 @@ export function TrainingBuilder({ training, modules }: TrainingBuilderProps) {
 
   const handleAddTopic = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    const formData = new FormData(form);
     const title = String(formData.get("title") || "").trim();
     const description = String(formData.get("description") || "").trim();
 
@@ -72,7 +77,7 @@ export function TrainingBuilder({ training, modules }: TrainingBuilderProps) {
       });
       if (!response.success) throw new Error(response.message);
       SuccessToast(response.message || "Topic added successfully");
-      event.currentTarget.reset();
+      form.reset();
       router.refresh();
     } catch (error: unknown) {
       ErrorToast(error instanceof Error ? error.message : "Unable to add topic");
@@ -102,6 +107,52 @@ export function TrainingBuilder({ training, modules }: TrainingBuilderProps) {
     }
   };
 
+
+  const handleUpdateTopic = async (
+    event: React.FormEvent<HTMLFormElement>,
+    topicId: string,
+  ) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const title = String(formData.get("title") || "").trim();
+    const description = String(formData.get("description") || "").trim();
+
+    if (!title) {
+      ErrorToast("Topic title is required");
+      return;
+    }
+
+    setPendingTopicId(topicId);
+    try {
+      const response = await updateTopic(training._id, topicId, {
+        title,
+        description,
+      });
+      if (!response.success) throw new Error(response.message);
+      SuccessToast(response.message || "Topic updated successfully");
+      setEditingTopicId(undefined);
+      router.refresh();
+    } catch (error: unknown) {
+      ErrorToast(error instanceof Error ? error.message : "Unable to update topic");
+    } finally {
+      setPendingTopicId(undefined);
+    }
+  };
+
+  const handleDeleteTopic = async (topicId: string) => {
+    setPendingTopicId(topicId);
+    try {
+      const response = await deleteTopic(training._id, topicId);
+      if (!response.success) throw new Error(response.message);
+      SuccessToast(response.message || "Topic deleted successfully");
+      router.refresh();
+    } catch (error: unknown) {
+      ErrorToast(error instanceof Error ? error.message : "Unable to delete topic");
+    } finally {
+      setPendingTopicId(undefined);
+    }
+  };
   const handleRemoveModule = async (topicId: string, moduleId: string) => {
     setPendingTopicId(topicId);
     try {
@@ -200,18 +251,95 @@ export function TrainingBuilder({ training, modules }: TrainingBuilderProps) {
 
             return (
               <section key={topic._id} className="rounded-md border border-border bg-card p-5 shadow-sm">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline">Topic {topic.order ?? "-"}</Badge>
-                      <Badge variant="secondary">{topic.moduleCount ?? topicModules.length} modules</Badge>
+                {editingTopicId === topic._id ? (
+                  <form
+                    onSubmit={(event) => void handleUpdateTopic(event, topic._id)}
+                    className="space-y-4"
+                  >
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <Field>
+                        <FieldLabel htmlFor={`edit-topic-title-${topic._id}`}>
+                          Topic Title
+                        </FieldLabel>
+                        <Input
+                          id={`edit-topic-title-${topic._id}`}
+                          name="title"
+                          defaultValue={topic.title}
+                        />
+                      </Field>
+                      <Field>
+                        <FieldLabel htmlFor={`edit-topic-description-${topic._id}`}>
+                          Description
+                        </FieldLabel>
+                        <Input
+                          id={`edit-topic-description-${topic._id}`}
+                          name="description"
+                          defaultValue={topic.description || ""}
+                        />
+                      </Field>
                     </div>
-                    <h2 className="font-heading text-xl font-bold">{topic.title}</h2>
-                    <p className="text-sm text-muted-foreground">
-                      {topic.description || "No description"}
-                    </p>
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={pendingTopicId === topic._id}
+                        onClick={() => setEditingTopicId(undefined)}
+                      >
+                        <X /> Cancel
+                      </Button>
+                      <Button type="submit" disabled={pendingTopicId === topic._id}>
+                        <Save /> {pendingTopicId === topic._id ? "Saving..." : "Save Topic"}
+                      </Button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline">Topic {topic.order ?? "-"}</Badge>
+                        <Badge variant="secondary">
+                          {topic.moduleCount ?? topicModules.length} modules
+                        </Badge>
+                      </div>
+                      <h2 className="font-heading text-xl font-bold">{topic.title}</h2>
+                      <p className="text-sm text-muted-foreground">
+                        {topic.description || "No description"}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        disabled={Boolean(pendingTopicId)}
+                        onClick={() => setEditingTopicId(topic._id)}
+                        title="Edit topic"
+                      >
+                        <Pencil />
+                      </Button>
+                      <ConfirmationModal
+                        title="Delete topic?"
+                        description="This topic will be removed from the training. Attached modules will remain in the module library."
+                        confirmText="Delete Topic"
+                        loadingText="Deleting..."
+                        variant="destructive"
+                        isLoading={pendingTopicId === topic._id}
+                        onConfirm={() => void handleDeleteTopic(topic._id)}
+                        actionTrigger={
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            disabled={Boolean(pendingTopicId)}
+                            title="Delete topic"
+                          >
+                            <Trash2 />
+                          </Button>
+                        }
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto]">
                   <Select

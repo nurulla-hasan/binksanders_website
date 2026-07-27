@@ -1,10 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import type { ColumnDef } from "@tanstack/react-table";
-import { ArrowRight, QrCode } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { TrainingActions } from "./TrainingActions";
 import type { Training, TrainingCompany } from "@/lib/types/training.type";
 import { formatDate } from "@/lib/utils";
 
@@ -87,21 +85,6 @@ export const columns: ColumnDef<Training>[] = [
   {
     id: "actions",
     header: () => <div className="text-right">Actions</div>,
-    cell: ({ row }) => (
-      <div className="flex justify-end gap-2">
-        {row.original.qrCodeUrl && (
-          <Button asChild variant="outline" size="icon" title="View QR code">
-            <Link href={`/super-admin/training/${row.original._id}`}>
-              <QrCode />
-            </Link>
-          </Button>
-        )}
-        <Button asChild variant="outline" size="sm">
-          <Link href={`/super-admin/training/${row.original._id}`}>
-            Manage <ArrowRight />
-          </Link>
-        </Button>
-      </div>
-    ),
+    cell: ({ row }) => <TrainingActions training={row.original} />,
   },
 ];

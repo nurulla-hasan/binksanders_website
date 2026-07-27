@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import type { PublicCompanyDropdownItem } from "@/lib/types/company.type";
 import type { Team } from "@/lib/types/team.type";
-import type { Training, TrainingAuthType, TrainingStatus } from "@/lib/types/training.type";
+import type { Training, TrainingAuthType } from "@/lib/types/training.type";
 import { ErrorToast, SuccessToast } from "@/lib/utils";
 import { createTraining } from "@/services/training.service";
 
@@ -26,7 +26,6 @@ type TrainingCreateFormProps = {
 };
 
 const authTypes: TrainingAuthType[] = ["passcode", "email", "employeeId", "guest"];
-const statuses: TrainingStatus[] = ["draft", "published"];
 
 export function TrainingCreateForm({ companies, teams }: TrainingCreateFormProps) {
   const router = useRouter();
@@ -34,7 +33,7 @@ export function TrainingCreateForm({ companies, teams }: TrainingCreateFormProps
   const [companyId, setCompanyId] = useState("");
   const [teamId, setTeamId] = useState("");
   const [authType, setAuthType] = useState<TrainingAuthType>("passcode");
-  const [status, setStatus] = useState<TrainingStatus>("draft");
+  const [thumbnailPreview, setThumbnailPreview] = useState<string>();
 
   const filteredTeams = useMemo(
     () => teams.filter((team) => !companyId || team.companyId === companyId),
@@ -44,6 +43,22 @@ export function TrainingCreateForm({ companies, teams }: TrainingCreateFormProps
   const handleCompanyChange = (value: string) => {
     setCompanyId(value);
     setTeamId("");
+  };
+
+
+  useEffect(() => {
+    return () => {
+      if (thumbnailPreview) URL.revokeObjectURL(thumbnailPreview);
+    };
+  }, [thumbnailPreview]);
+
+  const handleThumbnailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    setThumbnailPreview((current) => {
+      if (current) URL.revokeObjectURL(current);
+      return file ? URL.createObjectURL(file) : undefined;
+    });
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -79,7 +94,6 @@ export function TrainingCreateForm({ companies, teams }: TrainingCreateFormProps
           companyId,
           teamId,
           authType,
-          status,
           ...(authType === "passcode" ? { passcode } : {}),
         },
         thumbnailImage:
@@ -100,27 +114,10 @@ export function TrainingCreateForm({ companies, teams }: TrainingCreateFormProps
   return (
     <form onSubmit={handleSubmit}>
       <FieldGroup>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field>
-            <FieldLabel htmlFor="title">Title</FieldLabel>
-            <Input id="title" name="title" placeholder="Customer Service Excellence" />
-          </Field>
-          <Field>
-            <FieldLabel>Status</FieldLabel>
-            <Select value={status} onValueChange={(value) => setStatus(value as TrainingStatus)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {statuses.map((item) => (
-                  <SelectItem key={item} value={item}>
-                    {item}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-        </div>
+        <Field>
+          <FieldLabel htmlFor="title">Title</FieldLabel>
+          <Input id="title" name="title" placeholder="Customer Service Excellence" />
+        </Field>
 
         <Field>
           <FieldLabel htmlFor="description">Description</FieldLabel>
@@ -189,7 +186,23 @@ export function TrainingCreateForm({ companies, teams }: TrainingCreateFormProps
 
         <Field>
           <FieldLabel htmlFor="thumbnail">Thumbnail</FieldLabel>
-          <Input id="thumbnail" name="thumbnail" type="file" accept="image/*" />
+          <Input
+            id="thumbnail"
+            name="thumbnail"
+            type="file"
+            accept="image/*"
+            onChange={handleThumbnailChange}
+          />
+          {thumbnailPreview && (
+            <div className="mt-3 overflow-hidden rounded-md border bg-background">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={thumbnailPreview}
+                alt="Selected training thumbnail preview"
+                className="h-44 w-full object-cover"
+              />
+            </div>
+          )}
         </Field>
 
         <div className="flex justify-end">
