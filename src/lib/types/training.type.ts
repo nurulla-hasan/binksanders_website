@@ -120,7 +120,7 @@ export type TopicData = {
 };
 
 export type AddModuleToTopicPayload = {
-  moduleId: string;
+  moduleIds: string[];
 };
 
 export type ReorderTopicsPayload = {

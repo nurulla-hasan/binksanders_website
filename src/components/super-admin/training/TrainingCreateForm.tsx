@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,37 +14,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import type { PublicCompanyDropdownItem } from "@/lib/types/company.type";
-import type { Team } from "@/lib/types/team.type";
 import type { Training, TrainingAuthType } from "@/lib/types/training.type";
 import { ErrorToast, SuccessToast } from "@/lib/utils";
 import { createTraining } from "@/services/training.service";
 
-type TrainingCreateFormProps = {
-  companies: PublicCompanyDropdownItem[];
-  teams: Team[];
-};
-
 const authTypes: TrainingAuthType[] = ["passcode", "email", "employeeId", "guest"];
 
-export function TrainingCreateForm({ companies, teams }: TrainingCreateFormProps) {
+export function TrainingCreateForm() {
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
-  const [companyId, setCompanyId] = useState("");
-  const [teamId, setTeamId] = useState("");
   const [authType, setAuthType] = useState<TrainingAuthType>("passcode");
   const [thumbnailPreview, setThumbnailPreview] = useState<string>();
-
-  const filteredTeams = useMemo(
-    () => teams.filter((team) => !companyId || team.companyId === companyId),
-    [companyId, teams],
-  );
-
-  const handleCompanyChange = (value: string) => {
-    setCompanyId(value);
-    setTeamId("");
-  };
-
 
   useEffect(() => {
     return () => {
@@ -74,11 +54,6 @@ export function TrainingCreateForm({ companies, teams }: TrainingCreateFormProps
       return;
     }
 
-    if (!companyId || !teamId) {
-      ErrorToast("Select a company and team");
-      return;
-    }
-
     if (authType === "passcode" && !passcode) {
       ErrorToast("Passcode is required for passcode auth");
       return;
@@ -91,8 +66,6 @@ export function TrainingCreateForm({ companies, teams }: TrainingCreateFormProps
         data: {
           title,
           description,
-          companyId,
-          teamId,
           authType,
           ...(authType === "passcode" ? { passcode } : {}),
         },
@@ -123,39 +96,6 @@ export function TrainingCreateForm({ companies, teams }: TrainingCreateFormProps
           <FieldLabel htmlFor="description">Description</FieldLabel>
           <Textarea id="description" name="description" placeholder="Short training summary" />
         </Field>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field>
-            <FieldLabel>Company</FieldLabel>
-            <Select value={companyId} onValueChange={handleCompanyChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select company" />
-              </SelectTrigger>
-              <SelectContent>
-                {companies.map((company) => (
-                  <SelectItem key={company._id} value={company._id}>
-                    {company.firstName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-          <Field>
-            <FieldLabel>Team</FieldLabel>
-            <Select value={teamId} onValueChange={setTeamId} disabled={!companyId}>
-              <SelectTrigger>
-                <SelectValue placeholder={companyId ? "Select team" : "Select company first"} />
-              </SelectTrigger>
-              <SelectContent>
-                {filteredTeams.map((team) => (
-                  <SelectItem key={team._id} value={team._id}>
-                    {team.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-        </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <Field>

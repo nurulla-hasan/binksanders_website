@@ -17,16 +17,19 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ConfirmationModal } from "@/components/ui/custom/confirmation-modal";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import type { LearningModule } from "@/lib/types/module.type";
 import type {
   Topic,
@@ -75,9 +78,11 @@ export function TrainingBuilder({ training, modules }: TrainingBuilderProps) {
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
   const [isSendingInvite, setIsSendingInvite] = useState(false);
   const [generatedLink, setGeneratedLink] = useState("");
+  const [isTopicModalOpen, setIsTopicModalOpen] = useState(false);
+  const [attachModalTopicId, setAttachModalTopicId] = useState<string>();
   const [pendingTopicId, setPendingTopicId] = useState<string>();
   const [editingTopicId, setEditingTopicId] = useState<string>();
-  const [selectedModules, setSelectedModules] = useState<Record<string, string>>({});
+  const [selectedModules, setSelectedModules] = useState<Record<string, string[]>>({});
 
   const companyName =
     typeof training.companyId === "object" && training.companyId
@@ -110,6 +115,7 @@ export function TrainingBuilder({ training, modules }: TrainingBuilderProps) {
       if (!response.success) throw new Error(response.message);
       SuccessToast(response.message || "Topic added successfully");
       form.reset();
+      setIsTopicModalOpen(false);
       router.refresh();
     } catch (error: unknown) {
       ErrorToast(error instanceof Error ? error.message : "Unable to add topic");
@@ -180,24 +186,36 @@ export function TrainingBuilder({ training, modules }: TrainingBuilderProps) {
     }
   };
   const handleAttachModule = async (topicId: string) => {
-    const moduleId = selectedModules[topicId];
-    if (!moduleId) {
-      ErrorToast("Select a module first");
+    const moduleIds = selectedModules[topicId] || [];
+    if (moduleIds.length === 0) {
+      ErrorToast("Select at least one module");
       return;
     }
 
     setPendingTopicId(topicId);
     try {
-      const response = await addModuleToTopic(training._id, topicId, { moduleId });
+      const response = await addModuleToTopic(training._id, topicId, { moduleIds });
       if (!response.success) throw new Error(response.message);
-      SuccessToast(response.message || "Module added to topic");
-      setSelectedModules((current) => ({ ...current, [topicId]: "" }));
+      SuccessToast(response.message || "Modules added to topic");
+      setSelectedModules((current) => ({ ...current, [topicId]: [] }));
+      setAttachModalTopicId(undefined);
       router.refresh();
     } catch (error: unknown) {
-      ErrorToast(error instanceof Error ? error.message : "Unable to add module");
+      ErrorToast(error instanceof Error ? error.message : "Unable to add modules");
     } finally {
       setPendingTopicId(undefined);
     }
+  };
+
+  const toggleSelectedModule = (topicId: string, moduleId: string) => {
+    setSelectedModules((current) => {
+      const selected = current[topicId] || [];
+      const next = selected.includes(moduleId)
+        ? selected.filter((id) => id !== moduleId)
+        : [...selected, moduleId];
+
+      return { ...current, [topicId]: next };
+    });
   };
 
 
@@ -380,25 +398,51 @@ export function TrainingBuilder({ training, modules }: TrainingBuilderProps) {
       </section>
 
       <section className="rounded-md border border-border bg-card p-5 shadow-sm">
-        <form onSubmit={handleAddTopic} className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field>
-              <FieldLabel htmlFor="topic-title">Topic Title</FieldLabel>
-              <Input id="topic-title" name="title" placeholder="Emotion & Aggression" />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="topic-description">Description</FieldLabel>
-              <Input id="topic-description" name="description" placeholder="Understanding behavior" />
-            </Field>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            <h2 className="font-heading text-lg font-bold">Topics</h2>
+            <p className="text-sm text-muted-foreground">
+              Create topics first, then attach existing modules under each topic.
+            </p>
           </div>
-          <div className="flex justify-end">
-            <Button type="submit" disabled={isAddingTopic}>
-              <Plus /> {isAddingTopic ? "Adding..." : "Add Topic"}
-            </Button>
-          </div>
-        </form>
+          <Dialog open={isTopicModalOpen} onOpenChange={setIsTopicModalOpen}>
+            <DialogTrigger asChild>
+              <Button type="button">
+                <Plus /> Add Topic
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <form onSubmit={handleAddTopic} className="space-y-5">
+                <DialogHeader>
+                  <DialogTitle>Add Topic</DialogTitle>
+                  <DialogDescription>
+                    Add a topic inside this training. Modules can be attached after the topic is created.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4">
+                  <Field>
+                    <FieldLabel htmlFor="topic-title">Topic Title</FieldLabel>
+                    <Input id="topic-title" name="title" placeholder="Emotion & Aggression" />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="topic-description">Description</FieldLabel>
+                    <Input
+                      id="topic-description"
+                      name="description"
+                      placeholder="Understanding behavior"
+                    />
+                  </Field>
+                </div>
+                <DialogFooter>
+                  <Button type="submit" disabled={isAddingTopic}>
+                    <Plus /> {isAddingTopic ? "Adding..." : "Add Topic"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </section>
-
       <div className="space-y-4">
         {(training.topics || []).length > 0 ? (
           training.topics?.map((topic) => {
@@ -498,32 +542,76 @@ export function TrainingBuilder({ training, modules }: TrainingBuilderProps) {
                   </div>
                 )}
 
-                <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto]">
-                  <Select
-                    value={selectedModules[topic._id] || ""}
-                    onValueChange={(value) =>
-                      setSelectedModules((current) => ({ ...current, [topic._id]: value }))
-                    }
+                <div className="mt-5 flex justify-end">
+                  <Dialog
+                    open={attachModalTopicId === topic._id}
+                    onOpenChange={(open) => {
+                      setAttachModalTopicId(open ? topic._id : undefined);
+                      if (open) {
+                        setSelectedModules((current) => ({ ...current, [topic._id]: [] }));
+                      }
+                    }}
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Attach existing module" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableModules.map((module) => (
-                        <SelectItem key={module._id} value={module._id}>
-                          {module.title}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={pendingTopicId === topic._id || availableModules.length === 0}
-                    onClick={() => void handleAttachModule(topic._id)}
-                  >
-                    <Plus /> Attach Module
-                  </Button>
+                    <DialogTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={pendingTopicId === topic._id || availableModules.length === 0}
+                      >
+                        <Plus /> Attach Module
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Attach Modules</DialogTitle>
+                        <DialogDescription>
+                          Select one or more modules to add under this topic.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="max-h-[55dvh] space-y-3 overflow-y-auto pr-1">
+                        {availableModules.map((module) => {
+                          const checked = (selectedModules[topic._id] || []).includes(module._id);
+                          return (
+                            <label
+                              key={module._id}
+                              className="flex cursor-pointer items-start gap-3 rounded-md border bg-background p-3"
+                            >
+                              <Checkbox
+                                checked={checked}
+                                onCheckedChange={() => toggleSelectedModule(topic._id, module._id)}
+                              />
+                              <span className="min-w-0 space-y-1">
+                                <span className="block font-medium">{module.title}</span>
+                                <span className="line-clamp-2 block text-xs text-muted-foreground">
+                                  {module.description || "No description"}
+                                </span>
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                      <DialogFooter>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          disabled={pendingTopicId === topic._id}
+                          onClick={() => setAttachModalTopicId(undefined)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="button"
+                          disabled={
+                            pendingTopicId === topic._id ||
+                            (selectedModules[topic._id] || []).length === 0
+                          }
+                          onClick={() => void handleAttachModule(topic._id)}
+                        >
+                          <Plus /> {pendingTopicId === topic._id ? "Attaching..." : "Attach Modules"}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 </div>
 
                 <div className="mt-5 space-y-3">
