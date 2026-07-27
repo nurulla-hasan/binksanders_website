@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, Building2, Mail, MapPin } from "lucide-react";
 import { ClientDetailsActions } from "@/components/super-admin/clients/ClientDetailsActions";
-import { AssignModulesModal } from "@/components/super-admin/clients/AssignModulesModal";
-import { AssignedModulesCompliance } from "@/components/super-admin/clients/AssignedModulesCompliance";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,8 +9,6 @@ import DashboardPageLayout from "@/components/ui/custom/DashboardPageLayout";
 import type { TParams } from "@/lib/types/global.type";
 import { formatDate, getInitials } from "@/lib/utils";
 import { getCompany } from "@/services/company.service";
-import { getCompanyModules, getModules } from "@/services/module.service";
-import { getCompanyTeams } from "@/services/team.service";
 
 export default async function CompanySettingsPage({
   params,
@@ -27,31 +23,13 @@ export default async function CompanySettingsPage({
   }
 
   const company = response.data;
-  const [modulesResult, assignedResult, teamsResult] = await Promise.allSettled([
-    getModules({ limit: 100 }),
-    getCompanyModules(company._id),
-    getCompanyTeams(company._id, { limit: 100 }),
-  ]);
-
-  const modules =
-    modulesResult.status === "fulfilled" && modulesResult.value.success
-      ? modulesResult.value.data
-      : [];
-  const assignedModules =
-    assignedResult.status === "fulfilled" && assignedResult.value.success
-      ? assignedResult.value.data
-      : [];
-  const teams =
-    teamsResult.status === "fulfilled" && teamsResult.value.success
-      ? teamsResult.value.data.result.map(({ _id, name }) => ({ _id, name }))
-      : [];
 
   return (
     <div className="animate-fadeIn">
       <DashboardPageLayout>
         <DashboardHeader
           title="Company Settings"
-          description="Manage company information, branding, modules, and platform access."
+          description="Manage company information, branding, and platform access."
         >
           <Button asChild variant="outline" size="sm">
             <Link href={`/super-admin/clients/${company._id}`}>
@@ -85,7 +63,7 @@ export default async function CompanySettingsPage({
 
           <div className="grid gap-6 p-6 sm:grid-cols-2 lg:grid-cols-4">
             <Detail label="Email" value={company.email} icon={<Mail />} />
-            <Detail label="Address" value={company.address || "—"} icon={<MapPin />} />
+            <Detail label="Address" value={company.address || "-"} icon={<MapPin />} />
             <Detail
               label="Created"
               value={formatDate(company.createdAt)}
@@ -122,20 +100,6 @@ export default async function CompanySettingsPage({
             />
           </div>
         </section>
-
-        <AssignedModulesCompliance
-          companyId={company._id}
-          modules={assignedModules}
-          action={
-            <AssignModulesModal
-              key="assign-modules-action"
-              companyId={company._id}
-              teams={teams}
-              modules={modules}
-              assignedModules={assignedModules}
-            />
-          }
-        />
       </DashboardPageLayout>
     </div>
   );

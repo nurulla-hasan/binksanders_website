@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ConfirmationModal } from "@/components/ui/custom/confirmation-modal";
+import { TrainingEditModal } from "./TrainingEditModal";
 import {
   Dialog,
   DialogContent,
@@ -292,13 +293,18 @@ export function TrainingBuilder({ training, modules }: TrainingBuilderProps) {
         <div className="grid gap-5 lg:grid-cols-[1fr_180px]">
           <div className="space-y-4">
             <div className="space-y-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge variant={training.status === "published" ? "active" : "outline"}>
-                  {training.status}
-                </Badge>
-                <Badge variant="outline">{training.authType || "auth not set"}</Badge>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="space-y-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant={training.status === "published" ? "active" : "outline"}>
+                      {training.status}
+                    </Badge>
+                    <Badge variant="outline">{training.authType || "auth not set"}</Badge>
+                  </div>
+                  <h1 className="font-heading text-2xl font-bold">{training.title}</h1>
+                </div>
+                <TrainingEditModal training={training} />
               </div>
-              <h1 className="font-heading text-2xl font-bold">{training.title}</h1>
               <p className="text-sm text-muted-foreground">
                 {training.description || "No description"}
               </p>
