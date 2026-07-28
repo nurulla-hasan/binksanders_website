@@ -127,28 +127,30 @@ export function QuestionAnswer({
     const options = question.options ?? [];
 
     return (
-      <div className="space-y-4">
-        <div className="min-h-80 space-y-4 rounded-sm border border-background bg-background/10 p-4">
+      <div className="flex flex-1 flex-col min-h-0 pt-2 w-full">
+        <div className="space-y-4 px-2 mb-6 overflow-y-auto min-h-0">
           {(question.messages ?? []).filter((msg) => msg.sender || msg.text).map((message, index) => (
-            <div key={`${message.sender}-${index}`} className="flex items-start gap-3">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                <MessageCircle className="size-4" />
+            <div key={`${message.sender}-${index}`} className="flex items-start gap-2.5">
+              <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm mt-0.5">
+                <MessageCircle className="size-3.5" />
               </div>
-              <div className="max-w-[78%] rounded-sm bg-muted p-3 text-sm text-foreground">
+              <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-secondary px-3.5 py-2 text-sm text-secondary-foreground shadow-sm">
                 <p className="wrap-break-word">{message.text}</p>
               </div>
             </div>
           ))}
           {typeof answer === "string" && answer !== "completed" && (
-            <div className="ml-auto max-w-[78%] rounded-sm bg-primary p-3 text-sm font-semibold text-primary-foreground">
-              <p className="wrap-break-word">{answer}</p>
+            <div className="flex justify-end mt-3">
+              <div className="max-w-[85%] rounded-2xl rounded-tr-sm bg-muted px-3.5 py-2 text-sm text-foreground shadow-sm">
+                <p className="wrap-break-word">{answer}</p>
+              </div>
             </div>
           )}
         </div>
 
         {options.length > 0 ? (
-          <div className="space-y-3 rounded-sm border bg-background p-4">
-            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+          <div className="mt-auto shrink-0 space-y-3 rounded-md border border-border bg-background p-3 shadow-sm">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
               Choose your response
             </p>
             {options.map((option, optionIndex) => {
@@ -165,7 +167,7 @@ export function QuestionAnswer({
                   disabled={disabled}
                   onClick={() => onAnswer(option)}
                   className={cn(
-                    "w-full min-w-0 rounded-sm border p-3 text-left text-sm transition-colors wrap-break-word",
+                    "w-full min-w-0 rounded-sm border p-2 text-left text-sm transition-colors wrap-break-word",
                     isCorrectOption && "border-2 border-success bg-background font-semibold text-foreground",
                     isWrongSelection && "border-2 border-primary bg-background font-semibold text-foreground",
                     !isSubmitted && selected && "border-2 border-primary bg-background font-semibold",

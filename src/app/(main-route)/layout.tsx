@@ -16,7 +16,7 @@ export default async function MainRouteLayout({
       <div className="flex flex-col h-dvh relative w-full max-w-120 mx-auto overflow-hidden">
         <TopNav />
         {/* Main content area */}
-        <main className="flex-1 min-h-0 flex flex-col w-full p-4 overflow-y-auto overflow-x-hidden">
+        <main className="flex-1 min-h-0 flex flex-col w-full p-3 overflow-y-auto overflow-x-hidden">
           {children}
         </main>
       </div>

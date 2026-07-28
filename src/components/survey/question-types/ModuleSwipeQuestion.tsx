@@ -63,7 +63,7 @@ export function ModuleSwipeQuestion({
   };
 
   return (
-    <div className="relative mb-20 min-h-112 w-full">
+    <div className="flex-1 min-h-0 flex flex-col w-full">
       <motion.div
         drag={isDisabled ? false : "x"}
         dragConstraints={{ left: 0, right: 0 }}
@@ -71,26 +71,28 @@ export function ModuleSwipeQuestion({
         onDragEnd={handleDragEnd}
         style={{ x, rotate }}
         animate={controls}
-        className="absolute inset-0 z-10 flex cursor-grab flex-col justify-center overflow-hidden rounded-sm border bg-background shadow-md active:cursor-grabbing"
+        className="relative flex-1 min-h-0 z-10 flex cursor-grab flex-col justify-center overflow-hidden rounded-lg border border-primary/20 bg-card shadow-sm active:cursor-grabbing"
       >
         <motion.div
-          className="pointer-events-none absolute inset-0"
+          className="pointer-events-none absolute inset-0 z-0"
           style={{ backgroundColor: overlayColor }}
         />
 
-        <div className="relative z-10 flex h-full flex-col items-center justify-center p-8">
-          {question.image && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={question.image}
-              alt=""
-              className="mb-5 max-h-48 w-full rounded-md object-contain"
-            />
-          )}
-          <h2 className="w-full text-center font-heading text-2xl font-bold leading-snug text-foreground">
-            {question.content}
-          </h2>
-          <div className="absolute inset-x-0 bottom-7 flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground">
+        <div className="relative z-10 flex h-full flex-col p-6 min-h-0">
+          <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin flex flex-col items-center justify-center w-full">
+            {question.image && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={question.image}
+                alt=""
+                className="mb-4 max-h-40 w-full rounded-md object-contain shrink-0"
+              />
+            )}
+            <h2 className="w-full text-center font-heading text-lg font-semibold leading-tight text-foreground my-auto py-4">
+              {question.content}
+            </h2>
+          </div>
+          <div className="shrink-0 mt-2 flex items-center justify-center gap-2 text-xs font-medium text-muted-foreground">
             <ArrowLeft className="size-4" />
             <span>Swipe to respond</span>
             <ArrowRight className="size-4" />
@@ -98,27 +100,27 @@ export function ModuleSwipeQuestion({
         </div>
       </motion.div>
 
-      <div className="absolute -bottom-20 z-20 flex w-full gap-4">
+      <div className="shrink-0 flex w-full gap-3 mt-4">
         <Button
           type="button"
           variant="disagree"
-          size="lg"
+          size="default"
           disabled={isDisabled}
-          className="flex-1 font-bold"
+          className="flex-1 font-bold text-sm shadow-sm"
           onClick={() => submitSwipe("left")}
         >
-          <X className="stroke-3" />
+          <X className="stroke-3 size-4 mr-1.5" />
           {question.leftLabel || "Disagree"}
         </Button>
         <Button
           type="button"
           variant="agree"
-          size="lg"
+          size="default"
           disabled={isDisabled}
-          className="flex-1 font-bold"
+          className="flex-1 font-bold text-sm shadow-sm"
           onClick={() => submitSwipe("right")}
         >
-          <Check className="stroke-3" />
+          <Check className="stroke-3 size-4 mr-1.5" />
           {question.rightLabel || "Agree"}
         </Button>
       </div>
