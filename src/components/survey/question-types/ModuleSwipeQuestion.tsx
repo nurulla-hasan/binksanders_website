@@ -79,7 +79,7 @@ export function ModuleSwipeQuestion({
         />
 
         <div className="relative z-10 flex h-full flex-col p-6 min-h-0">
-          <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin flex flex-col items-center justify-center w-full">
+          <div className="flex-1 min-h-0 flex flex-col items-center justify-center w-full">
             {question.image && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
