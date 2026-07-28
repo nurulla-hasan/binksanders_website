@@ -12,7 +12,7 @@ import type { CompanyDropdownItem } from "@/lib/types/company.type";
 import { ErrorToast, SuccessToast } from "@/lib/utils";
 import { createTeam } from "@/services/team.service";
 
-const initialForm = { name: "", companyId: "", passcode: "" };
+const initialForm = { name: "", companyId: "" };
 
 export function AddTeamModal({ companies }: { companies: CompanyDropdownItem[] }) {
   const router = useRouter();
@@ -43,7 +43,7 @@ export function AddTeamModal({ companies }: { companies: CompanyDropdownItem[] }
       open={isOpen}
       onOpenChange={setIsOpen}
       title="Add Team"
-      description="Create a team and set its access passcode."
+      description="Create a team."
       actionTrigger={<Button><Plus /> Add Team</Button>}
     >
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -68,10 +68,7 @@ export function AddTeamModal({ companies }: { companies: CompanyDropdownItem[] }
             <FieldLabel htmlFor="teamName">Team Name</FieldLabel>
             <Input id="teamName" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} required />
           </Field>
-          <Field>
-            <FieldLabel htmlFor="teamPasscode">Passcode</FieldLabel>
-            <Input id="teamPasscode" type="password" value={form.passcode} onChange={(event) => setForm({ ...form, passcode: event.target.value })} required />
-          </Field>
+
         </FieldGroup>
         <div className="flex justify-end gap-2">
           <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
