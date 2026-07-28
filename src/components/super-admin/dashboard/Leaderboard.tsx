@@ -16,7 +16,7 @@ export function Leaderboard() {
   ];
 
   return (
-    <Card className="col-span-1 bg-secondary/10 border-none shadow-none h-full rounded-sm overflow-hidden flex flex-col pt-0">
+    <Card className="col-span-1 bg-secondary/30 border-none shadow-none h-full rounded-sm overflow-hidden flex flex-col pt-0">
       <CardHeader className="pt-5 pb-4 px-4 bg-secondary/20 border-b border-secondary/20">
         <CardTitle className="text-sm font-bold font-heading uppercase tracking-wide leading-tight">
           EMPLOYEE PERFORMANCE<br />LEADERBOARD

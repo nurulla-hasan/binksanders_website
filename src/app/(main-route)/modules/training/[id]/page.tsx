@@ -54,28 +54,46 @@ export default async function TrainingModulesPage({
       : training.topics || [];
 
   return (
-    <div className="flex flex-1 min-h-0 flex-col gap-4 pb-8 animate-fadeIn overflow-y-auto pr-1">
-      <section className="overflow-hidden rounded-lg border bg-card shadow-sm">
+    <div className="flex flex-1 min-h-0 flex-col gap-4 pb-8 animate-fadeIn overflow-y-auto">
+      <section className="overflow-hidden rounded-lg border border-primary/20 bg-primary shadow-sm text-primary-foreground">
         {training.thumbnailImage && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={training.thumbnailImage}
             alt={training.title}
-            className="h-40 w-full object-cover"
+            className="h-32 w-full object-cover bg-background"
           />
         )}
-        <div className="space-y-3 p-5">
+        <div className="space-y-4 p-5">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant={training.status === "published" ? "active" : "outline"}>
+            <Badge variant="outline" className="border-primary-foreground/30 bg-primary-foreground/10 text-primary-foreground">
               {training.status}
             </Badge>
-            <Badge variant="secondary">{topics.length} topics</Badge>
+            <Badge variant="secondary">
+              {topics.length} topics
+            </Badge>
           </div>
           <div className="space-y-1">
             <h1 className="font-heading text-2xl font-bold">{training.title}</h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-primary-foreground/80">
               {training.description || "Training overview"}
             </p>
+          </div>
+
+          <div className="flex items-center justify-around rounded-md bg-background py-3 text-center shadow-sm">
+            <div className="flex-1">
+              <p className="text-2xl font-bold text-primary">
+                {topics.length}
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">Topics</p>
+            </div>
+            <div className="h-10 w-px bg-border"></div>
+            <div className="flex-1">
+              <p className="text-2xl font-bold text-primary">
+                {topics.reduce((acc, t) => acc + (t.moduleCount ?? t.modules?.length ?? 0), 0)}
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">Modules</p>
+            </div>
           </div>
         </div>
       </section>
@@ -94,7 +112,7 @@ export default async function TrainingModulesPage({
             <Link
               key={topic._id}
               href={`/modules/training/${id}/topics/${topic._id}`}
-              className="group block rounded-lg border bg-card p-5 shadow-sm transition-colors hover:border-primary/50"
+              className="group block rounded-lg border border-border bg-secondary/20 p-5 shadow-sm transition-colors hover:border-secondary/50"
             >
               <article className="space-y-3">
                 <div className="flex items-center justify-between gap-3">
@@ -115,7 +133,7 @@ export default async function TrainingModulesPage({
                   </p>
                 </div>
                 <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                  <Layers3 className="size-4" />
+                  <Layers3 className="size-4 text-secondary" />
                   Open topic to view modules
                 </div>
               </article>

@@ -28,7 +28,7 @@ const stats = [
     icon: TrendingUp,
     color: "from-secondary/10 to-secondary/5",
     border: "border-secondary/10",
-    iconBg: "bg-secondary/10 text-secondary",
+    iconBg: "bg-secondary/30 text-secondary",
   },
   {
     label: "Organization Grade",

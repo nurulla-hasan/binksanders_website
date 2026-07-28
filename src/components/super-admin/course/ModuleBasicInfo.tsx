@@ -26,7 +26,7 @@ export function ModuleBasicInfo({
   };
 
   return (
-    <div className="bg-secondary/10 border border-secondary/20 rounded-md p-6 space-y-6">
+    <div className="bg-secondary/30 border border-secondary/20 rounded-md p-6 space-y-6">
       {/* Module Title */}
       <Field>
         <FieldLabel htmlFor="module-title">
