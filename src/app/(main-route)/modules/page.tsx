@@ -2,15 +2,23 @@ import Link from "next/link";
 import { ArrowRight, BookOpen, CheckCircle2, Layers3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getMyTrainings } from "@/services/training.service";
+import { getMyProfile } from "@/services/user.service";
+import { WelcomeVideoOverlay } from "@/components/survey/WelcomeVideoOverlay";
 
 export default async function ModulesPage() {
-  const response = await getMyTrainings();
+  const [response, profileResponse] = await Promise.all([
+    getMyTrainings(),
+    getMyProfile(),
+  ]);
 
   if (!response.success) {
     throw new Error(response.message || "Unable to load your trainings");
   }
 
   const trainings = response.data;
+  const user = profileResponse.success ? profileResponse.data : null;
+  const branding = user?.branding;
+  
   const totalModules = trainings.reduce(
     (sum, training) => sum + (training.totalModules ?? 0),
     0,
@@ -18,6 +26,8 @@ export default async function ModulesPage() {
 
   return (
     <div className="flex flex-1 min-h-0 flex-col gap-4 pb-8 animate-fadeIn overflow-y-auto">
+      <WelcomeVideoOverlay branding={branding} user={user} />
+
       <section className="relative shrink-0 overflow-hidden rounded-lg border border-primary/20 bg-primary p-4 text-primary-foreground shadow-sm">
         <div className="relative z-10 space-y-4">
           <div className="space-y-1">
