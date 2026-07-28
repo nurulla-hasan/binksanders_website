@@ -46,20 +46,15 @@ export default function ForgotPasswordPage() {
 
       {/* Main Form Content */}
       <div className="flex-1 flex flex-col justify-center px-6 max-w-sm mx-auto w-full py-10">
-        <div className="flex flex-col items-center mb-10">
-          <div className="flex items-center gap-3">
-            <Image
-              src="/acme-logo.svg"
-              alt="Acme Inc Logo"
-              width={36}
-              height={36}
-              priority
-              style={{ height: "auto" }}
-            />
-            <span className="text-2xl font-bold font-heading tracking-tight text-foreground">
-              Acme Inc
-            </span>
-          </div>
+        <div className="mb-10 flex items-center justify-center">
+          <Image
+            src="/acme-inc.svg"
+            alt="Act Inc"
+            width={150}
+            height={50}
+            priority
+            className="h-auto w-37.5 max-w-full dark:invert"
+          />
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8 animate-fadeIn">

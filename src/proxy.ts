@@ -18,7 +18,9 @@ const AUTH_ROUTES = [
   "/auth/login",
   "/auth/admin-login",
   "/auth/forgot-password",
+  "/auth/admin-forgot-password",
   "/auth/reset-password",
+  "/auth/admin-reset-password",
   "/auth/verify-otp",
 ];
 
