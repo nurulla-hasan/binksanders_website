@@ -91,6 +91,13 @@ export function TrainingBuilder({ training, modules }: TrainingBuilderProps) {
       ? training.companyId.firstName
       : "Unassigned";
 
+  const teamName =
+    typeof training.teamId === "object" && training.teamId
+      ? training.teamId.name
+      : typeof training.teamId === "string"
+        ? (training.teamId.length === 24 ? "Assigned" : training.teamId)
+        : "Unassigned";
+
   const moduleById = useMemo(
     () => new Map(modules.map((module) => [module._id, module])),
     [modules],
@@ -340,9 +347,9 @@ export function TrainingBuilder({ training, modules }: TrainingBuilderProps) {
                 <p className="text-xs text-muted-foreground">Company</p>
                 <p className="mt-1 font-medium">{companyName}</p>
               </div>
-              <div className="rounded-md border bg-background p-3">
+              <div className="rounded-md border p-4">
                 <p className="text-xs text-muted-foreground">Team</p>
-                <p className="mt-1 font-medium">{training.teamId || "Unassigned"}</p>
+                <p className="mt-1 font-medium">{teamName}</p>
               </div>
               <div className="rounded-md border bg-background p-3">
                 <p className="text-xs text-muted-foreground">Passcode</p>

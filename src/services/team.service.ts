@@ -25,7 +25,7 @@ export const createTeam = async <T = unknown>(payload: CreateTeamPayload) => {
 
 export const getTeams = async (params: TQuery = {}) =>
   nextServerFetch<ApiResponse<TeamListData>>(`/team${buildQueryString(params)}`, {
-    next: { tags: ["teams"] },
+    next: { tags: ["teams"], revalidate: 3600 },
   });
 
 export const getCompanyTeams = async (
@@ -34,7 +34,7 @@ export const getCompanyTeams = async (
 ) =>
   nextServerFetch<ApiResponse<TeamListData>>(
     `/team/company/${companyId}${buildQueryString(params)}`,
-    { next: { tags: ["teams", `company-${companyId}-teams`] } }
+    { next: { tags: ["teams", `company-${companyId}-teams`], revalidate: 3600 } }
   );
 
 export const getCompanyTeamDropdown = async <T = unknown>(
@@ -44,7 +44,7 @@ export const getCompanyTeamDropdown = async <T = unknown>(
   nextServerFetch<ApiResponse<T>>(
     `/team/company/${companyId}/dropdown${buildQueryString(params)}`,
     {
-      cache: "no-store",
+      next: { tags: ["teams", `company-${companyId}-teams`], revalidate: 3600 }
     },
   );
 
@@ -53,7 +53,7 @@ export const getPublicCompanyTeamDropdown = async (companyId: string) =>
     `/team/company/${companyId}/dropdown`,
     {
       auth: "none",
-      cache: "no-store",
+      next: { tags: ["teams", `company-${companyId}-teams`], revalidate: 3600 }
     },
   );
 

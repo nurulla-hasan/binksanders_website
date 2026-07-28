@@ -46,13 +46,18 @@ export type TrainingModuleSummary = Pick<
   };
 };
 
+export type TrainingTeam = {
+  _id: string;
+  name: string;
+};
+
 export type Training = {
   _id: string;
   title: string;
   description?: string;
   thumbnailImage?: string;
   companyId?: string | TrainingCompany | null;
-  teamId?: string;
+  teamId?: string | TrainingTeam | null;
   status: TrainingStatus;
   authType?: TrainingAuthType;
   passcode?: string;
