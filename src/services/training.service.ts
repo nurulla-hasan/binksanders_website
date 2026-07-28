@@ -198,7 +198,10 @@ export const addModuleToTopic = async <T = Topic>(
     { method: "POST", body: payload },
   );
 
-  if (response.success) updateTag(`training-${trainingId}`);
+  if (response.success) {
+    updateTag(`training-${trainingId}`);
+    updateTag("modules");
+  }
   return response;
 };
 
