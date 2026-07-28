@@ -22,7 +22,7 @@ export function QuestionAnswer({
 }: AnswerRendererProps) {
   if (question.type === "Information") {
     return (
-      <div className="space-y-4 overflow-hidden rounded-lg border bg-card p-4">
+      <div className="space-y-4 overflow-hidden rounded-lg border bg-card p-4 mt-auto">
         <Button
           type="button"
           variant={answer === "reviewed" ? "default" : "outline"}

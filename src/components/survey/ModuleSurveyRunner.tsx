@@ -206,7 +206,7 @@ export function ModuleSurveyRunner({
       <AnimationWrapper key={currentIndex} direction="left" duration={0.4} className="flex-1 min-h-0 flex flex-col overflow-hidden">
         <div
           className={cn(
-            "flex-1 min-h-0 overflow-y-auto scrollbar-thin",
+            "flex-1 min-h-0 overflow-y-auto scrollbar-thin flex flex-col",
             isSimulatedCall
               ? "overflow-hidden rounded-lg bg-foreground p-0"
               : "space-y-4 rounded-lg bg-background/45 p-3 pr-1.5",
