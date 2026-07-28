@@ -146,10 +146,10 @@ export function ModuleSurveyRunner({
 
   if (isCompleted) {
     return (
-      <AnimationWrapper direction="up" duration={0.4}>
-        <div className="flex min-h-[50dvh] flex-1 flex-col justify-between">
+      <AnimationWrapper direction="up" duration={0.4} className="flex h-full flex-col">
+        <div className="flex h-full flex-1 flex-col justify-between">
           <div className="space-y-4">
-            <div className="rounded-lg bg-primary p-4 text-center text-primary-foreground shadow-sm">
+            <div className="rounded-lg bg-primary p-3 text-center text-primary-foreground shadow-sm">
               <CheckCircle2 className="mx-auto mb-2.5 size-10" />
               <h1 className="font-heading text-xl font-bold">
                 Module completed
@@ -159,7 +159,7 @@ export function ModuleSurveyRunner({
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 rounded-lg border bg-card p-3 text-center">
+            <div className="grid grid-cols-2 gap-3 rounded-lg border border-secondary-foreground/10 bg-secondary/30 p-3 text-center">
               <div>
                 <p className="text-xl font-bold text-primary">
                   {finalResult?.moduleScore ??
@@ -178,9 +178,11 @@ export function ModuleSurveyRunner({
             </div>
           </div>
 
-          <Button size="lg" onClick={() => router.push("/modules")}>
-            Back to learning path <ArrowRight />
-          </Button>
+          <div className="mt-auto pt-6">
+            <Button size="lg" className="w-full" onClick={() => router.push("/modules")}>
+              Back to learning path <ArrowRight />
+            </Button>
+          </div>
         </div>
       </AnimationWrapper>
     );
@@ -311,7 +313,7 @@ export function ModuleSurveyRunner({
                 {isOptionFeedback ? (
                   <div
                     className={cn(
-                      "min-w-0 rounded-sm border bg-background p-4 text-sm font-semibold wrap-break-word",
+                      "min-w-0 rounded-sm border bg-background p-3 text-sm font-medium wrap-break-word",
                       result.isCorrect === false
                         ? "border-primary text-primary"
                         : result.isCorrect === true
@@ -332,7 +334,7 @@ export function ModuleSurveyRunner({
                 ) : (
                   <div
                     className={cn(
-                      "min-w-0 overflow-hidden rounded-sm border p-4 text-sm wrap-break-word",
+                      "min-w-0 overflow-hidden rounded-sm border p-3 text-sm wrap-break-word",
                       result.isCorrect === false
                         ? "border-destructive/30 bg-destructive/10 text-destructive-foreground"
                         : result.isCorrect === true
@@ -340,7 +342,7 @@ export function ModuleSurveyRunner({
                           : "border-2 border-border bg-background text-foreground",
                     )}
                   >
-                    <p className="font-bold">{feedbackTitle}</p>
+                    <p className="font-medium">{feedbackTitle}</p>
                     {canShowCorrectAnswer &&
                       result.isCorrect === false &&
                       result.correctAnswer && (
@@ -354,8 +356,8 @@ export function ModuleSurveyRunner({
                   </div>
                 )}
                 {result.explanation && (
-                  <div className="min-w-0 rounded-sm border border-border bg-background p-4 text-sm wrap-break-word">
-                    <span className="font-bold text-primary">
+                  <div className="min-w-0 rounded-sm border border-border bg-background p-3 text-sm wrap-break-word">
+                    <span className="font-medium text-primary">
                       Explanation:{" "}
                     </span>
                     <span>{result.explanation}</span>

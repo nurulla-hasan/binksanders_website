@@ -26,7 +26,7 @@ export function SimulatedCallQuestion({
 
   if (!hasAnswered) {
     return (
-      <div className="relative flex min-h-full h-full w-full overflow-hidden bg-foreground text-background">
+      <div className="fixed inset-0 z-50 flex h-full w-full overflow-hidden bg-foreground text-background">
         {question.callerPhoto && (
           <MediaImage value={question.callerPhoto as MediaValue} alt="" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-45 blur-xl" />
         )}
@@ -50,10 +50,16 @@ export function SimulatedCallQuestion({
           </div>
 
           <div className="flex flex-col items-center gap-6">
-            <div className="flex flex-col items-center text-background/35">
-              <ArrowUp className="size-8" />
-              <ArrowUp className="-mt-3 size-8 text-background/50" />
-              <ArrowUp className="-mt-3 size-8 text-background/75" />
+            <div className="flex flex-col items-center">
+              <motion.div animate={{ opacity: [0.3, 1, 0.3], y: [0, -4, 0] }} transition={{ repeat: Infinity, duration: 1.2, delay: 0.4 }}>
+                <ArrowUp className="size-8 text-background/35" />
+              </motion.div>
+              <motion.div animate={{ opacity: [0.3, 1, 0.3], y: [0, -4, 0] }} transition={{ repeat: Infinity, duration: 1.2, delay: 0.2 }}>
+                <ArrowUp className="size-8 text-background/50" />
+              </motion.div>
+              <motion.div animate={{ opacity: [0.3, 1, 0.3], y: [0, -4, 0] }} transition={{ repeat: Infinity, duration: 1.2, delay: 0 }}>
+                <ArrowUp className="size-8 text-background/75" />
+              </motion.div>
             </div>
             <motion.button
               type="button"
@@ -88,7 +94,7 @@ export function SimulatedCallQuestion({
   }
 
   return (
-    <div className="relative flex min-h-full h-full w-full flex-col overflow-hidden bg-black animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex h-full w-full flex-col overflow-hidden bg-black animate-fadeIn">
       {question.postCallVideoUrl ? (
         <MediaVideo 
           value={question.postCallVideoUrl as MediaValue} 

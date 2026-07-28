@@ -42,7 +42,7 @@ export function QuestionAnswer({
               disabled={disabled}
               onClick={() => onAnswer(option)}
               className={cn(
-                "group flex w-full min-w-0 items-center gap-3 rounded-sm border p-4 text-left text-sm transition-colors",
+                "group flex w-full min-w-0 items-center gap-3 rounded-sm border p-3 text-left text-sm transition-colors",
                 isCorrectOption && "border-2 border-success bg-background font-semibold text-foreground",
                 isWrongSelection && "border-2 border-primary bg-background font-semibold text-foreground",
                 !isSubmitted && selected && "border-2 border-success bg-background font-semibold",
@@ -245,7 +245,7 @@ export function QuestionAnswer({
                   disabled={disabled}
                   onClick={() => onAnswer(option)}
                   className={cn(
-                    "w-full min-w-0 rounded-sm border p-4 text-left text-sm transition-colors wrap-break-word",
+                    "w-full min-w-0 rounded-sm border p-3 text-left text-sm transition-colors wrap-break-word",
                     isCorrectOption && "border-2 border-success bg-background font-semibold text-foreground",
                     isWrongSelection && "border-2 border-primary bg-background font-semibold text-foreground",
                     !isSubmitted && selected && "border-2 border-primary bg-background font-semibold",
@@ -269,7 +269,7 @@ export function QuestionAnswer({
 
   if (question.type === "Rating") {
     return (
-      <div className="grid grid-cols-5 gap-2 py-5">
+      <div className="mt-auto grid grid-cols-5 gap-2 pt-3">
         {Array.from({ length: question.scale ?? 5 }, (_, index) => index + 1).map((rating) => (
           <Button key={rating} type="button" variant={answer === rating ? "default" : "outline"} disabled={disabled} onClick={() => onAnswer(rating)}>
             {rating}
