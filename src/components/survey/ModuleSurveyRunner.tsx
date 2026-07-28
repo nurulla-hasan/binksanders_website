@@ -2,107 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import {
-  ArrowDown,
-  ArrowRight,
-  ArrowUp,
-  CheckCircle2,
-  MessageCircle,
-  Phone,
-  Play,
-  UserRound,
-} from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Textarea } from "@/components/ui/textarea";
 import type {
-  ModuleQuestion,
   SubmitModuleAnswerResult,
   UserModuleDetails,
 } from "@/lib/types/module.type";
 import { cn, ErrorToast } from "@/lib/utils";
 import { submitModuleAnswer } from "@/services/user-progress.service";
-import { SurveyIntro } from "./SurveyIntro";
-import { ModuleSwipeQuestion } from "./question-types/ModuleSwipeQuestion";
 import AnimationWrapper from "@/components/ui/custom/animation-wrapper";
-
-type AnswerValue = string | number | string[];
-
-
-type MediaValue = string | File;
-
-const optionLabel = (index: number) => String.fromCharCode(65 + index);
-
-function MediaImage({
-  value,
-  alt = "",
-  className,
-}: {
-  value: MediaValue;
-  alt?: string;
-  className?: string;
-}) {
-  const [objectUrl, setObjectUrl] = useState<string>();
-  const src = value instanceof File ? objectUrl : value;
-
-  useEffect(() => {
-    if (!(value instanceof File)) return;
-
-    const nextUrl = URL.createObjectURL(value);
-    const timer = window.setTimeout(() => setObjectUrl(nextUrl), 0);
-
-    return () => {
-      window.clearTimeout(timer);
-      URL.revokeObjectURL(nextUrl);
-    };
-  }, [value]);
-
-  if (!src) return null;
-
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img src={src} alt={alt} className={className} />;
-}
-
-function MediaVideo({
-  value,
-  className,
-  autoPlay,
-}: {
-  value: MediaValue;
-  className?: string;
-  autoPlay?: boolean;
-}) {
-  const [objectUrl, setObjectUrl] = useState<string>();
-  const src = value instanceof File ? objectUrl : value;
-
-  useEffect(() => {
-    if (!(value instanceof File)) return;
-
-    const nextUrl = URL.createObjectURL(value);
-    const timer = window.setTimeout(() => setObjectUrl(nextUrl), 0);
-
-    return () => {
-      window.clearTimeout(timer);
-      URL.revokeObjectURL(nextUrl);
-    };
-  }, [value]);
-
-  if (!src) return null;
-
-  return <video src={src} controls autoPlay={autoPlay} playsInline className={className} />;
-}
-export const initialAnswer = (question?: ModuleQuestion): AnswerValue | null => {
-  if (question?.type === "Ordering") return [...(question.items ?? [])];
-  return null;
-};
-
-export const hasAnswer = (answer: AnswerValue | null) => {
-  if (answer === null) return false;
-  if (typeof answer === "string") return answer.trim().length > 0;
-  if (Array.isArray(answer)) return answer.length > 0;
-  return true;
-};
+import { SurveyIntro } from "./SurveyIntro";
+import { QuestionAnswer } from "./module-runner/QuestionAnswer";
+import { initialAnswer, hasAnswer } from "./module-runner/answer-utils";
+import { MediaImage } from "./module-runner/media";
+import type { AnswerValue, MediaValue } from "./module-runner/types";
 
 export function ModuleSurveyRunner({
   details,
@@ -268,7 +182,7 @@ export function ModuleSurveyRunner({
     : Math.max(localProgress, (currentIndex / Math.max(totalQuestions, 1)) * 100);
   const isSimulatedCall = question.type === "Simulated Call";
   const canShowCorrectAnswer = !["Information", "Rating", "Free Input", "Simulated Call"].includes(question.type);
-  const isMcqFeedback = question.type === "MCQ" && Boolean(result);
+  const isOptionFeedback = ["MCQ", "Chat Scenario", "Video"].includes(question.type) && Boolean(result);
   const feedbackTitle = canShowCorrectAnswer
     ? result?.isCorrect === false
       ? "Not quite right"
@@ -297,7 +211,7 @@ export function ModuleSurveyRunner({
               : "space-y-4 rounded-lg bg-background/45 p-3 pr-1.5",
           )}
         >
-          {question.type !== "Swipe" && question.type !== "Simulated Call" && (
+          {question.type !== "Swipe" && question.type !== "Simulated Call" && question.type !== "Chat Scenario" && (
             <div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
                 {question.type}
@@ -306,8 +220,7 @@ export function ModuleSurveyRunner({
                 {question.content}
               </h1>
               {question.image && (
-                 
-                <MediaImage value={question.image as string | File} alt="" className="mt-4 max-h-48 w-full rounded-lg border bg-background object-contain" />
+                <MediaImage value={question.image as MediaValue} alt="" className="mt-4 max-h-48 w-full rounded-lg border bg-background object-contain" />
               )}
             </div>
           )}
@@ -328,13 +241,13 @@ export function ModuleSurveyRunner({
           {result && (
             <AnimationWrapper direction="up" duration={0.3} delay={0.1}>
               <div className="space-y-3">
-                {isMcqFeedback ? (
+                {isOptionFeedback ? (
                   <div
                     className={cn(
                       "min-w-0 rounded-sm border bg-background p-4 text-sm font-semibold wrap-break-word",
                       result.isCorrect === false
                         ? "border-primary text-primary"
-                        : "border-success text-success",
+                        : "border-success bg-success/20 text-success",
                     )}
                   >
                     {result.isCorrect === false
@@ -347,7 +260,7 @@ export function ModuleSurveyRunner({
                       "min-w-0 overflow-hidden rounded-sm border p-4 text-sm wrap-break-word",
                       result.isCorrect === false
                         ? "border-destructive/30 bg-destructive/10"
-                        : "border-success/30 bg-success/10",
+                        : "border-success bg-success/20 text-success",
                     )}
                   >
                     <p className="font-bold">{feedbackTitle}</p>
@@ -362,7 +275,7 @@ export function ModuleSurveyRunner({
                   </div>
                 )}
                 {result.explanation && (
-                  <div className="min-w-0 rounded-sm border border-primary/40 bg-background p-4 text-sm wrap-break-word">
+                  <div className="min-w-0 rounded-sm border border-border bg-background p-4 text-sm wrap-break-word">
                     <span className="font-bold text-primary">Explanation: </span>
                     <span>{result.explanation}</span>
                   </div>
@@ -380,8 +293,7 @@ export function ModuleSurveyRunner({
           </div>
         ) : result ? (
           <Button size="lg" className="w-full" onClick={handleContinue}>
-            {currentIndex === totalQuestions - 1 ||
-            result.moduleStatus === "completed"
+            {currentIndex === totalQuestions - 1 || result.moduleStatus === "completed"
               ? "View result"
               : "Continue"}
             <ArrowRight />
@@ -401,426 +313,5 @@ export function ModuleSurveyRunner({
     </div>
   );
 }
-
-export function QuestionAnswer({
-  question,
-  answer,
-  disabled,
-  onAnswer,
-  onSwipe,
-  correctAnswer,
-  isSubmitted = false,
-}: {
-  question: ModuleQuestion;
-  answer: AnswerValue | null;
-  disabled: boolean;
-  onAnswer: (answer: AnswerValue) => void;
-  onSwipe: (direction: "left" | "right") => void;
-  correctAnswer?: AnswerValue;
-  isSubmitted?: boolean;
-}) {
-  if (question.type === "Information") {
-    return (
-      <div className="space-y-4 overflow-hidden rounded-lg border bg-card p-4">
-
-        <Button
-          type="button"
-          variant={answer === "reviewed" ? "default" : "outline"}
-          disabled={disabled}
-          onClick={() => onAnswer("reviewed")}
-          className="w-full"
-        >
-          <CheckCircle2 /> {answer === "reviewed" ? "Reviewed" : "Mark as reviewed"}
-        </Button>
-      </div>
-    );
-  }
-  if (question.type === "MCQ") {
-    return (
-      <div className="space-y-3">
-        {(question.options ?? []).map((option, optionIndex) => {
-          const selected = answer === option;
-          const isCorrectOption = isSubmitted && correctAnswer === option;
-          const isWrongSelection = isSubmitted && selected && correctAnswer !== option;
-          const isDimmed = isSubmitted && !isCorrectOption && !isWrongSelection;
-
-          return (
-            <button
-              key={`${option}-${optionIndex}`}
-              type="button"
-              disabled={disabled}
-              onClick={() => onAnswer(option)}
-              className={cn(
-                "group flex w-full min-w-0 items-center gap-3 rounded-sm border bg-background p-4 text-left text-sm transition-colors",
-                isCorrectOption && "border-success font-semibold",
-                isWrongSelection && "border-primary font-semibold",
-                !isSubmitted && selected && "border-success font-semibold",
-                !isSubmitted && !selected && "hover:border-primary/50",
-                isDimmed && "border-transparent bg-background/55 text-muted-foreground opacity-70",
-              )}
-            >
-              <span
-                className={cn(
-                  "flex size-8 shrink-0 items-center justify-center rounded-sm bg-muted text-xs font-bold text-muted-foreground transition-colors",
-                  (isCorrectOption || (!isSubmitted && selected)) && "bg-success text-success-foreground",
-                  isWrongSelection && "bg-primary text-primary-foreground",
-                )}
-              >
-                {optionLabel(optionIndex)}
-              </span>
-              <span className="min-w-0 flex-1 wrap-break-word">
-                {option}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-    );
-  }
-
-  if (question.type === "Swipe") {
-    return (
-      <ModuleSwipeQuestion
-        key={question.id}
-        question={question}
-        disabled={disabled}
-        onSwipe={onSwipe}
-      />
-    );
-  }
-
-  if (question.type === "Ordering") {
-    const items = Array.isArray(answer) ? answer : question.items ?? [];
-    const move = (index: number, offset: number) => {
-      const nextIndex = index + offset;
-      if (nextIndex < 0 || nextIndex >= items.length) return;
-      const updated = [...items];
-      [updated[index], updated[nextIndex]] = [updated[nextIndex], updated[index]];
-      onAnswer(updated);
-    };
-
-    return (
-      <div className="space-y-3">
-        {items.map((item, index) => (
-          <motion.div
-            layout
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              layout: { type: "spring", stiffness: 300, damping: 30 },
-              opacity: { duration: 0.2 }
-            }}
-            key={`${item}-${index}`}
-            className="flex items-center gap-3 rounded-lg border bg-background p-3"
-          >
-            <span className="flex size-8 shrink-0 items-center justify-center rounded bg-muted text-sm font-bold">
-              {index + 1}
-            </span>
-            <span className="min-w-0 flex-1 wrap-break-word text-sm">{item}</span>
-            <div className="flex gap-1">
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                disabled={disabled || index === 0}
-                onClick={() => move(index, -1)}
-              >
-                <ArrowUp />
-              </Button>
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                disabled={disabled || index === items.length - 1}
-                onClick={() => move(index, 1)}
-              >
-                <ArrowDown />
-              </Button>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-    );
-  }
-
-  if (question.type === "Chat Scenario") {
-    const options = question.options ?? [];
-
-    return (
-      <div className="space-y-4">
-        <div className="min-h-80 space-y-3 rounded-lg border bg-muted/30 p-4">
-          {(question.messages ?? []).filter(msg => msg.sender || msg.text).map((message, index) => (
-            <div
-              key={`${message.sender}-${index}`}
-              className={cn(
-                "max-w-[85%] rounded-xl p-3 text-sm bg-background",
-              )}
-            >
-              <p className="mb-1 wrap-break-word text-[10px] font-bold uppercase opacity-70">
-                {message.sender}
-              </p>
-              <p className="wrap-break-word">{message.text}</p>
-            </div>
-          ))}
-          {typeof answer === "string" && answer !== "completed" && (
-            <div className="ml-auto max-w-[85%] rounded-xl bg-primary p-3 text-sm text-primary-foreground">
-              <p className="wrap-break-word">{answer}</p>
-            </div>
-          )}
-        </div>
-
-        {options.length > 0 ? (
-          <div className="space-y-2 rounded-lg border bg-background p-4">
-            <p className="mb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              Choose your response
-            </p>
-            {options.map((option, optionIndex) => (
-              <button
-                key={`${option}-${optionIndex}`}
-                type="button"
-                disabled={disabled}
-                onClick={() => onAnswer(option)}
-                className={cn(
-                  "w-full min-w-0 rounded-sm border p-3 text-left text-sm transition-colors wrap-break-word",
-                  answer === option
-                    ? "border-primary bg-primary/10 font-semibold"
-                    : "hover:border-primary/50",
-                )}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        ) : (
-          <Button
-            type="button"
-            variant={answer === "completed" ? "default" : "outline"}
-            disabled={disabled}
-            onClick={() => onAnswer("completed")}
-            className="w-full"
-          >
-            <MessageCircle /> I reviewed this conversation
-          </Button>
-        )}
-      </div>
-    );
-  }
-
-  if (question.type === "Simulated Call") {
-    return (
-      <SimulatedCallQuestion
-        question={question}
-        answer={answer}
-        disabled={disabled}
-        onComplete={() => onAnswer("completed")}
-      />
-    );
-  }
-  if (question.type === "Video") {
-    const videoUrl = question.videoUrl ?? "";
-    const videoSrc = videoUrl as string | File;
-    const youtubeId =
-      typeof videoUrl === "string"
-        ? videoUrl.match(/(?:youtu\.be\/|v=)([\w-]{11})/)?.[1] ?? undefined
-        : undefined;
-    const hasOptions = Array.isArray(question.options) && question.options.length > 0;
-
-    return (
-      <div className="space-y-4">
-        <div className="aspect-video overflow-hidden rounded-lg bg-black">
-          {youtubeId ? (
-            <iframe
-              src={`https://www.youtube.com/embed/${youtubeId}`}
-              title={question.content}
-              className="size-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          ) : (
-            <MediaVideo value={videoSrc} className="size-full" />
-          )}
-        </div>
-        {hasOptions ? (
-          <div className="space-y-3 pt-2">
-            {question.options?.map((option, optionIndex) => (
-              <button
-                key={`${option}-${optionIndex}`}
-                type="button"
-                disabled={disabled}
-                onClick={() => onAnswer(option)}
-                className={cn(
-                  "w-full min-w-0 rounded-sm border bg-background p-4 text-left text-sm transition-colors wrap-break-word",
-                  answer === option
-                    ? "border-primary bg-primary/10 font-semibold"
-                    : "hover:border-primary/50",
-                )}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        ) : (
-          <Button
-            type="button"
-            variant={answer === "watched" ? "default" : "outline"}
-            disabled={disabled}
-            onClick={() => onAnswer("watched")}
-            className="w-full"
-          >
-            <Play /> Mark as watched
-          </Button>
-        )}
-      </div>
-    );
-  }
-
-  if (question.type === "Rating") {
-    return (
-      <div className="grid grid-cols-5 gap-2 py-5">
-        {Array.from({ length: question.scale ?? 5 }, (_, index) => index + 1).map(
-          (rating) => (
-            <Button
-              key={rating}
-              type="button"
-              variant={answer === rating ? "default" : "outline"}
-              disabled={disabled}
-              onClick={() => onAnswer(rating)}
-            >
-              {rating}
-            </Button>
-          ),
-        )}
-      </div>
-    );
-  }
-
-  return (
-    <Textarea
-      value={typeof answer === "string" ? answer : ""}
-      disabled={disabled}
-      placeholder="Write your answer..."
-      className="min-h-36 bg-background"
-      onChange={(event) => onAnswer(event.target.value)}
-    />
-  );
-}
-
-function SimulatedCallQuestion({
-  question,
-  answer,
-  disabled,
-  onComplete,
-}: {
-  question: ModuleQuestion;
-  answer: AnswerValue | null;
-  disabled: boolean;
-  onComplete: () => void;
-}) {
-  const [hasAnswered, setHasAnswered] = useState(answer === "completed");
-  const [dragOffset, setDragOffset] = useState(0);
-  const isComplete = answer === "completed";
-  const callerName = question.callerName || "Training caller";
-
-  if (!hasAnswered) {
-    return (
-      <div className="relative flex min-h-full h-full overflow-hidden rounded-lg border-0 bg-foreground text-background shadow-sm">
-        {question.callerPhoto && (
-           
-          <MediaImage value={question.callerPhoto as string | File} alt="" className="absolute inset-0 size-full scale-110 object-cover opacity-45 blur-xl" />
-        )}
-        <div className="absolute inset-0 bg-foreground/55" />
-
-        <div className="relative z-10 flex min-h-full w-full flex-col items-center justify-between px-6 py-10 text-center">
-          <div className="space-y-8">
-            <p className="text-lg text-background/80">Incoming call...</p>
-            <div className="mx-auto flex size-40 items-center justify-center overflow-hidden rounded-full border border-background/80 bg-background/15 shadow-sm">
-              {question.callerPhoto ? (
-                 
-                <MediaImage value={question.callerPhoto as string | File} alt={callerName} className="size-full object-cover" />
-              ) : (
-                <UserRound className="size-16 text-background/80" />
-              )}
-            </div>
-            <div>
-              <h2 className="font-heading text-3xl font-bold text-background">
-                {callerName}
-              </h2>
-            </div>
-          </div>
-
-          <div className="flex flex-col items-center gap-6">
-            <div className="flex flex-col items-center text-background/35">
-              <ArrowUp className="size-8" />
-              <ArrowUp className="-mt-3 size-8 text-background/50" />
-              <ArrowUp className="-mt-3 size-8 text-background/75" />
-            </div>
-            <motion.button
-              type="button"
-              disabled={disabled}
-              drag="y"
-              dragConstraints={{ top: -120, bottom: 0 }}
-              dragElastic={0.08}
-              animate={{ y: dragOffset }}
-              whileTap={{ scale: disabled ? 1 : 0.96 }}
-              onDrag={(_, info) => setDragOffset(Math.min(0, info.offset.y))}
-              onDragEnd={(_, info) => {
-                if (disabled) return;
-                if (info.offset.y < -72) {
-                  setDragOffset(-120);
-                  window.setTimeout(() => setHasAnswered(true), 120);
-                  return;
-                }
-                setDragOffset(0);
-              }}
-              className="flex size-16 items-center justify-center rounded-full bg-success text-success-foreground shadow-lg shadow-foreground/30 ring-6 ring-background/15 disabled:opacity-60"
-              aria-label="Swipe up to answer call"
-            >
-              <Phone className="size-7" />
-            </motion.button>
-            <p className="text-xs font-semibold uppercase tracking-wider text-background/60">
-              Swipe up to answer
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-4 overflow-hidden rounded-lg border bg-card p-4">
-      {question.postCallVideoUrl && (
-        <div className="aspect-video overflow-hidden rounded-lg bg-black">
-          <MediaVideo value={question.postCallVideoUrl as string | File} autoPlay className="size-full" />
-        </div>
-      )}
-
-      <div className="space-y-2">
-        <p className="text-xs font-bold uppercase tracking-wider text-primary">
-          Call complete
-        </p>
-        <h2 className="font-heading text-xl font-bold wrap-break-word">{callerName}</h2>
-        {question.postCallMessage && (
-          <p className="wrap-break-word text-sm text-muted-foreground">
-            {question.postCallMessage}
-          </p>
-        )}
-      </div>
-
-      <Button
-        type="button"
-        variant={isComplete ? "default" : "outline"}
-        disabled={disabled}
-        onClick={onComplete}
-        className="w-full"
-      >
-        <CheckCircle2 /> {isComplete ? "Call reviewed" : "Mark call as reviewed"}
-      </Button>
-    </div>
-  );
-}
-
-
-
-
 
 

@@ -58,6 +58,7 @@ export function QuestionBlock({
     "Rating",
     "Information",
     "Simulated Call",
+    "Swipe",
   ].includes(currentQuestion.type);
   const supportsQuestionImage = currentQuestion.type !== "Video";
   const getMediaLabel = (value: unknown) => {
@@ -556,6 +557,8 @@ export function QuestionBlock({
     </div>
   );
 }
+
+
 
 
 

@@ -40,6 +40,10 @@ const prepareModulePayload = (values: CreateModuleFormValues) => {
       delete cleanQuestion.correctAnswer;
     }
 
+    if (["Free Input", "Rating", "Information", "Simulated Call", "Swipe"].includes(String(cleanQuestion.type))) {
+      delete cleanQuestion.explanation;
+    }
+
     if (cleanQuestion.type === "Simulated Call") {
       delete cleanQuestion.content;
     }
@@ -215,6 +219,8 @@ export function ModuleEditor({ module }: { module?: LearningModule }) {
     </div>
   );
 }
+
+
 
 
 

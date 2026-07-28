@@ -9,11 +9,8 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import type { CreateModuleFormValues } from "@/lib/validations/course";
 import { SurveyIntro } from "@/components/survey/SurveyIntro";
-import {
-  QuestionAnswer,
-  initialAnswer,
-  hasAnswer,
-} from "@/components/survey/ModuleSurveyRunner";
+import { QuestionAnswer } from "@/components/survey/module-runner/QuestionAnswer";
+import { initialAnswer, hasAnswer } from "@/components/survey/module-runner/answer-utils";
 
 type AnswerValue = string | number | string[];
 
@@ -228,7 +225,7 @@ export function ModulePreview({
     const displayedProgress =
       totalQuestions > 0 ? (currentIndex / totalQuestions) * 100 : 0;
     const canShowCorrectAnswer = !["Information", "Rating", "Free Input", "Simulated Call"].includes(question.type);
-    const isMcqFeedback = question.type === "MCQ" && Boolean(result);
+    const isOptionFeedback = ["MCQ", "Chat Scenario", "Video"].includes(question.type) && Boolean(result);
     const feedbackTitle = canShowCorrectAnswer
       ? result?.isCorrect === false
         ? "Not quite right"
@@ -249,7 +246,7 @@ export function ModulePreview({
         </div>
 
         <div className="min-w-0 flex-1 min-h-0 space-y-5 overflow-y-auto overflow-x-hidden rounded-sm bg-background/45 p-4 pr-2 scrollbar-thin">
-          {question.type !== "Swipe" && question.type !== "Simulated Call" && (
+          {question.type !== "Swipe" && question.type !== "Simulated Call" && question.type !== "Chat Scenario" && (
             <div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
                 {question.type}
@@ -283,13 +280,13 @@ export function ModulePreview({
 
           {result && (
             <div className="space-y-3">
-              {isMcqFeedback ? (
+              {isOptionFeedback ? (
                 <div
                   className={cn(
                     "min-w-0 rounded-sm border bg-background p-4 text-sm font-semibold wrap-break-word",
                     result.isCorrect === false
                       ? "border-primary text-primary"
-                      : "border-success text-success",
+                      : "border-success bg-success/20 text-success",
                   )}
                 >
                   {result.isCorrect === false
@@ -302,7 +299,7 @@ export function ModulePreview({
                     "min-w-0 overflow-hidden rounded-sm border p-4 text-sm wrap-break-word",
                     result.isCorrect === false
                       ? "border-destructive/30 bg-destructive/10"
-                      : "border-success/30 bg-success/10",
+                      : "border-success bg-success/20 text-success",
                   )}
                 >
                   <p className="font-bold">{feedbackTitle}</p>
@@ -317,7 +314,7 @@ export function ModulePreview({
                 </div>
               )}
               {result.explanation && (
-                <div className="min-w-0 rounded-sm border border-primary/40 bg-background p-4 text-sm wrap-break-word">
+                <div className="min-w-0 rounded-sm border border-border bg-background p-4 text-sm wrap-break-word">
                   <span className="font-bold text-primary">Explanation: </span>
                   <span>{result.explanation}</span>
                 </div>
@@ -360,7 +357,7 @@ export function ModulePreview({
         <span className="text-xs text-muted-foreground">Learner&apos;s View</span>
       </div>
 
-      <div className="relative flex h-[80dvh] max-h-[760px] min-h-[520px] flex-col overflow-hidden rounded-xl border-4 border-muted bg-card shadow-lg">
+      <div className="relative flex h-[80dvh] max-h-190 min-h-130 flex-col overflow-hidden rounded-xl border-4 border-muted bg-card shadow-lg">
         {/* Fake mobile header/status bar for visual flair */}
         <div className="flex shrink-0 items-center justify-between bg-muted/50 px-4 py-1.5 text-[10px] font-medium text-muted-foreground">
           <span>9:41</span>
@@ -376,6 +373,11 @@ export function ModulePreview({
     </div>
   );
 }
+
+
+
+
+
 
 
 
