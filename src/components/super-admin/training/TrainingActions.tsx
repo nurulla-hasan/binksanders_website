@@ -56,7 +56,9 @@ export function TrainingActions({ training, companies }: TrainingActionsProps) {
   const [isAssignOpen, setIsAssignOpen] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
   const [selectedCompanyId, setSelectedCompanyId] = useState(initialCompanyId);
-  const [selectedTeamId, setSelectedTeamId] = useState(training.teamId || "");
+  
+  const initialTeamId = typeof training.teamId === "object" && training.teamId ? training.teamId._id : (training.teamId || "");
+  const [selectedTeamId, setSelectedTeamId] = useState(initialTeamId);
   const [teams, setTeams] = useState<TeamDropdownItem[]>([]);
   const [isLoadingTeams, startLoadingTeams] = useTransition();
 
@@ -86,7 +88,7 @@ export function TrainingActions({ training, companies }: TrainingActionsProps) {
 
   const openAssignModal = () => {
     setIsAssignOpen(true);
-    loadTeams(initialCompanyId, training.teamId || "");
+    loadTeams(initialCompanyId, initialTeamId);
   };
 
   const handleAssign = async () => {
