@@ -40,10 +40,10 @@ export function SurveyIntro({
         <span className="inline-block bg-primary text-primary-foreground px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider w-max mb-4 shadow-sm rounded-lg">
           {badge}
         </span>
-        <h1 className="text-3xl font-bold font-heading text-secondary-foreground mb-3 break-words">
+        <h1 className="text-2xl font-bold font-heading text-secondary-foreground mb-1 wrap-break-word">
           {title}
         </h1>
-        <p className="text-sm text-secondary-foreground/80 leading-relaxed mb-8 max-w-full break-words">
+        <p className="text-sm text-secondary-foreground/80 leading-relaxed mb-8 max-w-full wrap-break-word">
           {description}
         </p>
         

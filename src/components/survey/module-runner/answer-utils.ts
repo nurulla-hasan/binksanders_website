@@ -5,6 +5,7 @@ export const optionLabel = (index: number) => String.fromCharCode(65 + index);
 
 export const initialAnswer = (question?: ModuleQuestion): AnswerValue | null => {
   if (question?.type === "Ordering") return [...(question.items ?? [])];
+  if (question?.type === "Information") return "reviewed";
   return null;
 };
 

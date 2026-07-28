@@ -230,18 +230,28 @@ export function ModuleSurveyRunner({
   return (
     <div
       className={cn(
-        "flex flex-1 min-h-0 h-full flex-col overflow-hidden shadow-sm animate-fadeIn",
+        "flex flex-1 min-h-0 h-full flex-col overflow-hidden animate-fadeIn",
         isSimulatedCall
           ? "bg-foreground"
-          : "rounded-lg border border-secondary/50 bg-secondary p-3",
+          : "bg-background",
       )}
     >
       {!isSimulatedCall && (
-        <div className="flex shrink-0 items-center gap-3 pb-2.5 pt-1">
-          <span className="whitespace-nowrap text-xs font-bold text-secondary-foreground/80">
-            Q{currentIndex + 1}/{totalQuestions}
-          </span>
-          <Progress value={displayedProgress} className="h-1.5 flex-1" />
+        <div className="bg-secondary px-4 py-3 rounded-b-xl mb-4 shadow-sm">
+          <h2 className="font-heading text-lg font-bold text-foreground mb-2 leading-tight">
+            {module.title}
+          </h2>
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-end justify-between">
+              <span className="bg-primary text-primary-foreground px-1.5 py-0.5 rounded-sm text-[10px] font-bold leading-none">
+                Q{currentIndex + 1}/{totalQuestions}
+              </span>
+              <span className="text-[10px] font-bold text-foreground/80 leading-none">
+                {currentIndex + 1}/{totalQuestions}
+              </span>
+            </div>
+            <Progress value={displayedProgress} className="h-1.5 w-full bg-background/50 [&>div]:bg-primary rounded-full" />
+          </div>
         </div>
       )}
 
@@ -256,17 +266,17 @@ export function ModuleSurveyRunner({
             "flex-1 min-h-0 overflow-y-auto scrollbar-thin flex flex-col",
             isSimulatedCall
               ? "overflow-hidden rounded-lg bg-foreground p-0"
-              : "space-y-4 rounded-lg bg-background/45 p-3 pr-1.5",
+              : "space-y-4 pb-2",
           )}
         >
           {question.type !== "Swipe" &&
             question.type !== "Simulated Call" &&
             question.type !== "Chat Scenario" && (
-              <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
+              <div className="border border-primary/40 bg-primary/5 rounded-lg p-3 shadow-sm mb-4">
+                <span className="inline-block bg-primary text-primary-foreground px-1.5 py-0.5 rounded text-[10px] font-bold uppercase mb-3 shadow-sm">
                   {question.type}
                 </span>
-                <h1 className="mt-2 font-heading text-xl font-bold leading-snug wrap-break-word">
+                <h1 className="font-heading text-md font-semibold leading-snug wrap-break-word text-foreground">
                   {question.content}
                 </h1>
                 {question.image && (
@@ -358,7 +368,7 @@ export function ModuleSurveyRunner({
       </AnimationWrapper>
 
       {!isSimulatedCall && (
-        <div className="shrink-0 pt-3 mt-auto border-t border-secondary-foreground/10 bg-secondary">
+        <div className="shrink-0 pt-4 mt-auto">
           {result && question.type === "Swipe" ? (
             <div className="py-2 text-center text-sm font-medium text-muted-foreground">
               Loading next question...

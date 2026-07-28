@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowDown, ArrowUp, CheckCircle2, MessageCircle, Play } from "lucide-react";
+import { ArrowDown, ArrowUp, MessageCircle, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -22,19 +22,7 @@ export function QuestionAnswer({
   isSubmitted = false,
 }: AnswerRendererProps & { onAutoSubmit?: (value: string) => void }) {
   if (question.type === "Information") {
-    return (
-      <div className="space-y-4 overflow-hidden rounded-lg border bg-card p-4 mt-auto">
-        <Button
-          type="button"
-          variant={answer === "reviewed" ? "default" : "outline"}
-          disabled={disabled}
-          onClick={() => onAnswer("reviewed")}
-          className="w-full"
-        >
-          <CheckCircle2 /> {answer === "reviewed" ? "Reviewed" : "Mark as reviewed"}
-        </Button>
-      </div>
-    );
+    return null;
   }
 
   if (question.type === "MCQ") {
