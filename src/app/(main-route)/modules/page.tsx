@@ -17,30 +17,31 @@ export default async function ModulesPage() {
   );
 
   return (
-    <div className="flex flex-1 min-h-0 flex-col gap-4 pb-8 animate-fadeIn overflow-y-auto pr-1">
-      <section className="relative shrink-0 overflow-hidden rounded-lg border border-secondary/20 bg-secondary p-4 text-secondary-foreground shadow-sm">
+    <div className="flex flex-1 min-h-0 flex-col gap-4 pb-8 animate-fadeIn overflow-y-auto">
+      <section className="relative shrink-0 overflow-hidden rounded-lg border border-primary/20 bg-primary p-4 text-primary-foreground shadow-sm">
         <div className="relative z-10 space-y-4">
           <div className="space-y-1">
-            <span className="block text-[10px] font-bold uppercase tracking-widest text-background">
+            <span className="block text-[10px] font-bold uppercase tracking-widest">
               Assigned trainings
             </span>
-            <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">
+            <h1 className="font-heading text-2xl font-bold tracking-tight">
               Your Learning Path
             </h1>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <div className="rounded-md border bg-background/70 p-3">
-              <p className="text-xs text-muted-foreground">Trainings</p>
-              <p className="mt-1 text-xl font-bold text-foreground">
+          <div className="flex items-center justify-around bg-background py-3 text-center shadow-sm">
+            <div className="flex-1">
+              <p className="text-2xl font-bold text-primary">
                 {trainings.length}
               </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">Trainings</p>
             </div>
-            <div className="rounded-md border bg-background/70 p-3">
-              <p className="text-xs text-muted-foreground">Modules</p>
-              <p className="mt-1 text-xl font-bold text-foreground">
+            <div className="h-10 w-px bg-border"></div>
+            <div className="flex-1">
+              <p className="text-2xl font-bold text-primary">
                 {totalModules}
               </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">Modules</p>
             </div>
           </div>
         </div>
@@ -52,7 +53,9 @@ export default async function ModulesPage() {
             <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-primary/10 text-primary">
               <BookOpen />
             </div>
-            <h2 className="font-heading text-lg font-bold">No trainings assigned yet</h2>
+            <h2 className="font-heading text-lg font-bold">
+              No trainings assigned yet
+            </h2>
             <p className="mt-2 max-w-xs text-sm text-muted-foreground">
               Trainings assigned to your team will appear here.
             </p>
@@ -61,7 +64,7 @@ export default async function ModulesPage() {
           trainings.map((training) => (
             <article
               key={training._id}
-              className="overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-colors hover:border-primary/50"
+              className="overflow-hidden rounded-lg border border-border bg-secondary/20 shadow-sm transition-colors hover:border-secondary/50"
             >
               {training.thumbnailImage && (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -75,11 +78,16 @@ export default async function ModulesPage() {
               <div className="space-y-4 p-5">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant={training.status === "published" ? "active" : "outline"}>
+                    <Badge
+                      variant={
+                        training.status === "published" ? "active" : "outline"
+                      }
+                    >
                       {training.status}
                     </Badge>
                     <Badge variant="secondary">
-                      {training.topicCount ?? training.topics?.length ?? 0} topics
+                      {training.topicCount ?? training.topics?.length ?? 0}{" "}
+                      topics
                     </Badge>
                   </div>
                   <Link
@@ -96,13 +104,15 @@ export default async function ModulesPage() {
                     {training.title}
                   </h2>
                   <p className="line-clamp-2 text-xs leading-normal text-muted-foreground">
-                    {training.description || "Complete this training to continue your learning path."}
+                    {training.description ||
+                      "Complete this training to continue your learning path."}
                   </p>
                 </div>
 
                 <div className="flex items-center justify-between rounded-md border bg-background p-3 text-xs text-muted-foreground">
                   <span className="flex items-center gap-2">
-                    <Layers3 className="size-4" /> {training.totalModules ?? 0} modules
+                    <Layers3 className="size-4" /> {training.totalModules ?? 0}{" "}
+                    modules
                   </span>
                   {training.status === "published" && (
                     <span className="flex items-center gap-1 font-medium text-primary">
@@ -118,4 +128,3 @@ export default async function ModulesPage() {
     </div>
   );
 }
-

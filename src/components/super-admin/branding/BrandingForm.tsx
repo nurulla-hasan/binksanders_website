@@ -138,11 +138,11 @@ export function BrandingForm({
         <FieldGroup className="grid gap-6 sm:grid-cols-2">
           <Field>
             <FieldLabel htmlFor="primaryBrandColor">Primary Brand Color</FieldLabel>
-            <Input id="primaryBrandColor" type="color" value={form.primaryColor || "#000000"} onChange={(event) => updateField("primaryColor", event.target.value)} />
+            <Input id="primaryBrandColor" type="color" value={form.primaryColor || "#E9308F"} onChange={(event) => updateField("primaryColor", event.target.value)} />
           </Field>
           <Field>
             <FieldLabel htmlFor="secondaryBrandColor">Secondary Brand Color</FieldLabel>
-            <Input id="secondaryBrandColor" type="color" value={form.secondaryColor || "#000000"} onChange={(event) => updateField("secondaryColor", event.target.value)} />
+            <Input id="secondaryBrandColor" type="color" value={form.secondaryColor || "#8ACDDE"} onChange={(event) => updateField("secondaryColor", event.target.value)} />
           </Field>
         </FieldGroup>
       </FieldSet>

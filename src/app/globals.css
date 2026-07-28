@@ -142,30 +142,13 @@
     font-size: 16px;
   }
 
-  /* Custom theme-aware scrollbars */
+  /* Hide scrollbars globally but keep functionality */
+  * {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  
   ::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
+    display: none; /* Chrome, Safari and Opera */
   }
-
-  ::-webkit-scrollbar-button {
-    display: none;
-    width: 0;
-    height: 0;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: var(--primary);
-    border-radius: 9999px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--primary);
-    filter: brightness(0.9);
-  }
-
 }
