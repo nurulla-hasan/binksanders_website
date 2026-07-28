@@ -44,9 +44,6 @@ const prepareModulePayload = (values: CreateModuleFormValues) => {
       delete cleanQuestion.explanation;
     }
 
-    if (cleanQuestion.type === "Simulated Call") {
-      delete cleanQuestion.content;
-    }
     mediaFields.forEach((field) => {
       const value = cleanQuestion[field];
       if (isFileValue(value)) {

@@ -41,9 +41,10 @@ export function QuestionAnswer({
       <div className="space-y-3">
         {(question.options ?? []).map((option, optionIndex) => {
           const selected = answer === option;
-          const isCorrectOption = isSubmitted && correctAnswer === option;
-          const isWrongSelection = isSubmitted && selected && correctAnswer !== option;
-          const isDimmed = isSubmitted && !isCorrectOption && !isWrongSelection;
+          const hasCorrectAnswer = correctAnswer !== undefined && correctAnswer !== null && !(typeof correctAnswer === "string" && correctAnswer.trim() === "");
+          const isCorrectOption = isSubmitted && hasCorrectAnswer && correctAnswer === option;
+          const isWrongSelection = isSubmitted && hasCorrectAnswer && selected && correctAnswer !== option;
+          const isDimmed = isSubmitted && hasCorrectAnswer && !isCorrectOption && !isWrongSelection;
 
           return (
             <button
@@ -52,19 +53,20 @@ export function QuestionAnswer({
               disabled={disabled}
               onClick={() => onAnswer(option)}
               className={cn(
-                "group flex w-full min-w-0 items-center gap-3 rounded-sm border bg-background p-4 text-left text-sm transition-colors",
-                isCorrectOption && "border-success bg-success/20 font-semibold text-success",
-                isWrongSelection && "border-primary bg-primary/10 font-semibold",
-                !isSubmitted && selected && "border-success font-semibold",
-                !isSubmitted && !selected && "hover:border-primary/50",
-                isDimmed && "border-transparent bg-background/55 text-muted-foreground opacity-70",
+                "group flex w-full min-w-0 items-center gap-3 rounded-sm border p-4 text-left text-sm transition-colors",
+                isCorrectOption && "border-2 border-success bg-background font-semibold text-foreground",
+                isWrongSelection && "border-2 border-primary bg-background font-semibold text-foreground",
+                !isSubmitted && selected && "border-2 border-success bg-background font-semibold",
+                !isSubmitted && !selected && "border-border bg-background hover:border-primary/50",
+                isDimmed && "border-transparent bg-black/5 text-muted-foreground opacity-60",
               )}
             >
               <span
                 className={cn(
                   "flex size-8 shrink-0 items-center justify-center rounded-sm bg-muted text-xs font-bold text-muted-foreground transition-colors",
-                  (isCorrectOption || (!isSubmitted && selected)) && "bg-success text-success-foreground",
+                  (isCorrectOption || (!isSubmitted && selected)) && "bg-success text-white",
                   isWrongSelection && "bg-primary text-primary-foreground",
+                  isDimmed && "bg-black/10 text-muted-foreground"
                 )}
               >
                 {optionLabel(optionIndex)}
@@ -162,9 +164,10 @@ export function QuestionAnswer({
             </p>
             {options.map((option, optionIndex) => {
               const selected = answer === option;
-              const isCorrectOption = isSubmitted && correctAnswer === option;
-              const isWrongSelection = isSubmitted && selected && correctAnswer !== option;
-              const isDimmed = isSubmitted && !isCorrectOption && !isWrongSelection;
+          const hasCorrectAnswer = correctAnswer !== undefined && correctAnswer !== null && !(typeof correctAnswer === "string" && correctAnswer.trim() === "");
+          const isCorrectOption = isSubmitted && hasCorrectAnswer && correctAnswer === option;
+          const isWrongSelection = isSubmitted && hasCorrectAnswer && selected && correctAnswer !== option;
+          const isDimmed = isSubmitted && hasCorrectAnswer && !isCorrectOption && !isWrongSelection;
 
               return (
                 <button
@@ -173,12 +176,12 @@ export function QuestionAnswer({
                   disabled={disabled}
                   onClick={() => onAnswer(option)}
                   className={cn(
-                    "w-full min-w-0 rounded-sm border bg-background p-3 text-left text-sm transition-colors wrap-break-word",
-                    isCorrectOption && "border-success bg-success/20 font-semibold text-success",
-                    isWrongSelection && "border-primary bg-primary/10 font-semibold",
-                    !isSubmitted && selected && "border-primary bg-primary/10 font-semibold",
-                    !isSubmitted && !selected && "hover:border-primary/50",
-                    isDimmed && "border-border/30 bg-muted/40 text-muted-foreground opacity-70",
+                    "w-full min-w-0 rounded-sm border p-3 text-left text-sm transition-colors wrap-break-word",
+                    isCorrectOption && "border-2 border-success bg-background font-semibold text-foreground",
+                    isWrongSelection && "border-2 border-primary bg-background font-semibold text-foreground",
+                    !isSubmitted && selected && "border-2 border-primary bg-background font-semibold",
+                    !isSubmitted && !selected && "border-border bg-background hover:border-primary/50",
+                    isDimmed && "border-transparent bg-black/5 text-muted-foreground opacity-60",
                   )}
                 >
                   {option}
@@ -234,9 +237,10 @@ export function QuestionAnswer({
           <div className="space-y-3 pt-2">
             {question.options?.map((option, optionIndex) => {
               const selected = answer === option;
-              const isCorrectOption = isSubmitted && correctAnswer === option;
-              const isWrongSelection = isSubmitted && selected && correctAnswer !== option;
-              const isDimmed = isSubmitted && !isCorrectOption && !isWrongSelection;
+          const hasCorrectAnswer = correctAnswer !== undefined && correctAnswer !== null && !(typeof correctAnswer === "string" && correctAnswer.trim() === "");
+          const isCorrectOption = isSubmitted && hasCorrectAnswer && correctAnswer === option;
+          const isWrongSelection = isSubmitted && hasCorrectAnswer && selected && correctAnswer !== option;
+          const isDimmed = isSubmitted && hasCorrectAnswer && !isCorrectOption && !isWrongSelection;
 
               return (
                 <button
@@ -245,12 +249,12 @@ export function QuestionAnswer({
                   disabled={disabled}
                   onClick={() => onAnswer(option)}
                   className={cn(
-                    "w-full min-w-0 rounded-sm border bg-background p-4 text-left text-sm transition-colors wrap-break-word",
-                    isCorrectOption && "border-success bg-success/20 font-semibold text-success",
-                    isWrongSelection && "border-primary bg-primary/10 font-semibold",
-                    !isSubmitted && selected && "border-primary bg-primary/10 font-semibold",
-                    !isSubmitted && !selected && "hover:border-primary/50",
-                    isDimmed && "border-border/30 bg-muted/40 text-muted-foreground opacity-70",
+                    "w-full min-w-0 rounded-sm border p-4 text-left text-sm transition-colors wrap-break-word",
+                    isCorrectOption && "border-2 border-success bg-background font-semibold text-foreground",
+                    isWrongSelection && "border-2 border-primary bg-background font-semibold text-foreground",
+                    !isSubmitted && selected && "border-2 border-primary bg-background font-semibold",
+                    !isSubmitted && !selected && "border-border bg-background hover:border-primary/50",
+                    isDimmed && "border-transparent bg-black/5 text-muted-foreground opacity-60",
                   )}
                 >
                   {option}
@@ -289,6 +293,9 @@ export function QuestionAnswer({
     />
   );
 }
+
+
+
 
 
 

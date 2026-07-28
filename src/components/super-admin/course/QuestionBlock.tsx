@@ -60,7 +60,7 @@ export function QuestionBlock({
     "Simulated Call",
     "Swipe",
   ].includes(currentQuestion.type);
-  const supportsQuestionImage = currentQuestion.type !== "Video";
+  const supportsQuestionImage = currentQuestion.type !== "Video" && currentQuestion.type !== "Simulated Call";
   const getMediaLabel = (value: unknown) => {
     if (value instanceof File) return value.name;
     if (typeof value === "string" && value) return "Existing media selected";
@@ -200,16 +200,14 @@ export function QuestionBlock({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-[1fr_200px]">
-        {currentQuestion.type !== "Simulated Call" && (
-          <Field>
-            <FieldLabel htmlFor={`question-${blockId}`}>Content</FieldLabel>
-            <Input
-              id={`question-${blockId}`}
-              placeholder="Question or instruction"
-              {...register(`questions.${index}.content`)}
-            />
-          </Field>
-        )}
+        <Field>
+          <FieldLabel htmlFor={`question-${blockId}`}>Content</FieldLabel>
+          <Input
+            id={`question-${blockId}`}
+            placeholder="Question or instruction"
+            {...register(`questions.${index}.content`)}
+          />
+        </Field>
         <Field>
           <FieldLabel>Question Type</FieldLabel>
           <Select
@@ -550,13 +548,11 @@ export function QuestionBlock({
           )}
         </div>
 
-        <Button type="button" variant="destructive" onClick={onDelete}>
-          <Trash2 /> Delete
-        </Button>
       </div>
     </div>
   );
 }
+
 
 
 

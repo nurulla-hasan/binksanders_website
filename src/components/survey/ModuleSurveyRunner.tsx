@@ -183,6 +183,7 @@ export function ModuleSurveyRunner({
   const isSimulatedCall = question.type === "Simulated Call";
   const canShowCorrectAnswer = !["Information", "Rating", "Free Input", "Simulated Call"].includes(question.type);
   const isOptionFeedback = ["MCQ", "Chat Scenario", "Video"].includes(question.type) && Boolean(result);
+  const hasFeedbackCorrectAnswer = result?.correctAnswer !== undefined && result?.correctAnswer !== null && !(typeof result.correctAnswer === "string" && result.correctAnswer.trim() === "");
   const feedbackTitle = canShowCorrectAnswer
     ? result?.isCorrect === false
       ? "Not quite right"
@@ -247,20 +248,30 @@ export function ModuleSurveyRunner({
                       "min-w-0 rounded-sm border bg-background p-4 text-sm font-semibold wrap-break-word",
                       result.isCorrect === false
                         ? "border-primary text-primary"
-                        : "border-success bg-success/20 text-success",
+                        : result.isCorrect === true
+                          ? "border-success text-success"
+                          : "border-border text-foreground",
                     )}
                   >
                     {result.isCorrect === false
-                      ? "Incorrect - correct answer is highlighted."
-                      : "Correct - answer is highlighted."}
+                      ? hasFeedbackCorrectAnswer
+                        ? "Incorrect - correct answer is highlighted."
+                        : "Incorrect."
+                      : result.isCorrect === true
+                        ? hasFeedbackCorrectAnswer
+                          ? "Correct - answer is highlighted."
+                          : "Correct."
+                        : "Answer submitted."}
                   </div>
                 ) : (
                   <div
                     className={cn(
                       "min-w-0 overflow-hidden rounded-sm border p-4 text-sm wrap-break-word",
                       result.isCorrect === false
-                        ? "border-destructive/30 bg-destructive/10"
-                        : "border-success bg-success/20 text-success",
+                        ? "border-destructive/30 bg-destructive/10 text-destructive-foreground"
+                        : result.isCorrect === true
+                          ? "border-2 border-success bg-background text-foreground"
+                          : "border-2 border-border bg-background text-foreground",
                     )}
                   >
                     <p className="font-bold">{feedbackTitle}</p>
@@ -313,5 +324,9 @@ export function ModuleSurveyRunner({
     </div>
   );
 }
+
+
+
+
 
 
