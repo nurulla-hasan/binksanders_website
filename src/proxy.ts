@@ -64,9 +64,9 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 
   const pathname = request.nextUrl.pathname;
 
-  const isPublic = PUBLIC_ROUTES.some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`)
-  );
+  const isPublic =
+    PUBLIC_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`)) ||
+    /^\/training\/[^\/]+\/join(\/|$)/.test(pathname);
 
   const isAuthRoute = AUTH_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`)
