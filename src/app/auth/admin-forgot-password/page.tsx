@@ -43,7 +43,7 @@ export default function AdminForgotPasswordPage() {
   };
 
   return (
-    <div className="relative flex min-h-dvh w-full flex-col justify-between bg-background pb-10 font-sans text-foreground">
+    <div className="relative mx-auto flex min-h-dvh w-full flex-col justify-between bg-background px-6 py-10 font-sans text-foreground sm:px-10">
       <div className="w-full px-6 pt-8">
         <Link href="/auth/admin-login" className="inline-flex h-10 w-10 items-center justify-center rounded-sm bg-muted/40 hover:bg-muted/60">
           <ArrowLeft className="h-5 w-5" />
@@ -51,12 +51,16 @@ export default function AdminForgotPasswordPage() {
         </Link>
       </div>
 
-      <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center px-6 py-10">
-        <div className="mb-10 flex flex-col items-center">
-          <div className="flex items-center gap-3">
-            <Image src="/acme-logo.svg" alt="Acme Inc Logo" width={36} height={36} priority />
-            <span className="font-heading text-2xl font-bold tracking-tight">Acme Inc</span>
-          </div>
+      <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-10">
+        <div className="mb-10 flex items-center justify-center">
+          <Image
+            src="/acme-inc.svg"
+            alt="Act Inc"
+            width={150}
+            height={50}
+            priority
+            className="h-auto w-37.5 max-w-full dark:invert"
+          />
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">

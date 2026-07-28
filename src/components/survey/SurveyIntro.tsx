@@ -11,7 +11,6 @@ interface SurveyIntroProps {
   format: string;
   startLabel?: string;
   onStart: () => void;
-  onBack: () => void;
 }
 
 export function SurveyIntro({ 
@@ -22,11 +21,9 @@ export function SurveyIntro({
   questionCount, 
   format, 
   startLabel = "Start",
-  onStart, 
-  onBack 
-}: SurveyIntroProps) {
+  onStart, }: SurveyIntroProps) {
   return (
-    <div className="flex-1 flex flex-col w-full">
+    <div className="flex-1 min-h-0 flex flex-col w-full overflow-y-auto pb-4">
       {/* Cover Image */}
       <div className="relative w-full h-55 rounded-lg overflow-hidden mb-4 z-0 bg-muted shadow-sm">
         <Image 
@@ -39,14 +36,14 @@ export function SurveyIntro({
       </div>
       
       {/* Content Card */}
-      <div className="bg-secondary p-4 relative z-10 flex-1 flex flex-col border border-secondary/50 shadow-sm rounded-lg">
+      <div className="bg-secondary p-4 relative z-10 flex flex-col border border-secondary/50 shadow-sm rounded-lg">
         <span className="inline-block bg-primary text-primary-foreground px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider w-max mb-4 shadow-sm rounded-lg">
           {badge}
         </span>
-        <h1 className="text-3xl font-bold font-heading text-secondary-foreground mb-3">
+        <h1 className="text-3xl font-bold font-heading text-secondary-foreground mb-3 break-words">
           {title}
         </h1>
-        <p className="text-sm text-secondary-foreground/80 leading-relaxed mb-8 max-w-[90%]">
+        <p className="text-sm text-secondary-foreground/80 leading-relaxed mb-8 max-w-full break-words">
           {description}
         </p>
         
@@ -67,9 +64,6 @@ export function SurveyIntro({
         <div className="mt-auto space-y-3 pt-4">
           <Button type="button" size="lg" className="w-full" onClick={onStart}>
             {startLabel} <ArrowRight />
-          </Button>
-          <Button type="button" size="lg" variant="outline" className="w-full" onClick={onBack}>
-            Back
           </Button>
         </div>
       </div>

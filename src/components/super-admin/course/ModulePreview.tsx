@@ -172,7 +172,6 @@ export function ModulePreview({
           format="Interactive"
           startLabel="Start"
           onStart={() => setIsStarted(true)}
-          onBack={() => {}}
         />
       );
     }
@@ -228,23 +227,34 @@ export function ModulePreview({
 
     const displayedProgress =
       totalQuestions > 0 ? (currentIndex / totalQuestions) * 100 : 0;
+    const canShowCorrectAnswer = !["Information", "Rating", "Free Input", "Simulated Call"].includes(question.type);
+    const isMcqFeedback = question.type === "MCQ" && Boolean(result);
+    const feedbackTitle = canShowCorrectAnswer
+      ? result?.isCorrect === false
+        ? "Not quite right"
+        : result?.isCorrect === true
+          ? "Correct answer"
+          : "Answer submitted"
+      : question.type === "Information" && answer === "reviewed"
+        ? "Reviewed"
+        : "Answer submitted";
 
     return (
-      <div className="flex flex-1 flex-col overflow-x-hidden rounded-lg border border-secondary/50 bg-secondary p-4 shadow-sm animate-fadeIn m-2">
-        <div className="flex items-center gap-3 pb-4 pt-2">
+      <div className="m-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-secondary/50 bg-secondary p-4 shadow-sm animate-fadeIn">
+        <div className="flex shrink-0 items-center gap-3 pb-4 pt-2">
           <span className="whitespace-nowrap text-xs font-bold text-secondary-foreground/80">
             Q{currentIndex + 1}/{totalQuestions}
           </span>
           <Progress value={displayedProgress} className="h-1.5 flex-1" />
         </div>
 
-        <div className="flex-1 space-y-5 rounded-lg bg-background/45 p-4">
-          {question.type !== "Swipe" && (
+        <div className="min-w-0 flex-1 min-h-0 space-y-5 overflow-y-auto overflow-x-hidden rounded-sm bg-background/45 p-4 pr-2 scrollbar-thin">
+          {question.type !== "Swipe" && question.type !== "Simulated Call" && (
             <div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
                 {question.type}
               </span>
-              <h1 className="mt-2 font-heading text-xl font-bold leading-snug">
+              <h1 className="mt-2 font-heading text-xl font-bold leading-snug wrap-break-word">
                 {question.content}
               </h1>
               {question.image && (
@@ -267,40 +277,56 @@ export function ModulePreview({
               setAnswer(direction);
               handleSubmit(direction);
             }}
+            correctAnswer={result?.correctAnswer}
+            isSubmitted={Boolean(result)}
           />
 
           {result && (
-            <div
-              className={cn(
-                "rounded-lg border p-4 text-sm",
-                result.isCorrect === false
-                  ? "border-destructive/30 bg-destructive/10"
-                  : "border-success/30 bg-success/10",
+            <div className="space-y-3">
+              {isMcqFeedback ? (
+                <div
+                  className={cn(
+                    "min-w-0 rounded-sm border bg-background p-4 text-sm font-semibold wrap-break-word",
+                    result.isCorrect === false
+                      ? "border-primary text-primary"
+                      : "border-success text-success",
+                  )}
+                >
+                  {result.isCorrect === false
+                    ? "Incorrect - correct answer is highlighted."
+                    : "Correct - answer is highlighted."}
+                </div>
+              ) : (
+                <div
+                  className={cn(
+                    "min-w-0 overflow-hidden rounded-sm border p-4 text-sm wrap-break-word",
+                    result.isCorrect === false
+                      ? "border-destructive/30 bg-destructive/10"
+                      : "border-success/30 bg-success/10",
+                  )}
+                >
+                  <p className="font-bold">{feedbackTitle}</p>
+                  {canShowCorrectAnswer && result.isCorrect === false && result.correctAnswer && (
+                    <p className="mt-2 wrap-break-word font-medium">
+                      Correct answer:{" "}
+                      {Array.isArray(result.correctAnswer)
+                        ? result.correctAnswer.join(" -> ")
+                        : result.correctAnswer}
+                    </p>
+                  )}
+                </div>
               )}
-            >
-              <p className="font-bold">
-                {result.isCorrect === false
-                  ? "Not quite right"
-                  : result.isCorrect === true
-                    ? "Correct answer"
-                    : "Answer submitted"}
-              </p>
               {result.explanation && (
-                <p className="mt-1 text-muted-foreground">{result.explanation}</p>
-              )}
-              {result.isCorrect === false && result.correctAnswer && (
-                <p className="mt-2 font-medium">
-                  Correct answer:{" "}
-                  {Array.isArray(result.correctAnswer)
-                    ? result.correctAnswer.join(" → ")
-                    : result.correctAnswer}
-                </p>
+                <div className="min-w-0 rounded-sm border border-primary/40 bg-background p-4 text-sm wrap-break-word">
+                  <span className="font-bold text-primary">Explanation: </span>
+                  <span>{result.explanation}</span>
+                </div>
               )}
             </div>
           )}
         </div>
 
-        <div className="mt-5">
+        <div className="mt-5 shrink-0">
           {result && question.type === "Swipe" ? (
             <div className="py-2 text-center text-sm font-medium text-muted-foreground">
               Loading next question...
@@ -318,7 +344,7 @@ export function ModulePreview({
               disabled={!hasAnswer(answer)}
               onClick={() => handleSubmit()}
             >
-              Submit answer
+              Next
               <ArrowRight />
             </Button>
           )}
@@ -334,9 +360,9 @@ export function ModulePreview({
         <span className="text-xs text-muted-foreground">Learner&apos;s View</span>
       </div>
 
-      <div className="rounded-xl border-4 border-muted bg-card shadow-lg overflow-hidden flex flex-col relative max-h-[85dvh] overflow-y-auto">
+      <div className="relative flex h-[80dvh] max-h-[760px] min-h-[520px] flex-col overflow-hidden rounded-xl border-4 border-muted bg-card shadow-lg">
         {/* Fake mobile header/status bar for visual flair */}
-        <div className="bg-muted/50 py-1.5 px-4 flex justify-between items-center text-[10px] font-medium text-muted-foreground">
+        <div className="flex shrink-0 items-center justify-between bg-muted/50 px-4 py-1.5 text-[10px] font-medium text-muted-foreground">
           <span>9:41</span>
           <div className="flex gap-1.5">
             <span className="block h-2 w-2 rounded-full bg-muted-foreground/40"></span>
@@ -350,3 +376,11 @@ export function ModulePreview({
     </div>
   );
 }
+
+
+
+
+
+
+
+

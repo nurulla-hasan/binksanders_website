@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Mail } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AuthPageLinks } from "@/components/auth/AuthPageLinks";
 import { Field, FieldGroup } from "@/components/ui/field";
@@ -32,11 +32,12 @@ export default function AdminLoginPage() {
 
       SuccessToast(result.message);
       router.replace("/super-admin");
+      router.refresh();
     } catch (error: unknown) {
       ErrorToast(
         error instanceof Error
           ? error.message
-          : "Unable to log in. Please try again."
+          : "Unable to log in. Please try again.",
       );
     } finally {
       setIsPending(false);
@@ -44,29 +45,27 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-dvh w-full flex-col justify-between bg-background pb-10 font-sans text-foreground">
-      <div className="flex flex-col items-center px-6 pt-16">
-        <div className="flex items-center gap-3">
-          <Image
-            src="/acme-logo.svg"
-            alt="Acme Inc Logo"
-            width={36}
-            height={36}
-            priority
-          />
-          <span className="font-heading text-2xl font-bold tracking-tight">
-            Acme Inc
-          </span>
-        </div>
-      </div>
+    <main className="relative mx-auto flex min-h-dvh w-full flex-col justify-between bg-background px-6 py-10 font-sans text-foreground sm:px-10">
+      <div />
 
-      <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center px-6 py-10">
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="space-y-2">
-            <h1 className="font-heading text-3xl font-bold tracking-tight">
+      <section className="mx-auto flex w-full max-w-sm flex-col justify-center">
+        <div className="mb-10 flex items-center justify-center">
+          <Image
+            src="/acme-inc.svg"
+            alt="Act Inc"
+            width={150}
+            height={50}
+            priority
+            className="h-auto w-37.5 max-w-full dark:invert"
+          />
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6 animate-fadeIn">
+          <div className="mb-6 space-y-2">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">
               Welcome Back
             </h1>
-            <p className="text-sm leading-relaxed text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Sign in to manage the Act Inc platform.
             </p>
           </div>
@@ -82,12 +81,13 @@ export default function AdminLoginPage() {
                   value={identifier}
                   onChange={(event) => setIdentifier(event.target.value)}
                   required
+                  className="pr-10"
                 />
                 <Mail className="pointer-events-none absolute right-3.5 h-5 w-5 text-muted-foreground/60" />
               </div>
             </Field>
 
-            <Field>
+            <Field className="space-y-2">
               <div className="relative flex items-center">
                 <Input
                   name="password"
@@ -97,6 +97,7 @@ export default function AdminLoginPage() {
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   required
+                  className="pr-10"
                 />
                 <button
                   type="button"
@@ -111,24 +112,25 @@ export default function AdminLoginPage() {
                   )}
                 </button>
               </div>
+              <div className="mt-1 text-right">
+                <Link
+                  href="/auth/admin-forgot-password"
+                  className="text-xs font-medium text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                >
+                  Forgot Password?
+                </Link>
+              </div>
             </Field>
           </FieldGroup>
 
           <Button type="submit" size="lg-full" disabled={isPending}>
             {isPending ? "Logging in..." : "Log In"}
+            {!isPending && <ArrowRight />}
           </Button>
-
-          <div className="text-center">
-            <Link
-              href="/auth/admin-forgot-password"
-              className="text-xs font-semibold text-destructive hover:underline"
-            >
-              Forgot Password?
-            </Link>
-          </div>
         </form>
+
         <AuthPageLinks showUserLogin />
-      </main>
+      </section>
 
       <div className="flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
         <span>Powered By</span>
@@ -140,7 +142,6 @@ export default function AdminLoginPage() {
           className="opacity-70 dark:invert"
         />
       </div>
-    </div>
+    </main>
   );
 }
-

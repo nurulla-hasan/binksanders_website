@@ -53,6 +53,13 @@ export function QuestionBlock({
     control,
     name: `questions.${index}`,
   }) as QuestionDataSchemaType;
+  const supportsCorrectAnswer = ![
+    "Free Input",
+    "Rating",
+    "Information",
+    "Simulated Call",
+  ].includes(currentQuestion.type);
+  const supportsQuestionImage = currentQuestion.type !== "Video";
   const getMediaLabel = (value: unknown) => {
     if (value instanceof File) return value.name;
     if (typeof value === "string" && value) return "Existing media selected";
@@ -192,14 +199,16 @@ export function QuestionBlock({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-[1fr_200px]">
-        <Field>
-          <FieldLabel htmlFor={`question-${blockId}`}>Content</FieldLabel>
-          <Input
-            id={`question-${blockId}`}
-            placeholder="Question or instruction"
-            {...register(`questions.${index}.content`)}
-          />
-        </Field>
+        {currentQuestion.type !== "Simulated Call" && (
+          <Field>
+            <FieldLabel htmlFor={`question-${blockId}`}>Content</FieldLabel>
+            <Input
+              id={`question-${blockId}`}
+              placeholder="Question or instruction"
+              {...register(`questions.${index}.content`)}
+            />
+          </Field>
+        )}
         <Field>
           <FieldLabel>Question Type</FieldLabel>
           <Select
@@ -470,7 +479,7 @@ export function QuestionBlock({
         </Field>
       )}
 
-      {currentQuestion.explanation !== undefined && (
+      {supportsCorrectAnswer && currentQuestion.explanation !== undefined && (
         <Field>
           <FieldLabel>Explanation</FieldLabel>
           <Input
@@ -480,7 +489,7 @@ export function QuestionBlock({
         </Field>
       )}
 
-      {currentQuestion.image !== undefined && renderMediaInput({ field: "image", label: "Question Image", accept: "image/*" })}
+      {supportsQuestionImage && currentQuestion.image !== undefined && renderMediaInput({ field: "image", label: "Question Image", accept: "image/*" })}
 
       <div className="flex flex-col justify-between gap-4 border-t border-border pt-4 sm:flex-row sm:items-center">
         <div className="flex flex-wrap items-center gap-5">
@@ -501,39 +510,43 @@ export function QuestionBlock({
             </FieldLabel>
           </Field>
 
-          <Field orientation="horizontal">
-            <Checkbox
-              id={`explanation-${blockId}`}
-              checked={currentQuestion.explanation !== undefined}
-              onCheckedChange={(checked) =>
-                setValue(
-                  `questions.${index}.explanation`,
-                  checked === true ? "" : undefined,
-                  { shouldDirty: true },
-                )
-              }
-            />
-            <FieldLabel htmlFor={`explanation-${blockId}`}>
-              Add explanation
-            </FieldLabel>
-          </Field>
+          {supportsCorrectAnswer && (
+            <Field orientation="horizontal">
+              <Checkbox
+                id={`explanation-${blockId}`}
+                checked={currentQuestion.explanation !== undefined}
+                onCheckedChange={(checked) =>
+                  setValue(
+                    `questions.${index}.explanation`,
+                    checked === true ? "" : undefined,
+                    { shouldDirty: true },
+                  )
+                }
+              />
+              <FieldLabel htmlFor={`explanation-${blockId}`}>
+                Add explanation
+              </FieldLabel>
+            </Field>
+          )}
 
-          <Field orientation="horizontal">
-            <Checkbox
-              id={`image-${blockId}`}
-              checked={currentQuestion.image !== undefined}
-              onCheckedChange={(checked) =>
-                setValue(
-                  `questions.${index}.image`,
-                  checked === true ? "" : undefined,
-                  { shouldDirty: true },
-                )
-              }
-            />
-            <FieldLabel htmlFor={`image-${blockId}`}>
-              Add image
-            </FieldLabel>
-          </Field>
+          {supportsQuestionImage && (
+            <Field orientation="horizontal">
+              <Checkbox
+                id={`image-${blockId}`}
+                checked={currentQuestion.image !== undefined}
+                onCheckedChange={(checked) =>
+                  setValue(
+                    `questions.${index}.image`,
+                    checked === true ? "" : undefined,
+                    { shouldDirty: true },
+                  )
+                }
+              />
+              <FieldLabel htmlFor={`image-${blockId}`}>
+                Add image
+              </FieldLabel>
+            </Field>
+          )}
         </div>
 
         <Button type="button" variant="destructive" onClick={onDelete}>

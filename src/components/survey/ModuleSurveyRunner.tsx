@@ -32,6 +32,8 @@ type AnswerValue = string | number | string[];
 
 type MediaValue = string | File;
 
+const optionLabel = (index: number) => String.fromCharCode(65 + index);
+
 function MediaImage({
   value,
   alt = "",
@@ -145,8 +147,17 @@ export function ModuleSurveyRunner({
       });
 
       if (!response.success) throw new Error(response.message);
-      setResult(response.data);
-      setFinalResult(response.data);
+      const isLastQuestion = currentIndex >= totalQuestions - 1;
+      const nextResult = isLastQuestion
+        ? {
+            ...response.data,
+            moduleStatus: response.data.moduleStatus === "completed" ? response.data.moduleStatus : "completed",
+            progressPercentage: Math.max(response.data.progressPercentage ?? 0, 100),
+            completedQuestions: Math.max(response.data.completedQuestions ?? 0, totalQuestions),
+          }
+        : response.data;
+      setResult(nextResult);
+      setFinalResult(nextResult);
     } catch (error: unknown) {
       ErrorToast(
         error instanceof Error ? error.message : "Unable to submit your answer",
@@ -205,7 +216,6 @@ export function ModuleSurveyRunner({
         format="Interactive"
         startLabel={userProgress.completedQuestions > 0 ? "Continue" : "Start"}
         onStart={() => setIsStarted(true)}
-        onBack={() => router.push("/modules")}
       />
     );
   }
@@ -256,6 +266,18 @@ export function ModuleSurveyRunner({
   const displayedProgress = result
     ? result.progressPercentage
     : Math.max(localProgress, (currentIndex / Math.max(totalQuestions, 1)) * 100);
+  const isSimulatedCall = question.type === "Simulated Call";
+  const canShowCorrectAnswer = !["Information", "Rating", "Free Input", "Simulated Call"].includes(question.type);
+  const isMcqFeedback = question.type === "MCQ" && Boolean(result);
+  const feedbackTitle = canShowCorrectAnswer
+    ? result?.isCorrect === false
+      ? "Not quite right"
+      : result?.isCorrect === true
+        ? "Correct answer"
+        : "Answer submitted"
+    : question.type === "Information" && answer === "reviewed"
+      ? "Reviewed"
+      : "Answer submitted";
 
   return (
     <div className="flex flex-1 min-h-0 h-full flex-col overflow-hidden rounded-lg border border-secondary/50 bg-secondary p-3 shadow-sm animate-fadeIn">
@@ -267,13 +289,20 @@ export function ModuleSurveyRunner({
       </div>
 
       <AnimationWrapper key={currentIndex} direction="left" duration={0.4} className="flex-1 min-h-0 flex flex-col overflow-hidden">
-        <div className="flex-1 min-h-0 space-y-4 rounded-lg bg-background/45 p-3 overflow-y-auto pr-1.5 scrollbar-thin">
-          {question.type !== "Swipe" && (
+        <div
+          className={cn(
+            "flex-1 min-h-0 overflow-y-auto scrollbar-thin",
+            isSimulatedCall
+              ? "overflow-hidden rounded-lg bg-foreground p-0"
+              : "space-y-4 rounded-lg bg-background/45 p-3 pr-1.5",
+          )}
+        >
+          {question.type !== "Swipe" && question.type !== "Simulated Call" && (
             <div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
                 {question.type}
               </span>
-              <h1 className="mt-2 font-heading text-xl font-bold leading-snug">
+              <h1 className="mt-2 font-heading text-xl font-bold leading-snug wrap-break-word">
                 {question.content}
               </h1>
               {question.image && (
@@ -292,35 +321,51 @@ export function ModuleSurveyRunner({
               setAnswer(direction);
               void handleSubmit(direction);
             }}
+            correctAnswer={result?.correctAnswer}
+            isSubmitted={Boolean(result)}
           />
 
           {result && (
             <AnimationWrapper direction="up" duration={0.3} delay={0.1}>
-              <div
-                className={cn(
-                  "rounded-lg border p-4 text-sm",
-                  result.isCorrect === false
-                    ? "border-destructive/30 bg-destructive/10"
-                    : "border-success/30 bg-success/10",
+              <div className="space-y-3">
+                {isMcqFeedback ? (
+                  <div
+                    className={cn(
+                      "min-w-0 rounded-sm border bg-background p-4 text-sm font-semibold wrap-break-word",
+                      result.isCorrect === false
+                        ? "border-primary text-primary"
+                        : "border-success text-success",
+                    )}
+                  >
+                    {result.isCorrect === false
+                      ? "Incorrect - correct answer is highlighted."
+                      : "Correct - answer is highlighted."}
+                  </div>
+                ) : (
+                  <div
+                    className={cn(
+                      "min-w-0 overflow-hidden rounded-sm border p-4 text-sm wrap-break-word",
+                      result.isCorrect === false
+                        ? "border-destructive/30 bg-destructive/10"
+                        : "border-success/30 bg-success/10",
+                    )}
+                  >
+                    <p className="font-bold">{feedbackTitle}</p>
+                    {canShowCorrectAnswer && result.isCorrect === false && result.correctAnswer && (
+                      <p className="mt-2 wrap-break-word font-medium">
+                        Correct answer:{" "}
+                        {Array.isArray(result.correctAnswer)
+                          ? result.correctAnswer.join(" -> ")
+                          : result.correctAnswer}
+                      </p>
+                    )}
+                  </div>
                 )}
-              >
-                <p className="font-bold">
-                  {result.isCorrect === false
-                    ? "Not quite right"
-                    : result.isCorrect === true
-                      ? "Correct answer"
-                      : "Answer submitted"}
-                </p>
                 {result.explanation && (
-                  <p className="mt-1 text-muted-foreground">{result.explanation}</p>
-                )}
-                {result.isCorrect === false && result.correctAnswer && (
-                  <p className="mt-2 font-medium">
-                    Correct answer:{" "}
-                    {Array.isArray(result.correctAnswer)
-                      ? result.correctAnswer.join(" → ")
-                      : result.correctAnswer}
-                  </p>
+                  <div className="min-w-0 rounded-sm border border-primary/40 bg-background p-4 text-sm wrap-break-word">
+                    <span className="font-bold text-primary">Explanation: </span>
+                    <span>{result.explanation}</span>
+                  </div>
                 )}
               </div>
             </AnimationWrapper>
@@ -348,7 +393,7 @@ export function ModuleSurveyRunner({
             disabled={!hasAnswer(answer) || isSubmitting}
             onClick={() => void handleSubmit()}
           >
-            {isSubmitting ? "Submitting..." : "Submit answer"}
+            {isSubmitting ? "Loading..." : "Next"}
             {!isSubmitting && <ArrowRight />}
           </Button>
         )}
@@ -363,20 +408,21 @@ export function QuestionAnswer({
   disabled,
   onAnswer,
   onSwipe,
+  correctAnswer,
+  isSubmitted = false,
 }: {
   question: ModuleQuestion;
   answer: AnswerValue | null;
   disabled: boolean;
   onAnswer: (answer: AnswerValue) => void;
   onSwipe: (direction: "left" | "right") => void;
+  correctAnswer?: AnswerValue;
+  isSubmitted?: boolean;
 }) {
   if (question.type === "Information") {
     return (
-      <div className="space-y-4 rounded-lg border bg-card p-4">
-        {question.image && (
-           
-          <MediaImage value={question.image as string | File} alt="" className="max-h-56 w-full rounded-lg border bg-background object-contain" />
-        )}
+      <div className="space-y-4 overflow-hidden rounded-lg border bg-card p-4">
+
         <Button
           type="button"
           variant={answer === "reviewed" ? "default" : "outline"}
@@ -392,22 +438,42 @@ export function QuestionAnswer({
   if (question.type === "MCQ") {
     return (
       <div className="space-y-3">
-        {(question.options ?? []).map((option, optionIndex) => (
-          <button
-            key={`${option}-${optionIndex}`}
-            type="button"
-            disabled={disabled}
-            onClick={() => onAnswer(option)}
-            className={cn(
-              "w-full rounded-lg border bg-background p-4 text-left text-sm transition-colors",
-              answer === option
-                ? "border-primary bg-primary/10 font-semibold"
-                : "hover:border-primary/50",
-            )}
-          >
-            {option}
-          </button>
-        ))}
+        {(question.options ?? []).map((option, optionIndex) => {
+          const selected = answer === option;
+          const isCorrectOption = isSubmitted && correctAnswer === option;
+          const isWrongSelection = isSubmitted && selected && correctAnswer !== option;
+          const isDimmed = isSubmitted && !isCorrectOption && !isWrongSelection;
+
+          return (
+            <button
+              key={`${option}-${optionIndex}`}
+              type="button"
+              disabled={disabled}
+              onClick={() => onAnswer(option)}
+              className={cn(
+                "group flex w-full min-w-0 items-center gap-3 rounded-sm border bg-background p-4 text-left text-sm transition-colors",
+                isCorrectOption && "border-success font-semibold",
+                isWrongSelection && "border-primary font-semibold",
+                !isSubmitted && selected && "border-success font-semibold",
+                !isSubmitted && !selected && "hover:border-primary/50",
+                isDimmed && "border-transparent bg-background/55 text-muted-foreground opacity-70",
+              )}
+            >
+              <span
+                className={cn(
+                  "flex size-8 shrink-0 items-center justify-center rounded-sm bg-muted text-xs font-bold text-muted-foreground transition-colors",
+                  (isCorrectOption || (!isSubmitted && selected)) && "bg-success text-success-foreground",
+                  isWrongSelection && "bg-primary text-primary-foreground",
+                )}
+              >
+                {optionLabel(optionIndex)}
+              </span>
+              <span className="min-w-0 flex-1 wrap-break-word">
+                {option}
+              </span>
+            </button>
+          );
+        })}
       </div>
     );
   }
@@ -450,7 +516,7 @@ export function QuestionAnswer({
             <span className="flex size-8 shrink-0 items-center justify-center rounded bg-muted text-sm font-bold">
               {index + 1}
             </span>
-            <span className="flex-1 text-sm">{item}</span>
+            <span className="min-w-0 flex-1 wrap-break-word text-sm">{item}</span>
             <div className="flex gap-1">
               <Button
                 type="button"
@@ -490,15 +556,15 @@ export function QuestionAnswer({
                 "max-w-[85%] rounded-xl p-3 text-sm bg-background",
               )}
             >
-              <p className="mb-1 text-[10px] font-bold uppercase opacity-70">
+              <p className="mb-1 wrap-break-word text-[10px] font-bold uppercase opacity-70">
                 {message.sender}
               </p>
-              {message.text}
+              <p className="wrap-break-word">{message.text}</p>
             </div>
           ))}
           {typeof answer === "string" && answer !== "completed" && (
             <div className="ml-auto max-w-[85%] rounded-xl bg-primary p-3 text-sm text-primary-foreground">
-              {answer}
+              <p className="wrap-break-word">{answer}</p>
             </div>
           )}
         </div>
@@ -508,14 +574,14 @@ export function QuestionAnswer({
             <p className="mb-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
               Choose your response
             </p>
-            {options.map((option) => (
+            {options.map((option, optionIndex) => (
               <button
-                key={option}
+                key={`${option}-${optionIndex}`}
                 type="button"
                 disabled={disabled}
                 onClick={() => onAnswer(option)}
                 className={cn(
-                  "w-full rounded-md border p-3 text-left text-sm transition-colors",
+                  "w-full min-w-0 rounded-sm border p-3 text-left text-sm transition-colors wrap-break-word",
                   answer === option
                     ? "border-primary bg-primary/10 font-semibold"
                     : "hover:border-primary/50",
@@ -583,7 +649,7 @@ export function QuestionAnswer({
                 disabled={disabled}
                 onClick={() => onAnswer(option)}
                 className={cn(
-                  "w-full rounded-lg border bg-background p-4 text-left text-sm transition-colors",
+                  "w-full min-w-0 rounded-sm border bg-background p-4 text-left text-sm transition-colors wrap-break-word",
                   answer === option
                     ? "border-primary bg-primary/10 font-semibold"
                     : "hover:border-primary/50",
@@ -657,7 +723,7 @@ function SimulatedCallQuestion({
 
   if (!hasAnswered) {
     return (
-      <div className="relative flex min-h-[34rem] overflow-hidden rounded-lg border bg-foreground text-background shadow-sm">
+      <div className="relative flex min-h-full h-full overflow-hidden rounded-lg border-0 bg-foreground text-background shadow-sm">
         {question.callerPhoto && (
            
           <MediaImage value={question.callerPhoto as string | File} alt="" className="absolute inset-0 size-full scale-110 object-cover opacity-45 blur-xl" />
@@ -679,7 +745,6 @@ function SimulatedCallQuestion({
               <h2 className="font-heading text-3xl font-bold text-background">
                 {callerName}
               </h2>
-              <p className="mt-3 text-sm text-background/75">{question.content}</p>
             </div>
           </div>
 
@@ -722,7 +787,7 @@ function SimulatedCallQuestion({
   }
 
   return (
-    <div className="space-y-4 rounded-lg border bg-card p-4">
+    <div className="space-y-4 overflow-hidden rounded-lg border bg-card p-4">
       {question.postCallVideoUrl && (
         <div className="aspect-video overflow-hidden rounded-lg bg-black">
           <MediaVideo value={question.postCallVideoUrl as string | File} autoPlay className="size-full" />
@@ -733,9 +798,9 @@ function SimulatedCallQuestion({
         <p className="text-xs font-bold uppercase tracking-wider text-primary">
           Call complete
         </p>
-        <h2 className="font-heading text-xl font-bold">{callerName}</h2>
+        <h2 className="font-heading text-xl font-bold wrap-break-word">{callerName}</h2>
         {question.postCallMessage && (
-          <p className="text-sm text-muted-foreground">
+          <p className="wrap-break-word text-sm text-muted-foreground">
             {question.postCallMessage}
           </p>
         )}
@@ -753,11 +818,6 @@ function SimulatedCallQuestion({
     </div>
   );
 }
-
-
-
-
-
 
 
 

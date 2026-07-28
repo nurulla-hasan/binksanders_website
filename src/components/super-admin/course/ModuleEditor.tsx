@@ -36,6 +36,13 @@ const prepareModulePayload = (values: CreateModuleFormValues) => {
   const questions = values.questions.map((question, index) => {
     const cleanQuestion = { ...question } as Record<string, unknown>;
 
+    if (["Free Input", "Rating", "Information", "Simulated Call"].includes(String(cleanQuestion.type))) {
+      delete cleanQuestion.correctAnswer;
+    }
+
+    if (cleanQuestion.type === "Simulated Call") {
+      delete cleanQuestion.content;
+    }
     mediaFields.forEach((field) => {
       const value = cleanQuestion[field];
       if (isFileValue(value)) {

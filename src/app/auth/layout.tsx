@@ -18,9 +18,6 @@ export default function AuthLayout({
           priority
           unoptimized
         />
-        <div className="absolute top-6 left-6 text-white/80 text-sm font-medium tracking-wide z-10 drop-shadow-md">
-          Authentication
-        </div>
       </div>
 
       {/* Right Side: Auth Content */}
