@@ -150,7 +150,12 @@ export function ModuleSurveyRunner({
             <div className="grid grid-cols-2 gap-3 rounded-lg border bg-card p-3 text-center">
               <div>
                 <p className="text-xl font-bold text-primary">
-                  {finalResult?.moduleScore ?? 0}
+                  {finalResult?.moduleScore ??
+                    userProgress.answers?.reduce(
+                      (acc, ans) => acc + (ans.score || 0),
+                      0,
+                    ) ??
+                    0}
                 </p>
                 <p className="text-xs text-muted-foreground">Module score</p>
               </div>

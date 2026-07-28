@@ -21,7 +21,7 @@ export default async function ModulesPage() {
       <section className="relative shrink-0 overflow-hidden rounded-lg border border-secondary/20 bg-secondary p-4 text-secondary-foreground shadow-sm">
         <div className="relative z-10 space-y-4">
           <div className="space-y-1">
-            <span className="block text-[10px] font-bold uppercase tracking-widest text-primary">
+            <span className="block text-[10px] font-bold uppercase tracking-widest text-background">
               Assigned trainings
             </span>
             <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">
