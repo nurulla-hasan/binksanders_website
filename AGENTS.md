@@ -78,6 +78,112 @@ Write TypeScript with strict types and import local modules via `@/*`. Use 2-spa
 
 For styling, use Tailwind CSS v4 tokens from `src/app/globals.css`. Do not hardcode colors; add CSS variables for both light and dark themes when a new color is required. Keep shadcn components pure: prefer built-in `variant` and `size` props, extend CVA variants in `src/components/ui`, and apply layout classes to wrapper elements.
 
+Also note: this project uses `shadcn/ui` style `"radix-vega"` (set in `components.json`), with `data-slot` attributes on primitives. The icon library is `lucide-react`.
+
+## Data Fetching & Service Layer
+
+All API calls go through `src/lib/nextServerFetch.ts` — a **server-only** wrapper around `fetch()` that auto-injects the `accessToken` from `httpOnly` cookies. Service files live in `src/services/` and all start with `"use server"` — they are **Next.js Server Actions**.
+
+**Pattern for read operations:**
+```typescript
+"use server";
+import { nextServerFetch } from "@/lib/nextServerFetch";
+import type { ApiResponse } from "@/lib/types/api.type";
+
+export const getItems = async (params: TQuery = {}) =>
+  nextServerFetch<ApiResponse<ItemType>>(`/endpoint${buildQueryString(params)}`, {
+    next: { tags: ["items"], revalidate: 3600 },
+  });
+```
+
+**Pattern for write/mutation operations:**
+```typescript
+"use server";
+import { nextServerFetch } from "@/lib/nextServerFetch";
+import { updateTag } from "next/cache";
+
+export const createItem = async (payload: PayloadType) => {
+  const response = await nextServerFetch<ApiResponse<T>>("/endpoint", {
+    method: "POST",
+    body: payload,
+  });
+  if (response?.success) updateTag("items");
+  return response;
+};
+```
+
+Key helpers in `src/lib/`:
+- `buildQueryString(params)` — filters out `undefined`/`null`/empty values, handles arrays
+- `createMultipartBody(data, files)` — wraps data + files into `FormData` for uploads
+- `updateTag("tag-name")` — revalidates cached data after mutations (from `next/cache`)
+
+**Data flow:** Server component page → service function → `nextServerFetch()` → fetch to `NEXT_PUBLIC_BASE_API` URL → typed response → passed to client components via props or `UserProvider`.
+
+## State Management
+
+**Zustand (`src/stores/`) is deprecated.** Auth state is managed via React Context and Next.js Server Actions.
+
+Use the `UserProvider` context (`src/providers/UserProvider.tsx`) for accessing the current user:
+- Server components fetch the user and pass it to `<UserProvider user={user}>`.
+- Client components consume it via `useUserContext()` (throws if used outside provider).
+
+**URL as state:** Use `useNextFilter` hook (`src/hooks/useNextFilter.ts`) for filter/pagination state synced to URL search params. It supports optimistic updates, debounced navigation, batch updates, multi-select toggle, and clear-all with exclusion list.
+
+## Layout Composition
+
+```
+RootLayout
+├── DynamicThemeProvider (client — fetches company branding, overrides CSS vars)
+│   ├── ThemeProvider (next-themes wrapper, class strategy, default light)
+│   │   ├── TooltipProvider
+│   │   │   ├── {route group layout} (server)
+│   │   │   │   └── UserProvider
+│   │   │   │       └── {page content}
+│   │   │   └── Toaster (sonner)
+```
+
+- **Main route** (`(main-route)/layout.tsx`): mobile-first layout with `max-w-120` container, `TopNav` (back button + icons), scrollable `<main>`, and `BottomNav` (Home/Modules/Profile tabs).
+- **Admin route** (`(admin-route)/layout.tsx`): desktop sidebar layout with `MainLayout` → `Sidebar` + `Header` (hamburger, greeting, theme toggle, avatar).
+- **Auth pages**: two-panel layout (image left, form right), no UserProvider.
+
+## Theme System
+
+- All colors are **CSS variables** defined in `src/app/globals.css` using OKLCH color space.
+- Every variable has `:root` (light), `.dark` (dark), and `@theme inline` (Tailwind v4 mapping) definitions.
+- **`DynamicThemeProvider`** (`src/providers/dynamic-theme-provider.tsx`) fetches company branding and overrides `--primary`, `--primary-foreground`, `--ring`, `--sidebar-*`, `--secondary*` CSS variables dynamically. It clears custom themes on auth pages.
+- Use `text-primary/80`, `bg-muted`, `border-border` — never hardcoded hex/rgb/oklch values.
+- Custom variables beyond shadcn defaults: `--success`/`--success-foreground`, `--font-heading`, `--radius-sm` through `--radius-4xl`, full sidebar color set.
+
+## Component Variants Already Extended
+
+These shadcn components already have custom variants/sizes in `src/components/ui/`. Use these via props before considering new extensions:
+
+- **Button**: variants `disagree`, `agree`, `sidebar-logout`; sizes `lg-full`, `icon-xs`, `icon-sm`, `icon-lg`, `sidebar-logout`
+- **Badge**: variants `success`, `info`, `progress`, `accepted`, `active`, `pending`, `blocked`, `rejected`, `processing`, `completed`, `manager`, `member`, `admin`
+- **Avatar**: size prop with `sm`, `lg`, `xl`; sub-components `AvatarBadge`, `AvatarGroup`, `AvatarGroupCount`
+
+## Utility Hooks (`src/hooks/`)
+
+- `useCopyToClipboard()` — copies text with 2s feedback state
+- `useCountdown(initialSeconds, storageKey)` — OTP timer persistent across page refreshes (localStorage)
+- `useLocalStorage<T>(key, initialValue)` — typed localStorage with SSR safety
+- `useMediaQuery(query)` — reactive media query matching
+- `useNetworkStatus()` — online/offline detection
+
+## Error, Loading & NotFound Boundaries
+
+- **`error.tsx`** — client component with `reset()` button; shows error message from `error.message`
+- **`loading.tsx`** — centered `LoaderCircle` spinner with "Loading" text
+- **`not-found.tsx`** — "404 — Page Not Found" with "Return Home" link styled as a Button
+- Individual pages handle errors inline with `ErrorToast()` (sonner toast) or by `throw new Error()` (caught by error boundary)
+
+## Project Configuration Notes
+
+- **Next.js config** (`next.config.ts`): server actions body limit set to `100mb`; remote images allowed from `images.unsplash.com` and `res.cloudinary.com`
+- **ESLint** (`eslint.config.mjs`): uses `eslint-config-next` with core-web-vitals and typescript configs
+- **Path alias**: `@/*` maps to `./src/*` (configured in `tsconfig.json`)
+- **Platform**: deployed on Vercel at `binksanders-website.vercel.app`
+
 ## Testing Guidelines
 
 No automated test framework is currently configured. Before submitting changes, run `npm run lint` and `npm run build`. If tests are added later, colocate them near the feature or use a clear `*.test.ts(x)` naming pattern, and document the command in `package.json`.
