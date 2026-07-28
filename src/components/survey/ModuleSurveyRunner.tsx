@@ -47,7 +47,8 @@ export function ModuleSurveyRunner({
 
   const question = module.questions[currentIndex];
   const totalQuestions = module.questions.length;
-  const localProgress = result?.progressPercentage ?? userProgress.progressPercentage;
+  const localProgress =
+    result?.progressPercentage ?? userProgress.progressPercentage;
 
   const handleSubmit = async (submittedAnswer: AnswerValue | null = answer) => {
     if (!question || !hasAnswer(submittedAnswer)) return;
@@ -65,9 +66,18 @@ export function ModuleSurveyRunner({
       const nextResult = isLastQuestion
         ? {
             ...response.data,
-            moduleStatus: response.data.moduleStatus === "completed" ? response.data.moduleStatus : "completed",
-            progressPercentage: Math.max(response.data.progressPercentage ?? 0, 100),
-            completedQuestions: Math.max(response.data.completedQuestions ?? 0, totalQuestions),
+            moduleStatus:
+              response.data.moduleStatus === "completed"
+                ? response.data.moduleStatus
+                : "completed",
+            progressPercentage: Math.max(
+              response.data.progressPercentage ?? 0,
+              100,
+            ),
+            completedQuestions: Math.max(
+              response.data.completedQuestions ?? 0,
+              totalQuestions,
+            ),
           }
         : response.data;
       setResult(nextResult);
@@ -99,7 +109,7 @@ export function ModuleSurveyRunner({
   };
 
   useEffect(() => {
-    if (question?.type !== "Swipe" || !result) return;
+    if ((question?.type !== "Swipe" && question?.type !== "Simulated Call") || !result) return;
 
     const timer = window.setTimeout(() => {
       if (
@@ -141,7 +151,9 @@ export function ModuleSurveyRunner({
           <div className="space-y-4">
             <div className="rounded-lg bg-primary p-4 text-center text-primary-foreground shadow-sm">
               <CheckCircle2 className="mx-auto mb-2.5 size-10" />
-              <h1 className="font-heading text-xl font-bold">Module completed</h1>
+              <h1 className="font-heading text-xl font-bold">
+                Module completed
+              </h1>
               <p className="mt-1.5 text-xs text-primary-foreground/85">
                 You completed all {totalQuestions} questions in {module.title}.
               </p>
@@ -184,11 +196,27 @@ export function ModuleSurveyRunner({
 
   const displayedProgress = result
     ? result.progressPercentage
-    : Math.max(localProgress, (currentIndex / Math.max(totalQuestions, 1)) * 100);
+    : Math.max(
+        localProgress,
+        (currentIndex / Math.max(totalQuestions, 1)) * 100,
+      );
   const isSimulatedCall = question.type === "Simulated Call";
-  const canShowCorrectAnswer = !["Information", "Rating", "Free Input", "Simulated Call"].includes(question.type);
-  const isOptionFeedback = ["MCQ", "Chat Scenario", "Video"].includes(question.type) && Boolean(result);
-  const hasFeedbackCorrectAnswer = result?.correctAnswer !== undefined && result?.correctAnswer !== null && !(typeof result.correctAnswer === "string" && result.correctAnswer.trim() === "");
+  const canShowCorrectAnswer = ![
+    "Information",
+    "Rating",
+    "Free Input",
+    "Simulated Call",
+  ].includes(question.type);
+  const isOptionFeedback =
+    ["MCQ", "Chat Scenario", "Video"].includes(question.type) &&
+    Boolean(result);
+  const hasFeedbackCorrectAnswer =
+    result?.correctAnswer !== undefined &&
+    result?.correctAnswer !== null &&
+    !(
+      typeof result.correctAnswer === "string" &&
+      result.correctAnswer.trim() === ""
+    );
   const feedbackTitle = canShowCorrectAnswer
     ? result?.isCorrect === false
       ? "Not quite right"
@@ -200,15 +228,29 @@ export function ModuleSurveyRunner({
       : "Answer submitted";
 
   return (
-    <div className="flex flex-1 min-h-0 h-full flex-col overflow-hidden rounded-lg border border-secondary/50 bg-secondary p-3 shadow-sm animate-fadeIn">
-      <div className="flex shrink-0 items-center gap-3 pb-2.5 pt-1">
-        <span className="whitespace-nowrap text-xs font-bold text-secondary-foreground/80">
-          Q{currentIndex + 1}/{totalQuestions}
-        </span>
-        <Progress value={displayedProgress} className="h-1.5 flex-1" />
-      </div>
+    <div
+      className={cn(
+        "flex flex-1 min-h-0 h-full flex-col overflow-hidden shadow-sm animate-fadeIn",
+        isSimulatedCall
+          ? "bg-foreground"
+          : "rounded-lg border border-secondary/50 bg-secondary p-3",
+      )}
+    >
+      {!isSimulatedCall && (
+        <div className="flex shrink-0 items-center gap-3 pb-2.5 pt-1">
+          <span className="whitespace-nowrap text-xs font-bold text-secondary-foreground/80">
+            Q{currentIndex + 1}/{totalQuestions}
+          </span>
+          <Progress value={displayedProgress} className="h-1.5 flex-1" />
+        </div>
+      )}
 
-      <AnimationWrapper key={currentIndex} direction="left" duration={0.4} className="flex-1 min-h-0 flex flex-col overflow-hidden">
+      <AnimationWrapper
+        key={currentIndex}
+        direction="left"
+        duration={0.4}
+        className="flex-1 min-h-0 flex flex-col overflow-hidden"
+      >
         <div
           className={cn(
             "flex-1 min-h-0 overflow-y-auto scrollbar-thin flex flex-col",
@@ -217,19 +259,25 @@ export function ModuleSurveyRunner({
               : "space-y-4 rounded-lg bg-background/45 p-3 pr-1.5",
           )}
         >
-          {question.type !== "Swipe" && question.type !== "Simulated Call" && question.type !== "Chat Scenario" && (
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
-                {question.type}
-              </span>
-              <h1 className="mt-2 font-heading text-xl font-bold leading-snug wrap-break-word">
-                {question.content}
-              </h1>
-              {question.image && (
-                <MediaImage value={question.image as MediaValue} alt="" className="mt-4 max-h-48 w-full rounded-lg border bg-background object-contain" />
-              )}
-            </div>
-          )}
+          {question.type !== "Swipe" &&
+            question.type !== "Simulated Call" &&
+            question.type !== "Chat Scenario" && (
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                  {question.type}
+                </span>
+                <h1 className="mt-2 font-heading text-xl font-bold leading-snug wrap-break-word">
+                  {question.content}
+                </h1>
+                {question.image && (
+                  <MediaImage
+                    value={question.image as MediaValue}
+                    alt=""
+                    className="mt-4 max-h-48 w-full rounded-lg border bg-background object-contain"
+                  />
+                )}
+              </div>
+            )}
 
           <QuestionAnswer
             question={question}
@@ -240,11 +288,14 @@ export function ModuleSurveyRunner({
               setAnswer(direction);
               void handleSubmit(direction);
             }}
+            onAutoSubmit={(ans) => {
+              void handleSubmit(ans);
+            }}
             correctAnswer={result?.correctAnswer}
             isSubmitted={Boolean(result)}
           />
 
-          {result && (
+          {result && question.type !== "Simulated Call" && (
             <AnimationWrapper direction="up" duration={0.3} delay={0.1}>
               <div className="space-y-3">
                 {isOptionFeedback ? (
@@ -280,19 +331,23 @@ export function ModuleSurveyRunner({
                     )}
                   >
                     <p className="font-bold">{feedbackTitle}</p>
-                    {canShowCorrectAnswer && result.isCorrect === false && result.correctAnswer && (
-                      <p className="mt-2 wrap-break-word font-medium">
-                        Correct answer:{" "}
-                        {Array.isArray(result.correctAnswer)
-                          ? result.correctAnswer.join(" -> ")
-                          : result.correctAnswer}
-                      </p>
-                    )}
+                    {canShowCorrectAnswer &&
+                      result.isCorrect === false &&
+                      result.correctAnswer && (
+                        <p className="mt-2 wrap-break-word font-medium">
+                          Correct answer:{" "}
+                          {Array.isArray(result.correctAnswer)
+                            ? result.correctAnswer.join(" -> ")
+                            : result.correctAnswer}
+                        </p>
+                      )}
                   </div>
                 )}
                 {result.explanation && (
                   <div className="min-w-0 rounded-sm border border-border bg-background p-4 text-sm wrap-break-word">
-                    <span className="font-bold text-primary">Explanation: </span>
+                    <span className="font-bold text-primary">
+                      Explanation:{" "}
+                    </span>
                     <span>{result.explanation}</span>
                   </div>
                 )}
@@ -302,36 +357,33 @@ export function ModuleSurveyRunner({
         </div>
       </AnimationWrapper>
 
-      <div className="shrink-0 pt-3 mt-auto border-t border-secondary-foreground/10 bg-secondary">
-        {result && question.type === "Swipe" ? (
-          <div className="py-2 text-center text-sm font-medium text-muted-foreground">
-            Loading next question...
-          </div>
-        ) : result ? (
-          <Button size="lg" className="w-full" onClick={handleContinue}>
-            {currentIndex === totalQuestions - 1 || result.moduleStatus === "completed"
-              ? "View result"
-              : "Continue"}
-            <ArrowRight />
-          </Button>
-        ) : (
-          <Button
-            size="lg"
-            className="w-full"
-            disabled={!hasAnswer(answer) || isSubmitting}
-            onClick={() => void handleSubmit()}
-          >
-            {isSubmitting ? "Loading..." : "Next"}
-            {!isSubmitting && <ArrowRight />}
-          </Button>
-        )}
-      </div>
+      {!isSimulatedCall && (
+        <div className="shrink-0 pt-3 mt-auto border-t border-secondary-foreground/10 bg-secondary">
+          {result && question.type === "Swipe" ? (
+            <div className="py-2 text-center text-sm font-medium text-muted-foreground">
+              Loading next question...
+            </div>
+          ) : result ? (
+            <Button size="lg" className="w-full" onClick={handleContinue}>
+              {currentIndex === totalQuestions - 1 ||
+              result.moduleStatus === "completed"
+                ? "View result"
+                : "Continue"}
+              <ArrowRight />
+            </Button>
+          ) : (
+            <Button
+              size="lg"
+              className="w-full"
+              disabled={!hasAnswer(answer) || isSubmitting}
+              onClick={() => void handleSubmit()}
+            >
+              {isSubmitting ? "Loading..." : "Next"}
+              {!isSubmitting && <ArrowRight />}
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
-
-
-
-
-
-

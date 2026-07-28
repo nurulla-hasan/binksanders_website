@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowUp, CheckCircle2, Phone, UserRound } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowUp, Phone, UserRound } from "lucide-react";
+// import { Button } from "@/components/ui/button";
 import type { ModuleQuestion } from "@/lib/types/module.type";
 import type { AnswerValue, MediaValue } from "./types";
 import { MediaImage, MediaVideo } from "./media";
@@ -26,9 +26,9 @@ export function SimulatedCallQuestion({
 
   if (!hasAnswered) {
     return (
-      <div className="relative flex min-h-full h-full overflow-hidden rounded-lg border-0 bg-foreground text-background shadow-sm">
+      <div className="relative flex min-h-full h-full w-full overflow-hidden bg-foreground text-background">
         {question.callerPhoto && (
-          <MediaImage value={question.callerPhoto as MediaValue} alt="" className="absolute inset-0 size-full scale-110 object-cover opacity-45 blur-xl" />
+          <MediaImage value={question.callerPhoto as MediaValue} alt="" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-45 blur-xl" />
         )}
         <div className="absolute inset-0 bg-foreground/55" />
 
@@ -88,34 +88,39 @@ export function SimulatedCallQuestion({
   }
 
   return (
-    <div className="space-y-4 overflow-hidden rounded-lg border bg-card p-4">
-      {question.postCallVideoUrl && (
-        <div className="aspect-video overflow-hidden rounded-lg bg-black">
-          <MediaVideo value={question.postCallVideoUrl as MediaValue} autoPlay className="size-full" />
+    <div className="relative flex min-h-full h-full w-full flex-col overflow-hidden bg-black animate-fadeIn">
+      {question.postCallVideoUrl ? (
+        <MediaVideo 
+          value={question.postCallVideoUrl as MediaValue} 
+          autoPlay 
+          className="absolute inset-0 h-full w-full object-cover"
+          onEnded={() => {
+            if (!disabled && !isComplete) onComplete();
+          }}
+        />
+      ) : question.callerPhoto ? (
+        <MediaImage 
+          value={question.callerPhoto as MediaValue} 
+          alt="" 
+          className="absolute inset-0 h-full w-full object-cover"
+          onLoad={() => {
+            if (!disabled && !isComplete) {
+              window.setTimeout(() => onComplete(), 3000);
+            }
+          }}
+        />
+      ) : (
+        <div className="flex h-full w-full flex-col items-center justify-center bg-foreground text-background">
+          <p className="text-xl font-bold">Call completed</p>
+          <p className="mt-2 text-sm text-background/60">Please wait...</p>
+          {(() => {
+            if (!disabled && !isComplete) {
+              window.setTimeout(() => onComplete(), 2000);
+            }
+            return null;
+          })()}
         </div>
       )}
-
-      <div className="space-y-2">
-        <p className="text-xs font-bold uppercase tracking-wider text-primary">
-          Call complete
-        </p>
-        <h2 className="font-heading text-xl font-bold wrap-break-word">{callerName}</h2>
-        {question.postCallMessage && (
-          <p className="wrap-break-word text-sm text-muted-foreground">
-            {question.postCallMessage}
-          </p>
-        )}
-      </div>
-
-      <Button
-        type="button"
-        variant={isComplete ? "default" : "outline"}
-        disabled={disabled}
-        onClick={onComplete}
-        className="w-full"
-      >
-        <CheckCircle2 /> {isComplete ? "Call reviewed" : "Mark call as reviewed"}
-      </Button>
     </div>
   );
 }

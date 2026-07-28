@@ -7,10 +7,12 @@ export function MediaImage({
   value,
   alt = "",
   className,
+  onLoad,
 }: {
   value: MediaValue;
   alt?: string;
   className?: string;
+  onLoad?: () => void;
 }) {
   const [objectUrl, setObjectUrl] = useState<string>();
   const src = value instanceof File ? objectUrl : value;
@@ -30,17 +32,19 @@ export function MediaImage({
   if (!src) return null;
 
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={src} alt={alt} className={className} />;
+  return <img src={src} alt={alt} className={className} onLoad={onLoad} />;
 }
 
 export function MediaVideo({
   value,
   className,
   autoPlay,
+  onEnded,
 }: {
   value: MediaValue;
   className?: string;
   autoPlay?: boolean;
+  onEnded?: () => void;
 }) {
   const [objectUrl, setObjectUrl] = useState<string>();
   const src = value instanceof File ? objectUrl : value;
@@ -59,5 +63,5 @@ export function MediaVideo({
 
   if (!src) return null;
 
-  return <video src={src} controls autoPlay={autoPlay} playsInline className={className} />;
+  return <video src={src} controls autoPlay={autoPlay} playsInline className={className} onEnded={onEnded} />;
 }

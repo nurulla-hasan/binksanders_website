@@ -17,9 +17,10 @@ export function QuestionAnswer({
   disabled,
   onAnswer,
   onSwipe,
+  onAutoSubmit,
   correctAnswer,
   isSubmitted = false,
-}: AnswerRendererProps) {
+}: AnswerRendererProps & { onAutoSubmit?: (value: string) => void }) {
   if (question.type === "Information") {
     return (
       <div className="space-y-4 overflow-hidden rounded-lg border bg-card p-4 mt-auto">
@@ -204,7 +205,12 @@ export function QuestionAnswer({
         question={question}
         answer={answer}
         disabled={disabled}
-        onComplete={() => onAnswer("completed")}
+        onComplete={() => {
+          onAnswer("completed");
+          if (onAutoSubmit) {
+            onAutoSubmit("completed");
+          }
+        }}
       />
     );
   }

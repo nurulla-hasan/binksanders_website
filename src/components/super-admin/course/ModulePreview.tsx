@@ -96,7 +96,7 @@ export function ModulePreview({
 
   // Auto-advance for Swipe questions just like the real runner
   useEffect(() => {
-    if (question?.type !== "Swipe" || !result) return;
+    if ((question?.type !== "Swipe" && question?.type !== "Simulated Call") || !result) return;
 
     const timer = window.setTimeout(() => {
       if (currentIndex >= totalQuestions - 1) {
@@ -241,16 +241,34 @@ export function ModulePreview({
         ? "Reviewed"
         : "Answer submitted";
 
-    return (
-      <div className="m-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-secondary/50 bg-secondary p-4 shadow-sm animate-fadeIn">
-        <div className="flex shrink-0 items-center gap-3 pb-4 pt-2">
-          <span className="whitespace-nowrap text-xs font-bold text-secondary-foreground/80">
-            Q{currentIndex + 1}/{totalQuestions}
-          </span>
-          <Progress value={displayedProgress} className="h-1.5 flex-1" />
-        </div>
+    const isSimulatedCall = question?.type === "Simulated Call";
 
-        <div className="min-w-0 flex-1 min-h-0 space-y-5 overflow-y-auto overflow-x-hidden rounded-sm bg-background/45 p-4 pr-2 scrollbar-thin flex flex-col">
+    return (
+      <div
+        className={cn(
+          "m-2 flex min-h-0 flex-1 flex-col overflow-hidden shadow-sm animate-fadeIn",
+          isSimulatedCall
+            ? "bg-foreground"
+            : "rounded-lg border border-secondary/50 bg-secondary p-4",
+        )}
+      >
+        {!isSimulatedCall && (
+          <div className="flex shrink-0 items-center gap-3 pb-4 pt-2">
+            <span className="whitespace-nowrap text-xs font-bold text-secondary-foreground/80">
+              Q{currentIndex + 1}/{totalQuestions}
+            </span>
+            <Progress value={displayedProgress} className="h-1.5 flex-1" />
+          </div>
+        )}
+
+        <div
+          className={cn(
+            "min-w-0 flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-thin flex flex-col",
+            isSimulatedCall
+              ? "overflow-hidden rounded-lg bg-foreground p-0"
+              : "space-y-5 rounded-sm bg-background/45 p-4 pr-2",
+          )}
+        >
           {question.type !== "Swipe" && question.type !== "Simulated Call" && question.type !== "Chat Scenario" && (
             <div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
@@ -279,11 +297,14 @@ export function ModulePreview({
               setAnswer(direction);
               handleSubmit(direction);
             }}
+            onAutoSubmit={(ans) => {
+              handleSubmit(ans);
+            }}
             correctAnswer={result?.correctAnswer}
             isSubmitted={Boolean(result)}
           />
 
-          {result && (
+          {result && !isSimulatedCall && (
             <div className="space-y-3">
               {isOptionFeedback ? (
                 <div
@@ -338,29 +359,31 @@ export function ModulePreview({
           )}
         </div>
 
-        <div className="mt-5 shrink-0">
-          {result && question.type === "Swipe" ? (
-            <div className="py-2 text-center text-sm font-medium text-muted-foreground">
-              Loading next question...
-            </div>
-          ) : result ? (
-            <Button type="button" size="lg" className="w-full" onClick={handleContinue}>
-              {currentIndex === totalQuestions - 1 ? "View result" : "Continue"}
-              <ArrowRight />
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              size="lg"
-              className="w-full"
-              disabled={!hasAnswer(answer)}
-              onClick={() => handleSubmit()}
-            >
-              Next
-              <ArrowRight />
-            </Button>
-          )}
-        </div>
+        {!isSimulatedCall && (
+          <div className="mt-5 shrink-0">
+            {result && question.type === "Swipe" ? (
+              <div className="py-2 text-center text-sm font-medium text-muted-foreground">
+                Loading next question...
+              </div>
+            ) : result ? (
+              <Button type="button" size="lg" className="w-full" onClick={handleContinue}>
+                {currentIndex === totalQuestions - 1 ? "View result" : "Continue"}
+                <ArrowRight />
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                size="lg"
+                className="w-full"
+                disabled={!hasAnswer(answer)}
+                onClick={() => handleSubmit()}
+              >
+                Next
+                <ArrowRight />
+              </Button>
+            )}
+          </div>
+        )}
       </div>
     );
   };

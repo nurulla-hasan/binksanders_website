@@ -200,15 +200,17 @@ export function QuestionBlock({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-[1fr_200px]">
-        <Field>
-          <FieldLabel htmlFor={`question-${blockId}`}>Content</FieldLabel>
-          <Input
-            id={`question-${blockId}`}
-            placeholder="Question or instruction"
-            {...register(`questions.${index}.content`)}
-          />
-        </Field>
-        <Field>
+        {currentQuestion.type !== "Chat Scenario" && (
+          <Field>
+            <FieldLabel htmlFor={`question-${blockId}`}>Content</FieldLabel>
+            <Input
+              id={`question-${blockId}`}
+              placeholder="Question or instruction"
+              {...register(`questions.${index}.content`)}
+            />
+          </Field>
+        )}
+        <Field className={currentQuestion.type === "Chat Scenario" ? "sm:max-w-50" : ""}>
           <FieldLabel>Question Type</FieldLabel>
           <Select
             value={currentQuestion.type}

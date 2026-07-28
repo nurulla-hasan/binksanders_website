@@ -37,7 +37,7 @@ const orderingSchema = baseQuestionSchema.extend({
   items: requiredStringList(2, "Add at least two ordering items"),
 });
 
-const chatScenarioSchema = baseQuestionSchema.extend({
+const chatScenarioSchema = baseQuestionSchema.omit({ content: true }).extend({
   type: z.literal("Chat Scenario"),
   messages: z
     .array(

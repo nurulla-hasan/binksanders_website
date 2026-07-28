@@ -20,7 +20,7 @@ export type ModuleMessage = {
 export type ModuleQuestion = {
   id: string;
   type: ModuleQuestionType;
-  content: string;
+  content?: string;
   isScored: boolean;
   explanation?: string;
   image?: string;
