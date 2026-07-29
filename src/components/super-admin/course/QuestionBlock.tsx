@@ -1,5 +1,6 @@
 import { Controller, useFormContext, useWatch } from "react-hook-form";
-import { Plus, Trash2, X } from "lucide-react";
+import { Plus, Trash2, X, ArrowUp, ArrowDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -26,6 +27,10 @@ interface QuestionBlockProps {
     newType: QuestionDataSchemaType["type"],
   ) => void;
   onDelete: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  isFirst: boolean;
+  isLast: boolean;
 }
 
 const questionTypes: QuestionDataSchemaType["type"][] = [
@@ -45,6 +50,10 @@ export function QuestionBlock({
   index,
   onChangeType,
   onDelete,
+  onMoveUp,
+  onMoveDown,
+  isFirst,
+  isLast,
 }: QuestionBlockProps) {
   const blockId = useId();
   const { control, register, setValue } =
@@ -178,8 +187,15 @@ export function QuestionBlock({
     }
   };
 
+  const bgColors = [
+    "bg-card",
+    "bg-primary/5",
+    "bg-secondary/10",
+  ];
+  const bgColor = bgColors[index % bgColors.length];
+
   return (
-    <div className="space-y-6 rounded-md border border-border bg-card p-6 shadow-sm">
+    <div className={cn("space-y-6 rounded-md border border-border p-6 shadow-sm transition-colors duration-300", bgColor)}>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-center gap-3">
           <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
@@ -187,16 +203,36 @@ export function QuestionBlock({
           </div>
           <h3 className="font-semibold">{currentQuestion.type}</h3>
         </div>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-          onClick={onDelete}
-        >
-          <Trash2 className="mr-2" />
-          Delete
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            disabled={isFirst}
+            onClick={onMoveUp}
+          >
+            <ArrowUp className="size-4" />
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            disabled={isLast}
+            onClick={onMoveDown}
+          >
+            <ArrowDown className="size-4" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+            onClick={onDelete}
+          >
+            <Trash2 className="mr-2" />
+            Delete
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-[1fr_200px]">

@@ -12,7 +12,7 @@ import AnimationWrapper from "@/components/ui/custom/animation-wrapper";
 export function QuestionnaireSection() {
   const { control } = useFormContext<CreateModuleFormValues>();
   
-  const { fields, append, remove, update } = useFieldArray({
+  const { fields, append, remove, update, move } = useFieldArray({
     control,
     name: "questions",
   });
@@ -52,12 +52,16 @@ export function QuestionnaireSection() {
         ) : (
           <AnimatePresence mode="popLayout">
             {fields.map((field, index) => (
-              <AnimationWrapper key={field.id} direction="up" duration={0.3}>
+              <AnimationWrapper key={field.id} direction="up" duration={0.3} layout>
                 <QuestionBlock 
                   question={field as QuestionDataSchemaType}
                   index={index}
                   onChangeType={(id, newType) => changeQuestionType(index, id, newType)}
                   onDelete={() => deleteQuestion(index)}
+                  onMoveUp={() => move(index, index - 1)}
+                  onMoveDown={() => move(index, index + 1)}
+                  isFirst={index === 0}
+                  isLast={index === fields.length - 1}
                 />
               </AnimationWrapper>
             ))}
