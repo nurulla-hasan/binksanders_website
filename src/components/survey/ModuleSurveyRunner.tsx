@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -108,8 +108,18 @@ export function ModuleSurveyRunner({
     setResult(undefined);
   };
 
+  const bottomRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    if ((question?.type !== "Swipe" && question?.type !== "Simulated Call") || !result) return;
+    if (result && bottomRef.current) {
+      setTimeout(() => {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }, 100);
+    }
+  }, [result]);
+
+  useEffect(() => {
+    if (question?.type !== "Simulated Call" || !result) return;
 
     const timer = window.setTimeout(() => {
       if (
@@ -366,16 +376,13 @@ export function ModuleSurveyRunner({
               </div>
             </AnimationWrapper>
           )}
+          <div ref={bottomRef} />
         </div>
       </AnimationWrapper>
 
       {!isSimulatedCall && (
         <div className="shrink-0 pt-4 mt-auto">
-          {result && question.type === "Swipe" ? (
-            <div className="py-2 text-center text-sm font-medium text-muted-foreground">
-              Loading next question...
-            </div>
-          ) : result ? (
+          {result ? (
             <Button size="lg" className="w-full" onClick={handleContinue}>
               {currentIndex === totalQuestions - 1 ||
               result.moduleStatus === "completed"

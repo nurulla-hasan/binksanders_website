@@ -28,7 +28,7 @@ export function SimulatedCallQuestion({
     return (
       <div className="fixed inset-0 z-50 flex h-full w-full overflow-hidden bg-foreground text-background">
         {question.callerPhoto && (
-          <MediaImage value={question.callerPhoto as MediaValue} alt="" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-45 blur-xl" />
+          <MediaImage value={question.callerPhoto as MediaValue} alt="" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-30" />
         )}
         <div className="absolute inset-0 bg-foreground/55" />
 
