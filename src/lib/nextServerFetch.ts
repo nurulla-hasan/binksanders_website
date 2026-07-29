@@ -157,80 +157,80 @@ export const nextServerFetch = async <T>(
   endpoint: string,
   options: NextServerFetchOptions = {},
 ): Promise<T> => {
-  const {
-    auth = "required",
-    body: rawBody,
-    headers: customHeaders,
-    method = "GET",
-    next,
-    ...requestOptions
-  } = options;
-
-  const normalizedMethod = method.toUpperCase();
-  const headers = new Headers(customHeaders);
-
-  /*
-   * Validate and prepare the body before reading cookies or
-   * making a network request. Invalid caller input therefore
-   * fails immediately.
-   */
-  const body = prepareBody(rawBody, headers, normalizedMethod);
-
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_API;
-
-  if (!baseUrl) {
-    throw new Error("NEXT_PUBLIC_BASE_API is not defined");
-  }
-
-  const accessToken = auth === "none" ? null : await getAccessToken();
-
-  if (auth === "required" && !accessToken) {
-    throw new ApiError("Authorization token is required", 401, {
-      success: false,
-      message: "Authorization token is required",
-      statusCode: 401,
-      data: null,
-    });
-  }
-
-  if (accessToken) {
-    headers.set("Authorization", `Bearer ${accessToken}`);
-  }
-
-  const normalizedBaseUrl = baseUrl.replace(/\/+$/, "");
-  const normalizedEndpoint = endpoint.replace(/^\/+/, "");
-
-  let response: Response;
   try {
-    response = await fetch(`${normalizedBaseUrl}/${normalizedEndpoint}`, {
-      ...requestOptions,
-      method: normalizedMethod,
-      headers,
-      ...(body !== undefined ? { body } : {}),
-      ...(next ? { next } : {}),
-    });
-  } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : "Network error";
-    throw new ApiError(
-      `Unable to connect to backend server (${normalizedBaseUrl}): ${message}`,
-      503,
-      {
+    const {
+      auth = "required",
+      body: rawBody,
+      headers: customHeaders,
+      method = "GET",
+      next,
+      ...requestOptions
+    } = options;
+
+    const normalizedMethod = method.toUpperCase();
+    const headers = new Headers(customHeaders);
+
+    const body = prepareBody(rawBody, headers, normalizedMethod);
+
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_API;
+
+    if (!baseUrl) {
+      return { success: false, message: "NEXT_PUBLIC_BASE_API is not defined", statusCode: 500 } as unknown as T;
+    }
+
+    const accessToken = auth === "none" ? null : await getAccessToken();
+
+    if (auth === "required" && !accessToken) {
+      return { success: false, message: "Authorization token is required", statusCode: 401 } as unknown as T;
+    }
+
+    if (accessToken) {
+      headers.set("Authorization", `Bearer ${accessToken}`);
+    }
+
+    const normalizedBaseUrl = baseUrl.replace(/\/+$/, "");
+    const normalizedEndpoint = endpoint.replace(/^\/+/, "");
+
+    let response: Response;
+    try {
+      response = await fetch(`${normalizedBaseUrl}/${normalizedEndpoint}`, {
+        ...requestOptions,
+        method: normalizedMethod,
+        headers,
+        ...(body !== undefined ? { body } : {}),
+        ...(next ? { next } : {}),
+      });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Network error";
+      return {
         success: false,
-        message: `Network request failed: ${message}`,
-      },
-    );
+        message: `Unable to connect to backend server: ${message}`,
+        statusCode: 503,
+      } as unknown as T;
+    }
+
+    const responseData = await parseJsonResponse(response);
+
+    if (!response.ok) {
+      return {
+        success: false,
+        message: buildErrorMessage(responseData, response.status),
+        statusCode: response.status,
+        data: responseData,
+      } as unknown as T;
+    }
+
+    // Make sure we return the data as T.
+    // Assuming backend returns { success, message, data, statusCode } which matches T
+    return responseData as T;
+  } catch (error: unknown) {
+    const message = error instanceof ApiError ? error.message : error instanceof Error ? error.message : "An unexpected error occurred";
+    const status = error instanceof ApiError ? error.status : 500;
+    
+    return {
+      success: false,
+      message,
+      statusCode: status,
+    } as unknown as T;
   }
-
-  const responseData = await parseJsonResponse(response);
-
-  if (!response.ok) {
-    throw new ApiError(
-      buildErrorMessage(responseData, response.status),
-      response.status,
-      responseData,
-    );
-  }
-
-  return responseData as T;
 };

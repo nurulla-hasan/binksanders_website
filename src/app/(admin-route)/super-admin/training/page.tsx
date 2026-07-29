@@ -7,6 +7,7 @@ import DashboardPageLayout from "@/components/ui/custom/DashboardPageLayout";
 import type { TSearchParams } from "@/lib/types/global.type";
 import { getCompanyDropdown } from "@/services/company.service";
 import { getTrainings } from "@/services/training.service";
+import { DataErrorBlock } from "@/components/ui/custom/data-error-block";
 
 export default async function TrainingPage({
   searchParams,
@@ -20,7 +21,17 @@ export default async function TrainingPage({
   ]);
 
   if (!trainingResponse.success) {
-    throw new Error(trainingResponse.message || "Unable to load trainings");
+    return (
+      <div className="animate-fadeIn">
+        <DashboardPageLayout>
+          <DashboardHeader
+            title="Training Directory"
+            description="Create trainings, assign them to teams, and manage topic/module structure."
+          />
+          <DataErrorBlock message={trainingResponse.message || "Unable to load trainings."} />
+        </DashboardPageLayout>
+      </div>
+    );
   }
 
   const companies = companyResponse.success ? companyResponse.data : [];
