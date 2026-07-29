@@ -24,9 +24,9 @@ export const getTrainingColumns = (companies: CompanyDropdownItem[]): ColumnDef<
     accessorKey: "title",
     header: "Training",
     cell: ({ row }) => (
-      <div className="min-w-72 space-y-1">
-        <p className="font-medium text-foreground">{row.original.title}</p>
-        <p className="line-clamp-1 text-xs text-muted-foreground">
+      <div className="min-w-64 max-w-xs space-y-1">
+        <p className="font-medium text-foreground truncate">{row.original.title}</p>
+        <p className="truncate text-xs text-muted-foreground">
           {row.original.description || "No description"}
         </p>
       </div>
