@@ -3,6 +3,8 @@ import { TopNav } from "@/components/common/TopNav";
 import { getMyProfile } from "@/services/user.service";
 import { UserProvider } from "@/providers/UserProvider";
 
+export const dynamic = "force-dynamic";
+
 export default async function MainRouteLayout({
   children,
 }: Readonly<{

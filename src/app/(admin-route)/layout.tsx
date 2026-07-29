@@ -2,6 +2,8 @@ import MainLayout from "@/components/layout/MainLayout";
 import { getMyProfile } from "@/services/user.service";
 import { UserProvider } from "@/providers/UserProvider";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminRouteLayout({
   children,
 }: {
