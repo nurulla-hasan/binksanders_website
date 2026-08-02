@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - client-feedback-frontend-fixes
+  pull_request:
+    branches:
+      - main
 
 jobs:
   verify:
