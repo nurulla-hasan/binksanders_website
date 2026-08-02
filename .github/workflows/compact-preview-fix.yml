@@ -1,9 +1,6 @@
 name: Compact preview fixer
 
 on:
-  push:
-    branches:
-      - client-feedback-frontend-fixes
   pull_request:
     branches:
       - main
@@ -13,7 +10,6 @@ permissions:
 
 jobs:
   fix-preview:
-    if: github.event_name == 'push' && github.event.head_commit.message != 'fix: align module preview spacing with survey runner'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
