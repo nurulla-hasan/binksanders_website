@@ -63,14 +63,13 @@ export function ModuleSwipeQuestion({
 
   const updateGesture = (x: number, y: number) => {
     const startPoint = startPointRef.current;
-    if (!startPoint || isDisabled) return;
+    if (!startPoint || isDisabled) return false;
 
     const deltaX = x - startPoint.x;
     const deltaY = y - startPoint.y;
 
-    // Preserve normal vertical page scrolling. Only treat the gesture as a
-    // swipe when horizontal movement is dominant.
-    if (Math.abs(deltaY) > Math.abs(deltaX)) return;
+    // Keep vertical page scrolling available until horizontal intent is clear.
+    if (Math.abs(deltaY) > Math.abs(deltaX)) return false;
 
     const nextDragX = Math.max(
       -MAX_DRAG_DISTANCE,
@@ -79,6 +78,7 @@ export function ModuleSwipeQuestion({
 
     dragXRef.current = nextDragX;
     setDragX(nextDragX);
+    return true;
   };
 
   const finishGesture = () => {
@@ -110,7 +110,10 @@ export function ModuleSwipeQuestion({
   const handleTouchMove = (event: ReactTouchEvent<HTMLDivElement>) => {
     const touch = event.touches[0];
     if (!touch) return;
-    updateGesture(touch.clientX, touch.clientY);
+
+    if (updateGesture(touch.clientX, touch.clientY)) {
+      event.preventDefault();
+    }
   };
 
   const handleMouseDown = (event: ReactMouseEvent<HTMLDivElement>) => {
@@ -131,57 +134,59 @@ export function ModuleSwipeQuestion({
       ? `rgba(34, 197, 94, ${overlayOpacity})`
       : `rgba(239, 68, 68, ${overlayOpacity})`;
 
+  // Remove the complete swipe subtree as soon as submission starts or a
+  // result arrives. Leaving its button wrapper mounted allowed some mobile
+  // browsers to keep displaying the old composited card layer.
+  if (isDisabled) return null;
+
   return (
     <div className="flex min-h-0 w-full max-w-full flex-1 flex-col overflow-hidden">
-      {!isDisabled && (
+      <div
+        role="group"
+        aria-label="Swipe response card"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={finishGesture}
+        onTouchCancel={cancelGesture}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={finishGesture}
+        onMouseLeave={finishGesture}
+        style={{ touchAction: "pan-y", userSelect: "none" }}
+        className="relative z-10 flex min-h-0 w-full max-w-full flex-1 cursor-grab flex-col justify-center overflow-hidden rounded-lg border border-primary/20 bg-card shadow-sm active:cursor-grabbing"
+      >
         <div
-          role="group"
-          aria-label="Swipe response card"
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={finishGesture}
-          onTouchCancel={cancelGesture}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={finishGesture}
-          onMouseLeave={finishGesture}
-          style={{ touchAction: "pan-y", userSelect: "none" }}
-          className="relative z-10 flex min-h-0 w-full max-w-full flex-1 cursor-grab flex-col justify-center overflow-hidden rounded-lg border border-primary/20 bg-card shadow-sm active:cursor-grabbing"
-        >
-          <div
-            className="pointer-events-none absolute inset-0 z-0"
-            style={{ backgroundColor: overlayColor }}
-          />
+          className="pointer-events-none absolute inset-0 z-0"
+          style={{ backgroundColor: overlayColor }}
+        />
 
-          <div className="relative z-10 flex h-full min-h-0 flex-col p-6">
-            <div className="flex min-h-0 w-full flex-1 flex-col items-center justify-center">
-              {question.image && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={question.image}
-                  alt=""
-                  className="mb-4 max-h-40 w-full shrink-0 rounded-md object-contain"
-                />
-              )}
-              <h2 className="my-auto w-full py-4 text-center font-heading text-lg font-semibold leading-tight text-foreground">
-                {question.content}
-              </h2>
-            </div>
-            <div className="mt-2 flex shrink-0 items-center justify-center gap-2 text-xs font-medium text-muted-foreground">
-              <ArrowLeft className="size-4" />
-              <span>Swipe to respond</span>
-              <ArrowRight className="size-4" />
-            </div>
+        <div className="relative z-10 flex h-full min-h-0 flex-col p-6">
+          <div className="flex min-h-0 w-full flex-1 flex-col items-center justify-center">
+            {question.image && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={question.image}
+                alt=""
+                className="mb-4 max-h-40 w-full shrink-0 rounded-md object-contain"
+              />
+            )}
+            <h2 className="my-auto w-full py-4 text-center font-heading text-lg font-semibold leading-tight text-foreground">
+              {question.content}
+            </h2>
+          </div>
+          <div className="mt-2 flex shrink-0 items-center justify-center gap-2 text-xs font-medium text-muted-foreground">
+            <ArrowLeft className="size-4" />
+            <span>Swipe to respond</span>
+            <ArrowRight className="size-4" />
           </div>
         </div>
-      )}
+      </div>
 
       <div className="mt-4 flex w-full max-w-full shrink-0 gap-3 overflow-hidden">
         <Button
           type="button"
           variant="disagree"
           size="default"
-          disabled={isDisabled}
           className="min-w-0 flex-1 text-sm font-bold shadow-sm"
           onClick={() => submitSwipe("left")}
         >
@@ -192,7 +197,6 @@ export function ModuleSwipeQuestion({
           type="button"
           variant="agree"
           size="default"
-          disabled={isDisabled}
           className="min-w-0 flex-1 text-sm font-bold shadow-sm"
           onClick={() => submitSwipe("right")}
         >
