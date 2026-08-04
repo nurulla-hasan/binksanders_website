@@ -71,7 +71,7 @@ export function ModuleSwipeQuestion({
   };
 
   return (
-    <div className="flex min-h-0 w-full flex-1 flex-col">
+    <div className="flex min-h-0 w-full max-w-full flex-1 flex-col overflow-x-hidden">
       <motion.div
         drag={isDisabled ? false : "x"}
         dragConstraints={{ left: 0, right: 0 }}
@@ -80,7 +80,7 @@ export function ModuleSwipeQuestion({
         onDragEnd={handleDragEnd}
         style={{ x, rotate, touchAction: "pan-y" }}
         animate={controls}
-        className="relative z-10 flex min-h-0 flex-1 cursor-grab flex-col justify-center overflow-hidden rounded-lg border border-primary/20 bg-card shadow-sm will-change-transform active:cursor-grabbing"
+        className="relative z-10 flex min-h-0 w-full max-w-full flex-1 cursor-grab flex-col justify-center overflow-hidden rounded-lg border border-primary/20 bg-card shadow-sm will-change-transform active:cursor-grabbing"
       >
         <motion.div
           className="pointer-events-none absolute inset-0 z-0"
@@ -109,13 +109,13 @@ export function ModuleSwipeQuestion({
         </div>
       </motion.div>
 
-      <div className="mt-4 flex w-full shrink-0 gap-3">
+      <div className="mt-4 flex w-full max-w-full shrink-0 gap-3">
         <Button
           type="button"
           variant="disagree"
           size="default"
           disabled={isDisabled}
-          className="flex-1 text-sm font-bold shadow-sm"
+          className="min-w-0 flex-1 text-sm font-bold shadow-sm"
           onClick={() => void submitSwipe("left")}
         >
           <X className="mr-1.5 size-4 stroke-3" />
@@ -126,7 +126,7 @@ export function ModuleSwipeQuestion({
           variant="agree"
           size="default"
           disabled={isDisabled}
-          className="flex-1 text-sm font-bold shadow-sm"
+          className="min-w-0 flex-1 text-sm font-bold shadow-sm"
           onClick={() => void submitSwipe("right")}
         >
           <Check className="mr-1.5 size-4 stroke-3" />
