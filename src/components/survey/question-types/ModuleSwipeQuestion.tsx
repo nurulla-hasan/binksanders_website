@@ -72,9 +72,11 @@ export function ModuleSwipeQuestion({
     }
   };
 
+  const shouldShowCard = !disabled && !isCardDismissed;
+
   return (
     <div className="flex min-h-0 w-full max-w-full flex-1 flex-col overflow-x-hidden">
-      {!isCardDismissed ? (
+      {shouldShowCard ? (
         <motion.div
           drag={isDisabled ? false : "x"}
           dragConstraints={{ left: 0, right: 0 }}
