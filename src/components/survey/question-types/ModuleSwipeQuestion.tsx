@@ -24,6 +24,7 @@ export function ModuleSwipeQuestion({
   const x = useMotionValue(0);
   const controls = useAnimation();
   const [hasSwiped, setHasSwiped] = useState(false);
+  const [isCardDismissed, setIsCardDismissed] = useState(false);
   const isDisabled = disabled || hasSwiped;
   const rotate = useTransform(x, [-220, 220], [-8, 8]);
   const overlayColor = useTransform(
@@ -42,12 +43,13 @@ export function ModuleSwipeQuestion({
     setHasSwiped(true);
 
     await controls.start({
-      x: direction === "right" ? 360 : -360,
+      x: direction === "right" ? 520 : -520,
       rotate: direction === "right" ? 8 : -8,
       opacity: 0,
       transition: { duration: 0.22, ease: "easeOut" },
     });
 
+    setIsCardDismissed(true);
     onSwipe(direction);
   };
 
@@ -72,42 +74,46 @@ export function ModuleSwipeQuestion({
 
   return (
     <div className="flex min-h-0 w-full max-w-full flex-1 flex-col overflow-x-hidden">
-      <motion.div
-        drag={isDisabled ? false : "x"}
-        dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={0.35}
-        dragMomentum={false}
-        onDragEnd={handleDragEnd}
-        style={{ x, rotate, touchAction: "pan-y" }}
-        animate={controls}
-        className="relative z-10 flex min-h-0 w-full max-w-full flex-1 cursor-grab flex-col justify-center overflow-hidden rounded-lg border border-primary/20 bg-card shadow-sm will-change-transform active:cursor-grabbing"
-      >
+      {!isCardDismissed ? (
         <motion.div
-          className="pointer-events-none absolute inset-0 z-0"
-          style={{ backgroundColor: overlayColor }}
-        />
+          drag={isDisabled ? false : "x"}
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.35}
+          dragMomentum={false}
+          onDragEnd={handleDragEnd}
+          style={{ x, rotate, touchAction: "pan-y" }}
+          animate={controls}
+          className="relative z-10 flex min-h-0 w-full max-w-full flex-1 cursor-grab flex-col justify-center overflow-hidden rounded-lg border border-primary/20 bg-card shadow-sm will-change-transform active:cursor-grabbing"
+        >
+          <motion.div
+            className="pointer-events-none absolute inset-0 z-0"
+            style={{ backgroundColor: overlayColor }}
+          />
 
-        <div className="relative z-10 flex h-full min-h-0 flex-col p-6">
-          <div className="flex min-h-0 w-full flex-1 flex-col items-center justify-center">
-            {question.image && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={question.image}
-                alt=""
-                className="mb-4 max-h-40 w-full shrink-0 rounded-md object-contain"
-              />
-            )}
-            <h2 className="my-auto w-full py-4 text-center font-heading text-lg font-semibold leading-tight text-foreground">
-              {question.content}
-            </h2>
+          <div className="relative z-10 flex h-full min-h-0 flex-col p-6">
+            <div className="flex min-h-0 w-full flex-1 flex-col items-center justify-center">
+              {question.image && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={question.image}
+                  alt=""
+                  className="mb-4 max-h-40 w-full shrink-0 rounded-md object-contain"
+                />
+              )}
+              <h2 className="my-auto w-full py-4 text-center font-heading text-lg font-semibold leading-tight text-foreground">
+                {question.content}
+              </h2>
+            </div>
+            <div className="mt-2 flex shrink-0 items-center justify-center gap-2 text-xs font-medium text-muted-foreground">
+              <ArrowLeft className="size-4" />
+              <span>Swipe to respond</span>
+              <ArrowRight className="size-4" />
+            </div>
           </div>
-          <div className="mt-2 flex shrink-0 items-center justify-center gap-2 text-xs font-medium text-muted-foreground">
-            <ArrowLeft className="size-4" />
-            <span>Swipe to respond</span>
-            <ArrowRight className="size-4" />
-          </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      ) : (
+        <div className="min-h-0 flex-1" aria-hidden="true" />
+      )}
 
       <div className="mt-4 flex w-full max-w-full shrink-0 gap-3">
         <Button
