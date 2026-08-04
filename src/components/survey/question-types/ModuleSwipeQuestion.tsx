@@ -42,11 +42,14 @@ export function ModuleSwipeQuestion({
 
     setHasSwiped(true);
 
+    // Keep the card inside its layout box. Translating it off-screen left a
+    // composited transform layer visible on some mobile browsers.
     await controls.start({
-      x: direction === "right" ? 520 : -520,
-      rotate: direction === "right" ? 8 : -8,
+      x: 0,
+      rotate: direction === "right" ? 2 : -2,
+      scale: 0.96,
       opacity: 0,
-      transition: { duration: 0.22, ease: "easeOut" },
+      transition: { duration: 0.16, ease: "easeOut" },
     });
 
     setIsCardDismissed(true);
@@ -67,6 +70,8 @@ export function ModuleSwipeQuestion({
       void controls.start({
         x: 0,
         rotate: 0,
+        scale: 1,
+        opacity: 1,
         transition: { type: "spring", stiffness: 420, damping: 32 },
       });
     }
@@ -75,7 +80,7 @@ export function ModuleSwipeQuestion({
   const shouldShowCard = !disabled && !isCardDismissed;
 
   return (
-    <div className="flex min-h-0 w-full max-w-full flex-1 flex-col overflow-x-hidden">
+    <div className="flex min-h-0 w-full max-w-full flex-1 flex-col overflow-hidden">
       {shouldShowCard ? (
         <motion.div
           drag={isDisabled ? false : "x"}
