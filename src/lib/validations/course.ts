@@ -1,6 +1,12 @@
 import * as z from "zod";
 
-const optionalMedia = z.union([z.literal(""), z.string().url("Enter a valid URL"), z.instanceof(File)]).optional();
+const optionalMedia = z
+  .union([
+    z.literal(""),
+    z.string().url("Enter a valid URL"),
+    z.instanceof(File),
+  ])
+  .optional();
 
 const baseQuestionSchema = z.object({
   id: z.string(),
@@ -19,10 +25,11 @@ const requiredStringList = (minimum: number, message: string) =>
 const informationSchema = baseQuestionSchema.extend({
   type: z.literal("Information"),
 });
+
 const mcqSchema = baseQuestionSchema.extend({
   type: z.literal("MCQ"),
   options: requiredStringList(2, "Add at least two options"),
-  correctAnswer: z.string().min(1, "Correct answer is required"),
+  correctAnswer: z.string().optional().default(""),
 });
 
 const swipeSchema = baseQuestionSchema.extend({
@@ -60,12 +67,15 @@ const chatScenarioSchema = baseQuestionSchema.omit({ content: true }).extend({
         .min(1, "Add at least one message"),
     ),
   options: requiredStringList(2, "Add at least two response options"),
-  correctAnswer: z.string().min(1, "Correct answer is required"),
+  correctAnswer: z.string().optional().default(""),
 });
 
 const videoSchema = baseQuestionSchema.extend({
   type: z.literal("Video"),
-  videoUrl: z.union([z.string().url("Enter a valid video URL"), z.instanceof(File)]),
+  videoUrl: z.union([
+    z.string().url("Enter a valid video URL"),
+    z.instanceof(File),
+  ]),
   options: requiredStringList(2, "Add at least two options").optional(),
   correctAnswer: z.string().optional(),
 });
@@ -88,7 +98,7 @@ const freeInputSchema = baseQuestionSchema.extend({
   type: z.literal("Free Input"),
 });
 
-export const questionSchema = z.discriminatedUnion("type", [
+const questionUnionSchema = z.discriminatedUnion("type", [
   informationSchema,
   mcqSchema,
   swipeSchema,
@@ -99,6 +109,21 @@ export const questionSchema = z.discriminatedUnion("type", [
   ratingSchema,
   freeInputSchema,
 ]);
+
+export const questionSchema = questionUnionSchema.superRefine((question, context) => {
+  if (!question.isScored) return;
+
+  if (
+    (question.type === "MCQ" || question.type === "Chat Scenario") &&
+    !question.correctAnswer?.trim()
+  ) {
+    context.addIssue({
+      code: "custom",
+      path: ["correctAnswer"],
+      message: "Correct answer is required for scored questions",
+    });
+  }
+});
 
 export const createModuleSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -170,5 +195,3 @@ export const getDefaultQuestionValues = (
       return { ...base, type, isScored: false };
   }
 };
-
-
