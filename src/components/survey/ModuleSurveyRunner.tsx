@@ -63,7 +63,10 @@ export function ModuleSurveyRunner({
 
       if (!response.success) throw new Error(response.message);
       const isLastQuestion = currentIndex >= totalQuestions - 1;
-      const nextResult = isLastQuestion
+      const shouldForceCompletion =
+        isLastQuestion &&
+        !(question.type === "Ordering" && response.data.isCorrect === false);
+      const nextResult = shouldForceCompletion
         ? {
             ...response.data,
             moduleStatus:
@@ -91,6 +94,10 @@ export function ModuleSurveyRunner({
     }
   };
 
+  const handleRetryOrdering = () => {
+    setResult(undefined);
+  };
+
   const handleContinue = () => {
     if (!result) return;
 
@@ -111,12 +118,12 @@ export function ModuleSurveyRunner({
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (result && bottomRef.current) {
+    if (result && bottomRef.current && question?.type !== "Swipe") {
       setTimeout(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
       }, 100);
     }
-  }, [result]);
+  }, [question?.type, result]);
 
   useEffect(() => {
     if (question?.type !== "Simulated Call" || !result) return;
@@ -229,6 +236,8 @@ export function ModuleSurveyRunner({
       typeof result.correctAnswer === "string" &&
       result.correctAnswer.trim() === ""
     );
+  const isOrderingRetry =
+    question.type === "Ordering" && result?.isCorrect === false;
   const feedbackTitle = canShowCorrectAnswer
     ? result?.isCorrect === false
       ? "Not quite right"
@@ -243,9 +252,7 @@ export function ModuleSurveyRunner({
     <div
       className={cn(
         "flex flex-1 min-h-0 h-full flex-col overflow-hidden animate-fadeIn",
-        isSimulatedCall
-          ? "bg-foreground"
-          : "bg-background",
+        isSimulatedCall ? "bg-foreground" : "bg-background",
       )}
     >
       {!isSimulatedCall && (
@@ -353,7 +360,13 @@ export function ModuleSurveyRunner({
                     )}
                   >
                     <p className="font-medium">{feedbackTitle}</p>
+                    {isOrderingRetry && (
+                      <p className="mt-2 wrap-break-word font-medium">
+                        Rearrange the items and try again.
+                      </p>
+                    )}
                     {canShowCorrectAnswer &&
+                      !isOrderingRetry &&
                       result.isCorrect === false &&
                       result.correctAnswer && (
                         <p className="mt-2 wrap-break-word font-medium">
@@ -365,7 +378,7 @@ export function ModuleSurveyRunner({
                       )}
                   </div>
                 )}
-                {result.explanation && (
+                {result.explanation && !isOrderingRetry && (
                   <div className="min-w-0 rounded-sm border border-border bg-background p-3 text-sm wrap-break-word">
                     <span className="font-medium text-primary">
                       Explanation:{" "}
@@ -383,13 +396,24 @@ export function ModuleSurveyRunner({
       {!isSimulatedCall && (
         <div className="shrink-0 pt-4 mt-auto">
           {result ? (
-            <Button size="lg" className="w-full" onClick={handleContinue}>
-              {currentIndex === totalQuestions - 1 ||
-              result.moduleStatus === "completed"
-                ? "View result"
-                : "Continue"}
-              <ArrowRight />
-            </Button>
+            isOrderingRetry ? (
+              <Button
+                size="lg"
+                className="w-full"
+                onClick={handleRetryOrdering}
+              >
+                Try again
+                <ArrowRight />
+              </Button>
+            ) : (
+              <Button size="lg" className="w-full" onClick={handleContinue}>
+                {currentIndex === totalQuestions - 1 ||
+                result.moduleStatus === "completed"
+                  ? "View result"
+                  : "Continue"}
+                <ArrowRight />
+              </Button>
+            )
           ) : (
             <Button
               size="lg"

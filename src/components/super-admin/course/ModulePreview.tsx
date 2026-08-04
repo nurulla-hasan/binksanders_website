@@ -246,18 +246,28 @@ export function ModulePreview({
     return (
       <div
         className={cn(
-          "m-2 flex min-h-0 flex-1 flex-col overflow-hidden shadow-sm animate-fadeIn",
+          "flex min-h-0 h-full flex-1 flex-col overflow-hidden animate-fadeIn",
           isSimulatedCall
             ? "bg-foreground"
-            : "rounded-lg border border-secondary/50 bg-secondary p-4",
+            : "bg-background",
         )}
       >
         {!isSimulatedCall && (
-          <div className="flex shrink-0 items-center gap-3 pb-4 pt-2">
-            <span className="whitespace-nowrap text-xs font-bold text-secondary-foreground/80">
-              Q{currentIndex + 1}/{totalQuestions}
-            </span>
-            <Progress value={displayedProgress} className="h-1.5 flex-1" />
+          <div className="mb-4 rounded-b-xl bg-secondary px-4 py-3 shadow-sm">
+            <h2 className="mb-2 font-heading text-lg font-bold leading-tight text-foreground">
+              {title || "Course Title"}
+            </h2>
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-end justify-between">
+            <span className="rounded-sm bg-primary px-1.5 py-0.5 text-[10px] font-bold leading-none text-primary-foreground">
+                  Q{currentIndex + 1}/{totalQuestions}
+                </span>
+                <span className="text-[10px] font-bold leading-none text-foreground/80">
+                  {currentIndex + 1}/{totalQuestions}
+                </span>
+              </div>
+              <Progress value={displayedProgress} className="h-1.5 w-full rounded-full bg-background/50 [&>div]:bg-primary" />
+            </div>
           </div>
         )}
 
@@ -266,15 +276,15 @@ export function ModulePreview({
             "min-w-0 flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-thin flex flex-col",
             isSimulatedCall
               ? "overflow-hidden rounded-lg bg-foreground p-0"
-              : "space-y-5 rounded-sm bg-background/45 p-4 pr-2",
+              : "space-y-4 pb-2",
           )}
         >
           {question.type !== "Swipe" && question.type !== "Simulated Call" && question.type !== "Chat Scenario" && (
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
+            <div className="mb-4 rounded-lg border border-primary/40 bg-primary/5 p-3 shadow-sm">
+              <span className="mb-3 inline-block rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold uppercase text-primary-foreground shadow-sm">
                 {question.type}
               </span>
-              <h1 className="mt-2 font-heading text-xl font-bold leading-snug wrap-break-word">
+              <h1 className="font-heading text-md font-semibold leading-snug text-foreground wrap-break-word">
                 {question.content}
               </h1>
               {question.image && (
@@ -309,7 +319,7 @@ export function ModulePreview({
               {isOptionFeedback ? (
                 <div
                   className={cn(
-                    "min-w-0 rounded-sm border bg-background p-4 text-sm font-semibold wrap-break-word",
+                    "min-w-0 rounded-sm border bg-background p-3 text-sm font-medium wrap-break-word",
                     result.isCorrect === false
                         ? "border-primary text-primary"
                         : result.isCorrect === true
@@ -330,7 +340,7 @@ export function ModulePreview({
               ) : (
                 <div
                   className={cn(
-                    "min-w-0 overflow-hidden rounded-sm border p-4 text-sm wrap-break-word",
+                    "min-w-0 overflow-hidden rounded-sm border p-3 text-sm wrap-break-word",
                     result.isCorrect === false
                         ? "border-destructive/30 bg-destructive/10 text-destructive-foreground"
                         : result.isCorrect === true
@@ -350,7 +360,7 @@ export function ModulePreview({
                 </div>
               )}
               {result.explanation && (
-                <div className="min-w-0 rounded-sm border border-border bg-background p-4 text-sm wrap-break-word">
+                <div className="min-w-0 rounded-sm border border-border bg-background p-3 text-sm wrap-break-word">
                   <span className="font-bold text-primary">Explanation: </span>
                   <span>{result.explanation}</span>
                 </div>
@@ -360,7 +370,7 @@ export function ModulePreview({
         </div>
 
         {!isSimulatedCall && (
-          <div className="mt-5 shrink-0">
+          <div className="mt-auto shrink-0 pt-4">
             {result && question.type === "Swipe" ? (
               <div className="py-2 text-center text-sm font-medium text-muted-foreground">
                 Loading next question...

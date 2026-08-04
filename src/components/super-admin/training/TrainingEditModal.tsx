@@ -27,14 +27,23 @@ import type { Training, TrainingAuthType } from "@/lib/types/training.type";
 import { ErrorToast, SuccessToast } from "@/lib/utils";
 import { updateTraining } from "@/services/training.service";
 
-const authTypes: TrainingAuthType[] = ["passcode", "email", "employeeId", "guest"];
+const authTypes: TrainingAuthType[] = [
+  "passcode",
+  "email",
+  "employeeId",
+  "guest",
+];
 
 export function TrainingEditModal({ training }: { training: Training }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isPending, setIsPending] = useState(false);
-  const [authType, setAuthType] = useState<TrainingAuthType>(training.authType || "passcode");
-  const [thumbnailPreview, setThumbnailPreview] = useState<string | undefined>(training.thumbnailImage);
+  const [authType, setAuthType] = useState<TrainingAuthType>(
+    training.authType || "passcode",
+  );
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | undefined>(
+    training.thumbnailImage,
+  );
   const [objectPreview, setObjectPreview] = useState<string>();
 
   useEffect(() => {
@@ -43,7 +52,6 @@ export function TrainingEditModal({ training }: { training: Training }) {
     };
   }, [objectPreview]);
 
-
   const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen);
     if (nextOpen) {
@@ -51,7 +59,10 @@ export function TrainingEditModal({ training }: { training: Training }) {
       setThumbnailPreview(training.thumbnailImage);
     }
   };
-  const handleThumbnailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+
+  const handleThumbnailChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
 
     setObjectPreview((current) => {
@@ -88,7 +99,10 @@ export function TrainingEditModal({ training }: { training: Training }) {
         description,
         authType,
         ...(authType === "passcode" ? { passcode } : {}),
-        thumbnailImage: thumbnail instanceof File && thumbnail.size > 0 ? thumbnail : undefined,
+        thumbnailImage:
+          thumbnail instanceof File && thumbnail.size > 0
+            ? thumbnail
+            : undefined,
       });
 
       if (!response.success) throw new Error(response.message);
@@ -96,7 +110,9 @@ export function TrainingEditModal({ training }: { training: Training }) {
       setOpen(false);
       router.refresh();
     } catch (error: unknown) {
-      ErrorToast(error instanceof Error ? error.message : "Unable to update training");
+      ErrorToast(
+        error instanceof Error ? error.message : "Unable to update training",
+      );
     } finally {
       setIsPending(false);
     }
@@ -113,13 +129,16 @@ export function TrainingEditModal({ training }: { training: Training }) {
         <DialogHeader>
           <DialogTitle>Edit Training</DialogTitle>
           <DialogDescription>
-            Update the training details and thumbnail. Company/team assignment stays separate.
+            Update the training details and thumbnail. Company/team assignment
+            stays separate.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="grid gap-4">
             <Field>
-              <FieldLabel htmlFor={`edit-training-title-${training._id}`}>Title</FieldLabel>
+              <FieldLabel htmlFor={`edit-training-title-${training._id}`}>
+                Title
+              </FieldLabel>
               <Input
                 id={`edit-training-title-${training._id}`}
                 name="title"
@@ -127,7 +146,11 @@ export function TrainingEditModal({ training }: { training: Training }) {
               />
             </Field>
             <Field>
-              <FieldLabel htmlFor={`edit-training-description-${training._id}`}>Description</FieldLabel>
+              <FieldLabel
+                htmlFor={`edit-training-description-${training._id}`}
+              >
+                Description
+              </FieldLabel>
               <Textarea
                 id={`edit-training-description-${training._id}`}
                 name="description"
@@ -137,7 +160,12 @@ export function TrainingEditModal({ training }: { training: Training }) {
             <div className="grid gap-4 sm:grid-cols-2">
               <Field>
                 <FieldLabel>Auth Type</FieldLabel>
-                <Select value={authType} onValueChange={(value) => setAuthType(value as TrainingAuthType)}>
+                <Select
+                  value={authType}
+                  onValueChange={(value) =>
+                    setAuthType(value as TrainingAuthType)
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -151,7 +179,9 @@ export function TrainingEditModal({ training }: { training: Training }) {
                 </Select>
               </Field>
               <Field>
-                <FieldLabel htmlFor={`edit-training-passcode-${training._id}`}>Passcode</FieldLabel>
+                <FieldLabel htmlFor={`edit-training-passcode-${training._id}`}>
+                  Passcode
+                </FieldLabel>
                 <Input
                   id={`edit-training-passcode-${training._id}`}
                   name="passcode"
@@ -161,7 +191,9 @@ export function TrainingEditModal({ training }: { training: Training }) {
               </Field>
             </div>
             <Field>
-              <FieldLabel htmlFor={`edit-training-thumbnail-${training._id}`}>Thumbnail</FieldLabel>
+              <FieldLabel htmlFor={`edit-training-thumbnail-${training._id}`}>
+                Thumbnail
+              </FieldLabel>
               <Input
                 id={`edit-training-thumbnail-${training._id}`}
                 name="thumbnail"
@@ -169,6 +201,10 @@ export function TrainingEditModal({ training }: { training: Training }) {
                 accept="image/*"
                 onChange={handleThumbnailChange}
               />
+              <p className="text-xs text-muted-foreground">
+                Recommended: 1280 × 720 px (16:9), JPG or PNG. Keep important
+                content near the centre because cards may crop the edges.
+              </p>
               {thumbnailPreview && (
                 <div className="mt-3 overflow-hidden rounded-md border bg-background">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -182,7 +218,12 @@ export function TrainingEditModal({ training }: { training: Training }) {
             </Field>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" disabled={isPending} onClick={() => setOpen(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isPending}
+              onClick={() => setOpen(false)}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={isPending}>

@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { nextServerFetch } from "@/lib/nextServerFetch";
 import type { ApiResponse } from "@/lib/types/api.type";
 import type {
@@ -12,22 +13,30 @@ import type {
 export const getMyLearningPath = async () =>
   nextServerFetch<ApiResponse<LearningPathData>>(
     "/user-progress/my-learning-path",
-    { cache:"no-store", },
+    { cache: "no-store" },
   );
 
 export const getUserModule = async (moduleId: string) =>
   nextServerFetch<ApiResponse<UserModuleDetails>>(
     `/user-progress/module/${moduleId}`,
-    { cache:"no-store", },
+    { cache: "no-store" },
   );
 
 export const submitModuleAnswer = async (
   payload: SubmitModuleAnswerPayload,
-) =>
-  nextServerFetch<ApiResponse<SubmitModuleAnswerResult>>(
+) => {
+  const response = await nextServerFetch<ApiResponse<SubmitModuleAnswerResult>>(
     "/user-progress/submit-answer",
     {
       method: "POST",
       body: payload,
     },
   );
+
+  if (response.success) {
+    revalidatePath("/modules");
+    revalidatePath(`/modules/${payload.moduleId}`);
+  }
+
+  return response;
+};
