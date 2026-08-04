@@ -1,9 +1,24 @@
 "use client";
 
-import { useRef, useState } from "react";
+import {
+  useRef,
+  useState,
+  type MouseEvent as ReactMouseEvent,
+  type TouchEvent as ReactTouchEvent,
+} from "react";
 import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ModuleQuestion } from "@/lib/types/module.type";
+
+type SwipeDirection = "left" | "right";
+
+type StartPoint = {
+  x: number;
+  y: number;
+};
+
+const SWIPE_THRESHOLD = 70;
+const MAX_DRAG_DISTANCE = 140;
 
 export function ModuleSwipeQuestion({
   question,
@@ -12,57 +27,105 @@ export function ModuleSwipeQuestion({
 }: {
   question: ModuleQuestion;
   disabled: boolean;
-  onSwipe: (direction: "left" | "right") => void;
+  onSwipe: (direction: SwipeDirection) => void;
 }) {
-  const startXRef = useRef<number | null>(null);
+  const startPointRef = useRef<StartPoint | null>(null);
+  const dragXRef = useRef(0);
+  const submittedRef = useRef(false);
   const [dragX, setDragX] = useState(0);
-  const [hasSubmitted, setHasSubmitted] = useState(false);
-  const isDisabled = disabled || hasSubmitted;
+  const [submittedDirection, setSubmittedDirection] =
+    useState<SwipeDirection | null>(null);
 
-  const submitSwipe = (direction: "left" | "right") => {
-    if (isDisabled) return;
+  const isDisabled = disabled || submittedDirection !== null;
 
-    // Remove the card before the parent result state updates. This avoids the
-    // persistent composited transform layer seen on some mobile browsers.
-    setHasSubmitted(true);
+  const resetGesture = () => {
+    startPointRef.current = null;
+    dragXRef.current = 0;
     setDragX(0);
+  };
+
+  const submitSwipe = (direction: SwipeDirection) => {
+    if (isDisabled || submittedRef.current) return;
+
+    submittedRef.current = true;
+    setSubmittedDirection(direction);
+    resetGesture();
     onSwipe(direction);
   };
 
-  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+  const startGesture = (x: number, y: number) => {
     if (isDisabled) return;
-    startXRef.current = event.clientX;
-    event.currentTarget.setPointerCapture(event.pointerId);
+
+    startPointRef.current = { x, y };
+    dragXRef.current = 0;
+    setDragX(0);
   };
 
-  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (isDisabled || startXRef.current === null) return;
+  const updateGesture = (x: number, y: number) => {
+    const startPoint = startPointRef.current;
+    if (!startPoint || isDisabled) return;
 
-    const nextX = event.clientX - startXRef.current;
-    setDragX(Math.max(-140, Math.min(140, nextX)));
+    const deltaX = x - startPoint.x;
+    const deltaY = y - startPoint.y;
+
+    // Preserve normal vertical page scrolling. Only treat the gesture as a
+    // swipe when horizontal movement is dominant.
+    if (Math.abs(deltaY) > Math.abs(deltaX)) return;
+
+    const nextDragX = Math.max(
+      -MAX_DRAG_DISTANCE,
+      Math.min(MAX_DRAG_DISTANCE, deltaX),
+    );
+
+    dragXRef.current = nextDragX;
+    setDragX(nextDragX);
   };
 
-  const handlePointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (startXRef.current === null) return;
+  const finishGesture = () => {
+    if (!startPointRef.current) return;
 
-    event.currentTarget.releasePointerCapture(event.pointerId);
-    startXRef.current = null;
+    const completedDragX = dragXRef.current;
+    resetGesture();
 
-    if (dragX >= 90) {
+    if (completedDragX >= SWIPE_THRESHOLD) {
       submitSwipe("right");
       return;
     }
 
-    if (dragX <= -90) {
+    if (completedDragX <= -SWIPE_THRESHOLD) {
       submitSwipe("left");
-      return;
     }
-
-    setDragX(0);
   };
 
-  const rotation = dragX / 24;
-  const overlayOpacity = Math.min(Math.abs(dragX) / 140, 0.35);
+  const cancelGesture = () => {
+    resetGesture();
+  };
+
+  const handleTouchStart = (event: ReactTouchEvent<HTMLDivElement>) => {
+    const touch = event.touches[0];
+    if (!touch) return;
+    startGesture(touch.clientX, touch.clientY);
+  };
+
+  const handleTouchMove = (event: ReactTouchEvent<HTMLDivElement>) => {
+    const touch = event.touches[0];
+    if (!touch) return;
+    updateGesture(touch.clientX, touch.clientY);
+  };
+
+  const handleMouseDown = (event: ReactMouseEvent<HTMLDivElement>) => {
+    startGesture(event.clientX, event.clientY);
+  };
+
+  const handleMouseMove = (event: ReactMouseEvent<HTMLDivElement>) => {
+    if (event.buttons !== 1) return;
+    updateGesture(event.clientX, event.clientY);
+  };
+
+  const overlayOpacity = Math.min(
+    Math.abs(dragX) / MAX_DRAG_DISTANCE,
+    0.35,
+  );
   const overlayColor =
     dragX > 0
       ? `rgba(34, 197, 94, ${overlayOpacity})`
@@ -74,15 +137,15 @@ export function ModuleSwipeQuestion({
         <div
           role="group"
           aria-label="Swipe response card"
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerEnd}
-          onPointerCancel={handlePointerEnd}
-          style={{
-            transform: `translate3d(${dragX}px, 0, 0) rotate(${rotation}deg)`,
-            transition: startXRef.current === null ? "transform 180ms ease-out" : "none",
-            touchAction: "pan-y",
-          }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={finishGesture}
+          onTouchCancel={cancelGesture}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={finishGesture}
+          onMouseLeave={finishGesture}
+          style={{ touchAction: "pan-y", userSelect: "none" }}
           className="relative z-10 flex min-h-0 w-full max-w-full flex-1 cursor-grab flex-col justify-center overflow-hidden rounded-lg border border-primary/20 bg-card shadow-sm active:cursor-grabbing"
         >
           <div
@@ -113,7 +176,7 @@ export function ModuleSwipeQuestion({
         </div>
       )}
 
-      <div className="mt-4 flex w-full max-w-full shrink-0 gap-3">
+      <div className="mt-4 flex w-full max-w-full shrink-0 gap-3 overflow-hidden">
         <Button
           type="button"
           variant="disagree"
