@@ -1,13 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import {
-  motion,
-  useAnimation,
-  useMotionValue,
-  useTransform,
-  type PanInfo,
-} from "framer-motion";
+import { useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ModuleQuestion } from "@/lib/types/module.type";
@@ -21,78 +14,78 @@ export function ModuleSwipeQuestion({
   disabled: boolean;
   onSwipe: (direction: "left" | "right") => void;
 }) {
-  const x = useMotionValue(0);
-  const controls = useAnimation();
-  const [hasSwiped, setHasSwiped] = useState(false);
-  const [isCardDismissed, setIsCardDismissed] = useState(false);
-  const isDisabled = disabled || hasSwiped;
-  const rotate = useTransform(x, [-220, 220], [-8, 8]);
-  const overlayColor = useTransform(
-    x,
-    [-160, 0, 160],
-    [
-      "rgba(239, 68, 68, 0.35)",
-      "rgba(255, 255, 255, 0)",
-      "rgba(34, 197, 94, 0.35)",
-    ],
-  );
+  const startXRef = useRef<number | null>(null);
+  const [dragX, setDragX] = useState(0);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const isDisabled = disabled || hasSubmitted;
 
-  const submitSwipe = async (direction: "left" | "right") => {
+  const submitSwipe = (direction: "left" | "right") => {
     if (isDisabled) return;
 
-    setHasSwiped(true);
-
-    // Keep the card inside its layout box. Translating it off-screen left a
-    // composited transform layer visible on some mobile browsers.
-    await controls.start({
-      x: 0,
-      rotate: direction === "right" ? 2 : -2,
-      scale: 0.96,
-      opacity: 0,
-      transition: { duration: 0.16, ease: "easeOut" },
-    });
-
-    setIsCardDismissed(true);
+    // Remove the card before the parent result state updates. This avoids the
+    // persistent composited transform layer seen on some mobile browsers.
+    setHasSubmitted(true);
+    setDragX(0);
     onSwipe(direction);
   };
 
-  const handleDragEnd = (
-    _event: MouseEvent | TouchEvent | PointerEvent,
-    info: PanInfo,
-  ) => {
-    const projectedOffset = info.offset.x + info.velocity.x * 0.08;
-
-    if (projectedOffset > 90) {
-      void submitSwipe("right");
-    } else if (projectedOffset < -90) {
-      void submitSwipe("left");
-    } else {
-      void controls.start({
-        x: 0,
-        rotate: 0,
-        scale: 1,
-        opacity: 1,
-        transition: { type: "spring", stiffness: 420, damping: 32 },
-      });
-    }
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (isDisabled) return;
+    startXRef.current = event.clientX;
+    event.currentTarget.setPointerCapture(event.pointerId);
   };
 
-  const shouldShowCard = !disabled && !isCardDismissed;
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (isDisabled || startXRef.current === null) return;
+
+    const nextX = event.clientX - startXRef.current;
+    setDragX(Math.max(-140, Math.min(140, nextX)));
+  };
+
+  const handlePointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (startXRef.current === null) return;
+
+    event.currentTarget.releasePointerCapture(event.pointerId);
+    startXRef.current = null;
+
+    if (dragX >= 90) {
+      submitSwipe("right");
+      return;
+    }
+
+    if (dragX <= -90) {
+      submitSwipe("left");
+      return;
+    }
+
+    setDragX(0);
+  };
+
+  const rotation = dragX / 24;
+  const overlayOpacity = Math.min(Math.abs(dragX) / 140, 0.35);
+  const overlayColor =
+    dragX > 0
+      ? `rgba(34, 197, 94, ${overlayOpacity})`
+      : `rgba(239, 68, 68, ${overlayOpacity})`;
 
   return (
     <div className="flex min-h-0 w-full max-w-full flex-1 flex-col overflow-hidden">
-      {shouldShowCard ? (
-        <motion.div
-          drag={isDisabled ? false : "x"}
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.35}
-          dragMomentum={false}
-          onDragEnd={handleDragEnd}
-          style={{ x, rotate, touchAction: "pan-y" }}
-          animate={controls}
-          className="relative z-10 flex min-h-0 w-full max-w-full flex-1 cursor-grab flex-col justify-center overflow-hidden rounded-lg border border-primary/20 bg-card shadow-sm will-change-transform active:cursor-grabbing"
+      {!isDisabled && (
+        <div
+          role="group"
+          aria-label="Swipe response card"
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerEnd}
+          onPointerCancel={handlePointerEnd}
+          style={{
+            transform: `translate3d(${dragX}px, 0, 0) rotate(${rotation}deg)`,
+            transition: startXRef.current === null ? "transform 180ms ease-out" : "none",
+            touchAction: "pan-y",
+          }}
+          className="relative z-10 flex min-h-0 w-full max-w-full flex-1 cursor-grab flex-col justify-center overflow-hidden rounded-lg border border-primary/20 bg-card shadow-sm active:cursor-grabbing"
         >
-          <motion.div
+          <div
             className="pointer-events-none absolute inset-0 z-0"
             style={{ backgroundColor: overlayColor }}
           />
@@ -117,9 +110,7 @@ export function ModuleSwipeQuestion({
               <ArrowRight className="size-4" />
             </div>
           </div>
-        </motion.div>
-      ) : (
-        <div className="min-h-0 flex-1" aria-hidden="true" />
+        </div>
       )}
 
       <div className="mt-4 flex w-full max-w-full shrink-0 gap-3">
@@ -129,7 +120,7 @@ export function ModuleSwipeQuestion({
           size="default"
           disabled={isDisabled}
           className="min-w-0 flex-1 text-sm font-bold shadow-sm"
-          onClick={() => void submitSwipe("left")}
+          onClick={() => submitSwipe("left")}
         >
           <X className="mr-1.5 size-4 stroke-3" />
           {question.leftLabel || "Disagree"}
@@ -140,7 +131,7 @@ export function ModuleSwipeQuestion({
           size="default"
           disabled={isDisabled}
           className="min-w-0 flex-1 text-sm font-bold shadow-sm"
-          onClick={() => void submitSwipe("right")}
+          onClick={() => submitSwipe("right")}
         >
           <Check className="mr-1.5 size-4 stroke-3" />
           {question.rightLabel || "Agree"}
