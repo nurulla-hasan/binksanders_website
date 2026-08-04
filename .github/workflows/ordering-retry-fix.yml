@@ -1,17 +1,17 @@
 name: Ordering retry frontend fix
 
 on:
-  push:
+  pull_request:
+    types: [reopened]
     branches:
-      - client-feedback-frontend-fixes
-    paths:
-      - ORDERING_RETRY_TRIGGER.txt
+      - main
 
 permissions:
   contents: write
 
 jobs:
   patch:
+    if: github.head_ref == 'client-feedback-frontend-fixes'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
