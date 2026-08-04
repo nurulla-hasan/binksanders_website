@@ -1,24 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import {
-  useRef,
-  useState,
-  type MouseEvent as ReactMouseEvent,
-  type TouchEvent as ReactTouchEvent,
-} from "react";
+  motion,
+  useAnimation,
+  useMotionValue,
+  useTransform,
+  type PanInfo,
+} from "framer-motion";
 import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ModuleQuestion } from "@/lib/types/module.type";
-
-type SwipeDirection = "left" | "right";
-
-type StartPoint = {
-  x: number;
-  y: number;
-};
-
-const SWIPE_THRESHOLD = 70;
-const MAX_DRAG_DISTANCE = 140;
 
 export function ModuleSwipeQuestion({
   question,
@@ -27,135 +19,70 @@ export function ModuleSwipeQuestion({
 }: {
   question: ModuleQuestion;
   disabled: boolean;
-  onSwipe: (direction: SwipeDirection) => void;
+  onSwipe: (direction: "left" | "right") => void;
 }) {
-  const startPointRef = useRef<StartPoint | null>(null);
-  const dragXRef = useRef(0);
-  const submittedRef = useRef(false);
-  const [dragX, setDragX] = useState(0);
-  const [submittedDirection, setSubmittedDirection] =
-    useState<SwipeDirection | null>(null);
+  const x = useMotionValue(0);
+  const controls = useAnimation();
+  const [hasSwiped, setHasSwiped] = useState(false);
+  const isDisabled = disabled || hasSwiped;
+  const rotate = useTransform(x, [-220, 220], [-8, 8]);
+  const overlayColor = useTransform(
+    x,
+    [-160, 0, 160],
+    [
+      "rgba(239, 68, 68, 0.35)",
+      "rgba(255, 255, 255, 0)",
+      "rgba(34, 197, 94, 0.35)",
+    ],
+  );
 
-  const isDisabled = disabled || submittedDirection !== null;
+  const submitSwipe = async (direction: "left" | "right") => {
+    if (isDisabled) return;
 
-  const resetGesture = () => {
-    startPointRef.current = null;
-    dragXRef.current = 0;
-    setDragX(0);
-  };
+    setHasSwiped(true);
 
-  const submitSwipe = (direction: SwipeDirection) => {
-    if (isDisabled || submittedRef.current) return;
+    await controls.start({
+      x: direction === "right" ? 360 : -360,
+      rotate: direction === "right" ? 8 : -8,
+      opacity: 0,
+      transition: { duration: 0.22, ease: "easeOut" },
+    });
 
-    submittedRef.current = true;
-    setSubmittedDirection(direction);
-    resetGesture();
     onSwipe(direction);
   };
 
-  const startGesture = (x: number, y: number) => {
-    if (isDisabled) return;
+  const handleDragEnd = (
+    _event: MouseEvent | TouchEvent | PointerEvent,
+    info: PanInfo,
+  ) => {
+    const projectedOffset = info.offset.x + info.velocity.x * 0.08;
 
-    startPointRef.current = { x, y };
-    dragXRef.current = 0;
-    setDragX(0);
-  };
-
-  const updateGesture = (x: number, y: number) => {
-    const startPoint = startPointRef.current;
-    if (!startPoint || isDisabled) return false;
-
-    const deltaX = x - startPoint.x;
-    const deltaY = y - startPoint.y;
-
-    // Keep vertical page scrolling available until horizontal intent is clear.
-    if (Math.abs(deltaY) > Math.abs(deltaX)) return false;
-
-    const nextDragX = Math.max(
-      -MAX_DRAG_DISTANCE,
-      Math.min(MAX_DRAG_DISTANCE, deltaX),
-    );
-
-    dragXRef.current = nextDragX;
-    setDragX(nextDragX);
-    return true;
-  };
-
-  const finishGesture = () => {
-    if (!startPointRef.current) return;
-
-    const completedDragX = dragXRef.current;
-    resetGesture();
-
-    if (completedDragX >= SWIPE_THRESHOLD) {
-      submitSwipe("right");
-      return;
-    }
-
-    if (completedDragX <= -SWIPE_THRESHOLD) {
-      submitSwipe("left");
+    if (projectedOffset > 90) {
+      void submitSwipe("right");
+    } else if (projectedOffset < -90) {
+      void submitSwipe("left");
+    } else {
+      void controls.start({
+        x: 0,
+        rotate: 0,
+        transition: { type: "spring", stiffness: 420, damping: 32 },
+      });
     }
   };
-
-  const cancelGesture = () => {
-    resetGesture();
-  };
-
-  const handleTouchStart = (event: ReactTouchEvent<HTMLDivElement>) => {
-    const touch = event.touches[0];
-    if (!touch) return;
-    startGesture(touch.clientX, touch.clientY);
-  };
-
-  const handleTouchMove = (event: ReactTouchEvent<HTMLDivElement>) => {
-    const touch = event.touches[0];
-    if (!touch) return;
-
-    if (updateGesture(touch.clientX, touch.clientY)) {
-      event.preventDefault();
-    }
-  };
-
-  const handleMouseDown = (event: ReactMouseEvent<HTMLDivElement>) => {
-    startGesture(event.clientX, event.clientY);
-  };
-
-  const handleMouseMove = (event: ReactMouseEvent<HTMLDivElement>) => {
-    if (event.buttons !== 1) return;
-    updateGesture(event.clientX, event.clientY);
-  };
-
-  const overlayOpacity = Math.min(
-    Math.abs(dragX) / MAX_DRAG_DISTANCE,
-    0.35,
-  );
-  const overlayColor =
-    dragX > 0
-      ? `rgba(34, 197, 94, ${overlayOpacity})`
-      : `rgba(239, 68, 68, ${overlayOpacity})`;
-
-  // Remove the complete swipe subtree as soon as submission starts or a
-  // result arrives. Leaving its button wrapper mounted allowed some mobile
-  // browsers to keep displaying the old composited card layer.
-  if (isDisabled) return null;
 
   return (
-    <div className="flex min-h-0 w-full max-w-full flex-1 flex-col overflow-hidden">
-      <div
-        role="group"
-        aria-label="Swipe response card"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={finishGesture}
-        onTouchCancel={cancelGesture}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={finishGesture}
-        onMouseLeave={finishGesture}
-        style={{ touchAction: "pan-y", userSelect: "none" }}
-        className="relative z-10 flex min-h-0 w-full max-w-full flex-1 cursor-grab flex-col justify-center overflow-hidden rounded-lg border border-primary/20 bg-card shadow-sm active:cursor-grabbing"
+    <div className="flex min-h-0 w-full max-w-full flex-1 flex-col overflow-x-hidden">
+      <motion.div
+        drag={isDisabled ? false : "x"}
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.35}
+        dragMomentum={false}
+        onDragEnd={handleDragEnd}
+        style={{ x, rotate, touchAction: "pan-y" }}
+        animate={controls}
+        className="relative z-10 flex min-h-0 w-full max-w-full flex-1 cursor-grab flex-col justify-center overflow-hidden rounded-lg border border-primary/20 bg-card shadow-sm will-change-transform active:cursor-grabbing"
       >
-        <div
+        <motion.div
           className="pointer-events-none absolute inset-0 z-0"
           style={{ backgroundColor: overlayColor }}
         />
@@ -180,15 +107,16 @@ export function ModuleSwipeQuestion({
             <ArrowRight className="size-4" />
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="mt-4 flex w-full max-w-full shrink-0 gap-3 overflow-hidden">
+      <div className="mt-4 flex w-full max-w-full shrink-0 gap-3">
         <Button
           type="button"
           variant="disagree"
           size="default"
+          disabled={isDisabled}
           className="min-w-0 flex-1 text-sm font-bold shadow-sm"
-          onClick={() => submitSwipe("left")}
+          onClick={() => void submitSwipe("left")}
         >
           <X className="mr-1.5 size-4 stroke-3" />
           {question.leftLabel || "Disagree"}
@@ -197,8 +125,9 @@ export function ModuleSwipeQuestion({
           type="button"
           variant="agree"
           size="default"
+          disabled={isDisabled}
           className="min-w-0 flex-1 text-sm font-bold shadow-sm"
-          onClick={() => submitSwipe("right")}
+          onClick={() => void submitSwipe("right")}
         >
           <Check className="mr-1.5 size-4 stroke-3" />
           {question.rightLabel || "Agree"}
