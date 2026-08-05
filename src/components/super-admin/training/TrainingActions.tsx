@@ -168,7 +168,7 @@ export function TrainingActions({ training, companies }: TrainingActionsProps) {
             <Building2 />
           </Button>
         </DialogTrigger>
-        <DialogContent>
+        <DialogContent className="h-[60vh] overflow-y-auto md:h-auto">
           <DialogHeader>
             <DialogTitle>Assign Training</DialogTitle>
             <DialogDescription>
@@ -235,7 +235,7 @@ export function TrainingActions({ training, companies }: TrainingActionsProps) {
               Create a copy of this training with a new title.
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleDuplicate} className="space-y-5">
+          <form onSubmit={handleDuplicate} className="space-y-5 h-[60vh] overflow-y-auto md:h-auto">
             <Field>
               <FieldLabel htmlFor={`duplicate-training-${training._id}`}>
                 New Title

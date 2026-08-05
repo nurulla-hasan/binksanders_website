@@ -105,7 +105,7 @@ export function GenerateQRModal() {
         </DialogHeader>
 
         <FormProvider {...methods}>
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={handleSubmit(onSubmit)} className="h-[60vh] overflow-y-auto md:h-auto">
             <FieldGroup className="gap-4">
               <Field>
                 <FieldLabel>Select Client Company</FieldLabel>
