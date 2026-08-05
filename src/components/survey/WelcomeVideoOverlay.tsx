@@ -6,17 +6,70 @@ import Image from "next/image";
 import { ArrowRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export function WelcomeVideoOverlay({ branding, user }: { branding: any; user: any }) {
+const WELCOME_SESSION_PREFIX = "welcome-video-shown:";
+
+const getWelcomeSessionKey = (loginSessionId: string, user: any) => {
+  const fallbackUserId =
+    user?._id ||
+    user?.guestId ||
+    user?.employeeId ||
+    user?.companyId ||
+    "anonymous";
+
+  return `${WELCOME_SESSION_PREFIX}${loginSessionId || fallbackUserId}`;
+};
+
+export function WelcomeVideoOverlay({
+  branding,
+  user,
+  loginSessionId,
+}: {
+  branding: any;
+  user: any;
+  loginSessionId: string;
+}) {
   const [show, setShow] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const processedSessionKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!branding?.videoUrl) return;
 
-    const timer = setTimeout(() => setShow(true), 0);
-    return () => clearTimeout(timer);
-  }, [branding?.videoUrl]);
+    const sessionKey = getWelcomeSessionKey(loginSessionId, user);
+
+    // React Strict Mode runs effects twice in development. Process each login
+    // session key only once so the second pass cannot suppress the overlay.
+    if (processedSessionKeyRef.current === sessionKey) return;
+    processedSessionKeyRef.current = sessionKey;
+
+    try {
+      for (let index = sessionStorage.length - 1; index >= 0; index -= 1) {
+        const key = sessionStorage.key(index);
+
+        if (
+          key?.startsWith(WELCOME_SESSION_PREFIX) &&
+          key !== sessionKey
+        ) {
+          sessionStorage.removeItem(key);
+        }
+      }
+
+      if (sessionStorage.getItem(sessionKey) === "1") return;
+      sessionStorage.setItem(sessionKey, "1");
+    } catch {
+      // Continue showing the video when session storage is unavailable.
+    }
+
+    setShow(true);
+  }, [
+    branding?.videoUrl,
+    loginSessionId,
+    user?._id,
+    user?.guestId,
+    user?.employeeId,
+    user?.companyId,
+  ]);
 
   if (!show || !branding?.videoUrl) return null;
 

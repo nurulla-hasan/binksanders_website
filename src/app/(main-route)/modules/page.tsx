@@ -1,14 +1,27 @@
+import { createHash } from "node:crypto";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { ArrowRight, BookOpen, CheckCircle2, Layers3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { FeaturedTrainingSection } from "@/components/survey/FeaturedTrainingSection";
+import { WelcomeVideoOverlay } from "@/components/survey/WelcomeVideoOverlay";
+import { getFeaturedTrainings } from "@/services/featured-training.service";
 import { getMyTrainings } from "@/services/training.service";
 import { getMyProfile } from "@/services/user.service";
-import { WelcomeVideoOverlay } from "@/components/survey/WelcomeVideoOverlay";
 
 export default async function ModulesPage() {
-  const [response, profileResponse] = await Promise.all([
+  const [response, profileResponse, featuredResult] = await Promise.all([
     getMyTrainings(),
     getMyProfile(),
+    getFeaturedTrainings()
+      .then((value) => ({ value, errorMessage: undefined }))
+      .catch((error: unknown) => ({
+        value: null,
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : "Unable to load featured training.",
+      })),
   ]);
 
   if (!response.success) {
@@ -18,7 +31,23 @@ export default async function ModulesPage() {
   const trainings = response.data;
   const user = profileResponse.success ? profileResponse.data : null;
   const branding = user?.branding;
-  
+  const featuredResponse = featuredResult.value;
+  const featuredTrainings = featuredResponse?.success
+    ? featuredResponse.data
+    : [];
+  const featuredErrorMessage =
+    featuredResult.errorMessage ||
+    (featuredResponse && !featuredResponse.success
+      ? featuredResponse.message || "Unable to load featured training."
+      : undefined);
+
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("accessToken")?.value;
+  const fallbackSessionId = user?._id || user?.companyId || "anonymous";
+  const loginSessionId = accessToken
+    ? createHash("sha256").update(accessToken).digest("hex").slice(0, 20)
+    : fallbackSessionId;
+
   const totalModules = trainings.reduce(
     (sum, training) => sum + (training.totalModules ?? 0),
     0,
@@ -26,7 +55,11 @@ export default async function ModulesPage() {
 
   return (
     <div className="flex flex-1 min-h-0 flex-col gap-4 pb-8 animate-fadeIn overflow-y-auto">
-      <WelcomeVideoOverlay branding={branding} user={user} />
+      <WelcomeVideoOverlay
+        branding={branding}
+        user={user}
+        loginSessionId={loginSessionId}
+      />
 
       <section className="relative shrink-0 overflow-hidden rounded-lg border border-primary/20 bg-primary p-4 text-primary-foreground shadow-sm">
         <div className="relative z-10 space-y-4">
@@ -57,7 +90,19 @@ export default async function ModulesPage() {
         </div>
       </section>
 
+      <FeaturedTrainingSection
+        featuredTrainings={featuredTrainings}
+        errorMessage={featuredErrorMessage}
+      />
+
       <section className="flex-1 space-y-4">
+        <div>
+          <h2 className="font-heading text-lg font-bold">All trainings</h2>
+          <p className="text-xs text-muted-foreground">
+            Continue with the trainings assigned to your team.
+          </p>
+        </div>
+
         {trainings.length === 0 ? (
           <div className="flex min-h-72 flex-col items-center justify-center rounded-lg border bg-card px-6 text-center">
             <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-primary/10 text-primary">

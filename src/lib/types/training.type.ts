@@ -178,8 +178,22 @@ export type UserTrainingView = Training & {
   totalModules?: number;
 };
 
+export type FeaturedTraining = {
+  _id: string;
+  moduleId: string | LearningModule;
+  trainingId: string | Training;
+  topicId: string | Topic;
+  companyId: string;
+  customText?: string;
+  isActive: boolean;
+  isDeleted?: boolean;
+  createdBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  __v?: number;
+};
 
-
-
-
-
+export type CreateFeaturedTrainingPayload = {
+  moduleId: string;
+  customText: string;
+};

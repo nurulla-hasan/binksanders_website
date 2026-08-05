@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Copy, Pencil, Trash2 } from "lucide-react";
+import { BarChart3, Copy, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmationModal } from "@/components/ui/custom/confirmation-modal";
 import { ModalWrapper } from "@/components/ui/custom/modal-wrapper";
@@ -56,6 +56,16 @@ export function ModuleActions({ module }: { module: LearningModule }) {
 
   return (
     <div className="flex items-center justify-end gap-2">
+      <Button asChild variant="outline" size="icon">
+        <Link
+          href={`/super-admin/course/${module._id}/analytics`}
+          aria-label={`View analytics for ${module.title}`}
+          title="View analytics"
+        >
+          <BarChart3 />
+        </Link>
+      </Button>
+
       <Button asChild variant="outline" size="icon">
         <Link
           href={`/super-admin/course/${module._id}/edit`}
