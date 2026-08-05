@@ -29,11 +29,17 @@ export function WelcomeVideoOverlay({
   const [show, setShow] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const processedSessionKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!branding?.videoUrl) return;
 
     const sessionKey = getWelcomeSessionKey(loginSessionId, user);
+
+    // React Strict Mode runs effects twice in development. Process each login
+    // session key only once so the second pass cannot cancel or suppress the UI.
+    if (processedSessionKeyRef.current === sessionKey) return;
+    processedSessionKeyRef.current = sessionKey;
 
     try {
       if (sessionStorage.getItem(sessionKey) === "1") return;
@@ -42,8 +48,7 @@ export function WelcomeVideoOverlay({
       // Continue showing the video when session storage is unavailable.
     }
 
-    const timer = setTimeout(() => setShow(true), 0);
-    return () => clearTimeout(timer);
+    setShow(true);
   }, [
     branding?.videoUrl,
     loginSessionId,
