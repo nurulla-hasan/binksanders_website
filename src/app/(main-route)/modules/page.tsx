@@ -1,4 +1,6 @@
+import { createHash } from "node:crypto";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { ArrowRight, BookOpen, CheckCircle2, Layers3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { FeaturedTrainingSection } from "@/components/survey/FeaturedTrainingSection";
@@ -39,6 +41,14 @@ export default async function ModulesPage() {
       ? featuredResponse.message || "Unable to load featured training."
       : undefined);
 
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("accessToken")?.value;
+  const fallbackSessionId =
+    user?._id || user?.guestId || user?.employeeId || user?.companyId || "anonymous";
+  const loginSessionId = accessToken
+    ? createHash("sha256").update(accessToken).digest("hex").slice(0, 20)
+    : fallbackSessionId;
+
   const totalModules = trainings.reduce(
     (sum, training) => sum + (training.totalModules ?? 0),
     0,
@@ -46,7 +56,11 @@ export default async function ModulesPage() {
 
   return (
     <div className="flex flex-1 min-h-0 flex-col gap-4 pb-8 animate-fadeIn overflow-y-auto">
-      <WelcomeVideoOverlay branding={branding} user={user} />
+      <WelcomeVideoOverlay
+        branding={branding}
+        user={user}
+        loginSessionId={loginSessionId}
+      />
 
       <section className="relative shrink-0 overflow-hidden rounded-lg border border-primary/20 bg-primary p-4 text-primary-foreground shadow-sm">
         <div className="relative z-10 space-y-4">
