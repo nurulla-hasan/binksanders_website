@@ -14,7 +14,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { LearningModule } from "@/lib/types/module.type";
-import type { FeaturedTraining, Training, Topic } from "@/lib/types/training.type";
+import type {
+  FeaturedTraining,
+  Training,
+  Topic,
+} from "@/lib/types/training.type";
 import { ErrorToast, SuccessToast } from "@/lib/utils";
 import {
   createFeaturedTraining,
@@ -26,6 +30,15 @@ type FeaturedTrainingManagerProps = {
   featuredTrainings: FeaturedTraining[];
   errorMessage?: string;
 };
+
+type FeaturedTrainingGroup = {
+  moduleId: string;
+  records: FeaturedTraining[];
+  primary: FeaturedTraining;
+};
+
+const getFeaturedModuleId = (item: FeaturedTraining) =>
+  typeof item.moduleId === "string" ? item.moduleId : item.moduleId._id;
 
 const getModule = (item: FeaturedTraining) =>
   typeof item.moduleId === "string" ? null : item.moduleId;
@@ -45,32 +58,52 @@ export function FeaturedTrainingManager({
   const [moduleId, setModuleId] = useState("");
   const [customText, setCustomText] = useState("");
   const [isCreating, setIsCreating] = useState(false);
-  const [removingId, setRemovingId] = useState<string>();
+  const [removingModuleId, setRemovingModuleId] = useState<string>();
 
   const activeFeaturedTrainings = useMemo(
     () => featuredTrainings.filter((item) => item.isActive && !item.isDeleted),
     [featuredTrainings],
   );
 
+  const featuredGroups = useMemo<FeaturedTrainingGroup[]>(() => {
+    const grouped = new Map<string, FeaturedTraining[]>();
+
+    for (const item of activeFeaturedTrainings) {
+      const id = getFeaturedModuleId(item);
+      const current = grouped.get(id) || [];
+      current.push(item);
+      grouped.set(id, current);
+    }
+
+    return Array.from(grouped.entries()).map(([id, records]) => ({
+      moduleId: id,
+      records,
+      primary: records[0],
+    }));
+  }, [activeFeaturedTrainings]);
+
   const featuredModuleIds = useMemo(
-    () =>
-      new Set(
-        activeFeaturedTrainings.map((item) =>
-          typeof item.moduleId === "string" ? item.moduleId : item.moduleId._id,
-        ),
-      ),
-    [activeFeaturedTrainings],
+    () => new Set(featuredGroups.map((group) => group.moduleId)),
+    [featuredGroups],
   );
 
   const availableModules = modules.filter(
     (module) => !featuredModuleIds.has(module._id),
   );
 
+  const duplicateRecordCount =
+    activeFeaturedTrainings.length - featuredGroups.length;
+
   const handleCreate = async () => {
     const text = customText.trim();
 
     if (!moduleId) {
       ErrorToast("Select a module to feature.");
+      return;
+    }
+
+    if (featuredModuleIds.has(moduleId)) {
+      ErrorToast("This module is already featured.");
       return;
     }
 
@@ -82,11 +115,16 @@ export function FeaturedTrainingManager({
     setIsCreating(true);
 
     try {
-      const response = await createFeaturedTraining({ moduleId, customText: text });
+      const response = await createFeaturedTraining({
+        moduleId,
+        customText: text,
+      });
 
       if (!response.success) throw new Error(response.message);
 
-      SuccessToast(response.message || "Featured training created successfully.");
+      SuccessToast(
+        response.message || "Featured training created successfully.",
+      );
       setModuleId("");
       setCustomText("");
       router.refresh();
@@ -101,21 +139,30 @@ export function FeaturedTrainingManager({
     }
   };
 
-  const handleRemove = async (featuredTrainingId: string) => {
+  const handleRemoveGroup = async (group: FeaturedTrainingGroup) => {
+    const recordLabel =
+      group.records.length > 1
+        ? `all ${group.records.length} duplicate records for this module`
+        : "this featured training";
     const confirmed = window.confirm(
-      "Remove this featured training from the learner home screen?",
+      `Remove ${recordLabel} from the learner home screen?`,
     );
 
     if (!confirmed) return;
 
-    setRemovingId(featuredTrainingId);
+    setRemovingModuleId(group.moduleId);
 
     try {
-      const response = await removeFeaturedTraining(featuredTrainingId);
+      for (const item of group.records) {
+        const response = await removeFeaturedTraining(item._id);
+        if (!response.success) throw new Error(response.message);
+      }
 
-      if (!response.success) throw new Error(response.message);
-
-      SuccessToast(response.message || "Featured training removed successfully.");
+      SuccessToast(
+        group.records.length > 1
+          ? "Duplicate featured records removed successfully."
+          : "Featured training removed successfully.",
+      );
       router.refresh();
     } catch (error: unknown) {
       ErrorToast(
@@ -124,7 +171,7 @@ export function FeaturedTrainingManager({
           : "Unable to remove featured training.",
       );
     } finally {
-      setRemovingId(undefined);
+      setRemovingModuleId(undefined);
     }
   };
 
@@ -134,20 +181,30 @@ export function FeaturedTrainingManager({
         <div>
           <div className="flex items-center gap-2">
             <Sparkles className="size-5 text-primary" />
-            <h2 className="font-heading text-lg font-bold">Featured training</h2>
+            <h2 className="font-heading text-lg font-bold">
+              Featured training
+            </h2>
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            Highlight an assigned module above the learner&apos;s normal training list.
+            Highlight an assigned module above the learner&apos;s normal training
+            list.
           </p>
         </div>
-        <Badge variant="secondary">
-          {activeFeaturedTrainings.length} active
-        </Badge>
+        <Badge variant="secondary">{featuredGroups.length} active</Badge>
       </div>
 
       {errorMessage && (
         <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive-foreground">
           {errorMessage}
+        </div>
+      )}
+
+      {duplicateRecordCount > 0 && (
+        <div className="rounded-md border border-primary/30 bg-primary/5 p-3 text-sm">
+          {duplicateRecordCount} duplicate active featured record
+          {duplicateRecordCount > 1 ? "s were" : " was"} detected. The list
+          below groups duplicates together; removing the module will clean all
+          of its duplicate records.
         </div>
       )}
 
@@ -161,17 +218,35 @@ export function FeaturedTrainingManager({
               <SelectValue placeholder="Select an assigned module" />
             </SelectTrigger>
             <SelectContent>
-              {availableModules.map((module) => (
-                <SelectItem key={module._id} value={module._id}>
-                  {module.title}
+              {modules.length === 0 ? (
+                <SelectItem value="no-modules" disabled>
+                  No assigned published modules available
                 </SelectItem>
-              ))}
+              ) : (
+                modules.map((module) => {
+                  const isFeatured = featuredModuleIds.has(module._id);
+
+                  return (
+                    <SelectItem
+                      key={module._id}
+                      value={module._id}
+                      disabled={isFeatured}
+                    >
+                      {module.title}
+                      {isFeatured ? " — already featured" : ""}
+                    </SelectItem>
+                  );
+                })
+              )}
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-sm font-medium" htmlFor="featured-custom-text">
+          <label
+            className="text-sm font-medium"
+            htmlFor="featured-custom-text"
+          >
             Learner message
           </label>
           <Textarea
@@ -186,38 +261,50 @@ export function FeaturedTrainingManager({
         <Button
           type="button"
           onClick={() => void handleCreate()}
-          disabled={isCreating || availableModules.length === 0}
+          disabled={isCreating || !moduleId}
         >
           {isCreating ? <Loader2 className="animate-spin" /> : <Sparkles />}
           Feature module
         </Button>
       </div>
 
-      {availableModules.length === 0 && modules.length > 0 && (
+      {modules.length === 0 ? (
         <p className="text-xs text-muted-foreground">
-          Every available assigned module is already featured.
+          Publish a module and assign it to a company, training, and topic before
+          featuring it.
         </p>
-      )}
+      ) : availableModules.length === 0 ? (
+        <p className="text-xs text-muted-foreground">
+          No additional module is available. Remove an existing featured module
+          before featuring it again.
+        </p>
+      ) : null}
 
       <div className="space-y-2">
-        {activeFeaturedTrainings.length === 0 ? (
+        {featuredGroups.length === 0 ? (
           <div className="rounded-md border border-dashed p-5 text-center text-sm text-muted-foreground">
             No featured training is active.
           </div>
         ) : (
-          activeFeaturedTrainings.map((item) => {
+          featuredGroups.map((group) => {
+            const item = group.primary;
             const module = getModule(item);
             const training = getTraining(item);
             const topic = getTopic(item);
 
             return (
               <article
-                key={item._id}
+                key={group.moduleId}
                 className="flex flex-col gap-3 rounded-md border bg-background p-3 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="min-w-0 space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="active">Featured</Badge>
+                    {group.records.length > 1 && (
+                      <Badge variant="outline">
+                        {group.records.length} duplicate records
+                      </Badge>
+                    )}
                     {training?.title && (
                       <Badge variant="outline">{training.title}</Badge>
                     )}
@@ -237,11 +324,11 @@ export function FeaturedTrainingManager({
                   type="button"
                   variant="outline"
                   size="sm"
-                  disabled={removingId === item._id}
-                  onClick={() => void handleRemove(item._id)}
+                  disabled={removingModuleId === group.moduleId}
+                  onClick={() => void handleRemoveGroup(group)}
                   className="shrink-0"
                 >
-                  {removingId === item._id ? (
+                  {removingModuleId === group.moduleId ? (
                     <Loader2 className="animate-spin" />
                   ) : (
                     <Trash2 />
