@@ -288,7 +288,7 @@ export function FeaturedTrainingManager({
         ) : (
           featuredGroups.map((group) => {
             const item = group.primary;
-            const module = getModule(item);
+            const featuredModule = getModule(item);
             const training = getTraining(item);
             const topic = getTopic(item);
 
@@ -313,7 +313,7 @@ export function FeaturedTrainingManager({
                     )}
                   </div>
                   <p className="truncate font-medium">
-                    {module?.title || "Featured module"}
+                    {featuredModule?.title || "Featured module"}
                   </p>
                   <p className="text-sm text-muted-foreground">
                     {item.customText || "Featured learning module"}
