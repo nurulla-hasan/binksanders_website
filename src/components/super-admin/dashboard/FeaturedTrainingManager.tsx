@@ -19,7 +19,7 @@ import { ErrorToast, SuccessToast } from "@/lib/utils";
 import {
   createFeaturedTraining,
   removeFeaturedTraining,
-} from "@/services/training.service";
+} from "@/services/featured-training.service";
 
 type FeaturedTrainingManagerProps = {
   modules: LearningModule[];
