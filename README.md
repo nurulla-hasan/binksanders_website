@@ -1,7 +1,7 @@
 # Binksanders Website
 
 Welcome to the **Binksanders Website** project! This is a modern, high-performance web application built with the latest frontend technologies to deliver a robust and beautiful user experience. It features a public-facing website, a `company` portal, and a `super-admin` dashboard.
-
+ 
 ## 🚀 Tech Stack
 
 - **Framework:** [Next.js](https://nextjs.org/) (App Router)
