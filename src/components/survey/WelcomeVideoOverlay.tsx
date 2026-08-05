@@ -6,6 +6,8 @@ import Image from "next/image";
 import { ArrowRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+const WELCOME_SESSION_PREFIX = "welcome-video-shown:";
+
 const getWelcomeSessionKey = (loginSessionId: string, user: any) => {
   const fallbackUserId =
     user?._id ||
@@ -14,7 +16,7 @@ const getWelcomeSessionKey = (loginSessionId: string, user: any) => {
     user?.companyId ||
     "anonymous";
 
-  return `welcome-video-shown:${loginSessionId || fallbackUserId}`;
+  return `${WELCOME_SESSION_PREFIX}${loginSessionId || fallbackUserId}`;
 };
 
 export function WelcomeVideoOverlay({
@@ -37,11 +39,22 @@ export function WelcomeVideoOverlay({
     const sessionKey = getWelcomeSessionKey(loginSessionId, user);
 
     // React Strict Mode runs effects twice in development. Process each login
-    // session key only once so the second pass cannot cancel or suppress the UI.
+    // session key only once so the second pass cannot suppress the overlay.
     if (processedSessionKeyRef.current === sessionKey) return;
     processedSessionKeyRef.current = sessionKey;
 
     try {
+      for (let index = sessionStorage.length - 1; index >= 0; index -= 1) {
+        const key = sessionStorage.key(index);
+
+        if (
+          key?.startsWith(WELCOME_SESSION_PREFIX) &&
+          key !== sessionKey
+        ) {
+          sessionStorage.removeItem(key);
+        }
+      }
+
       if (sessionStorage.getItem(sessionKey) === "1") return;
       sessionStorage.setItem(sessionKey, "1");
     } catch {
