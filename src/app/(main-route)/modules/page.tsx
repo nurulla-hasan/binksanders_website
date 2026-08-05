@@ -43,8 +43,7 @@ export default async function ModulesPage() {
 
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("accessToken")?.value;
-  const fallbackSessionId =
-    user?._id || user?.guestId || user?.employeeId || user?.companyId || "anonymous";
+  const fallbackSessionId = user?._id || user?.companyId || "anonymous";
   const loginSessionId = accessToken
     ? createHash("sha256").update(accessToken).digest("hex").slice(0, 20)
     : fallbackSessionId;
