@@ -39,24 +39,7 @@ export default async function ModulesPage() {
       ? featuredResponse.message || "Unable to load featured training."
       : undefined);
 
-  console.log(
-    "[featured-training-debug]",
-    JSON.stringify(
-      {
-        learner: user
-          ? {
-              role: user.role,
-              companyId: user.companyId,
-              teamId: user.teamId,
-            }
-          : null,
-        featuredResponse,
-        featuredErrorMessage,
-      },
-      null,
-      2,
-    ),
-  );
+  console.log("featuredResult", featuredResult );
 
   const totalModules = trainings.reduce(
     (sum, training) => sum + (training.totalModules ?? 0),
