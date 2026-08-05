@@ -1,14 +1,17 @@
 import Link from "next/link";
 import { ArrowRight, BookOpen, CheckCircle2, Layers3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { FeaturedTrainingSection } from "@/components/survey/FeaturedTrainingSection";
+import { WelcomeVideoOverlay } from "@/components/survey/WelcomeVideoOverlay";
+import { getFeaturedTrainings } from "@/services/featured-training.service";
 import { getMyTrainings } from "@/services/training.service";
 import { getMyProfile } from "@/services/user.service";
-import { WelcomeVideoOverlay } from "@/components/survey/WelcomeVideoOverlay";
 
 export default async function ModulesPage() {
-  const [response, profileResponse] = await Promise.all([
+  const [response, profileResponse, featuredResponse] = await Promise.all([
     getMyTrainings(),
     getMyProfile(),
+    getFeaturedTrainings().catch(() => null),
   ]);
 
   if (!response.success) {
@@ -18,7 +21,10 @@ export default async function ModulesPage() {
   const trainings = response.data;
   const user = profileResponse.success ? profileResponse.data : null;
   const branding = user?.branding;
-  
+  const featuredTrainings = featuredResponse?.success
+    ? featuredResponse.data
+    : [];
+
   const totalModules = trainings.reduce(
     (sum, training) => sum + (training.totalModules ?? 0),
     0,
@@ -57,7 +63,16 @@ export default async function ModulesPage() {
         </div>
       </section>
 
+      <FeaturedTrainingSection featuredTrainings={featuredTrainings} />
+
       <section className="flex-1 space-y-4">
+        <div>
+          <h2 className="font-heading text-lg font-bold">All trainings</h2>
+          <p className="text-xs text-muted-foreground">
+            Continue with the trainings assigned to your team.
+          </p>
+        </div>
+
         {trainings.length === 0 ? (
           <div className="flex min-h-72 flex-col items-center justify-center rounded-lg border bg-card px-6 text-center">
             <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-primary/10 text-primary">
