@@ -39,8 +39,6 @@ export default async function ModulesPage() {
       ? featuredResponse.message || "Unable to load featured training."
       : undefined);
 
-  console.log("featuredResult", featuredResult );
-
   const totalModules = trainings.reduce(
     (sum, training) => sum + (training.totalModules ?? 0),
     0,
