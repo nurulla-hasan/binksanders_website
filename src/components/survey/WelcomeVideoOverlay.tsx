@@ -6,6 +6,13 @@ import Image from "next/image";
 import { ArrowRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+const getWelcomeSessionKey = (user: any) => {
+  const userId =
+    user?._id || user?.guestId || user?.employeeId || user?.companyId || "anonymous";
+
+  return `welcome-video-shown:${userId}`;
+};
+
 export function WelcomeVideoOverlay({ branding, user }: { branding: any; user: any }) {
   const [show, setShow] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -14,9 +21,24 @@ export function WelcomeVideoOverlay({ branding, user }: { branding: any; user: a
   useEffect(() => {
     if (!branding?.videoUrl) return;
 
+    const sessionKey = getWelcomeSessionKey(user);
+
+    try {
+      if (sessionStorage.getItem(sessionKey) === "1") return;
+      sessionStorage.setItem(sessionKey, "1");
+    } catch {
+      // Continue showing the video when session storage is unavailable.
+    }
+
     const timer = setTimeout(() => setShow(true), 0);
     return () => clearTimeout(timer);
-  }, [branding?.videoUrl]);
+  }, [
+    branding?.videoUrl,
+    user?._id,
+    user?.guestId,
+    user?.employeeId,
+    user?.companyId,
+  ]);
 
   if (!show || !branding?.videoUrl) return null;
 
