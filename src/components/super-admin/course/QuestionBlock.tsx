@@ -16,7 +16,6 @@ import type {
   CreateModuleFormValues,
   QuestionDataSchemaType,
 } from "@/lib/validations/course";
-
 import { useId } from "react";
 
 interface QuestionBlockProps {
@@ -69,7 +68,10 @@ export function QuestionBlock({
     "Simulated Call",
     "Swipe",
   ].includes(currentQuestion.type);
-  const supportsQuestionImage = currentQuestion.type !== "Video" && currentQuestion.type !== "Simulated Call";
+  const supportsQuestionImage =
+    currentQuestion.type !== "Video" &&
+    currentQuestion.type !== "Simulated Call";
+
   const getMediaLabel = (value: unknown) => {
     if (value instanceof File) return value.name;
     if (typeof value === "string" && value) return "Existing media selected";
@@ -82,16 +84,28 @@ export function QuestionBlock({
   ) => {
     const value = file ?? "";
     if (field === "image") {
-      setValue(`questions.${index}.image`, value, { shouldDirty: true, shouldValidate: true });
+      setValue(`questions.${index}.image`, value, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
     }
     if (field === "videoUrl") {
-      setValue(`questions.${index}.videoUrl`, value, { shouldDirty: true, shouldValidate: true });
+      setValue(`questions.${index}.videoUrl`, value, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
     }
     if (field === "callerPhoto") {
-      setValue(`questions.${index}.callerPhoto`, value, { shouldDirty: true, shouldValidate: true });
+      setValue(`questions.${index}.callerPhoto`, value, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
     }
     if (field === "postCallVideoUrl") {
-      setValue(`questions.${index}.postCallVideoUrl`, value, { shouldDirty: true, shouldValidate: true });
+      setValue(`questions.${index}.postCallVideoUrl`, value, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
     }
   };
 
@@ -99,10 +113,12 @@ export function QuestionBlock({
     field,
     label,
     accept,
+    hint,
   }: {
     field: "image" | "videoUrl" | "callerPhoto" | "postCallVideoUrl";
     label: string;
     accept: string;
+    hint?: string;
   }) => {
     const value = currentQuestion[field as keyof typeof currentQuestion];
 
@@ -114,6 +130,7 @@ export function QuestionBlock({
           accept={accept}
           onChange={(event) => setMediaValue(field, event.target.files?.[0])}
         />
+        {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
         <p className="text-xs text-muted-foreground">{getMediaLabel(value)}</p>
       </Field>
     );
@@ -122,10 +139,13 @@ export function QuestionBlock({
   const addOption = () => {
     if (currentQuestion.type !== "MCQ" && currentQuestion.type !== "Video")
       return;
-    setValue(`questions.${index}.options`, [...(currentQuestion.options || []), ""], {
-      shouldDirty: true,
-    });
+    setValue(
+      `questions.${index}.options`,
+      [...(currentQuestion.options || []), ""],
+      { shouldDirty: true },
+    );
   };
+
   const removeOption = (optionIndex: number) => {
     if (
       (currentQuestion.type !== "MCQ" && currentQuestion.type !== "Video") ||
@@ -135,7 +155,9 @@ export function QuestionBlock({
     const removed = currentQuestion.options?.[optionIndex];
     setValue(
       `questions.${index}.options`,
-      (currentQuestion.options || []).filter((_, index) => index !== optionIndex),
+      (currentQuestion.options || []).filter((_, itemIndex) =>
+        itemIndex !== optionIndex,
+      ),
       { shouldDirty: true, shouldValidate: true },
     );
     if (currentQuestion.correctAnswer === removed) {
@@ -145,9 +167,11 @@ export function QuestionBlock({
 
   const addOrderingItem = () => {
     if (currentQuestion.type !== "Ordering") return;
-    setValue(`questions.${index}.items`, [...currentQuestion.items, ""], {
-      shouldDirty: true,
-    });
+    setValue(
+      `questions.${index}.items`,
+      [...currentQuestion.items, ""],
+      { shouldDirty: true },
+    );
   };
 
   const removeOrderingItem = (itemIndex: number) => {
@@ -158,16 +182,20 @@ export function QuestionBlock({
       return;
     setValue(
       `questions.${index}.items`,
-      currentQuestion.items.filter((_, index) => index !== itemIndex),
+      currentQuestion.items.filter((_, indexToKeep) =>
+        indexToKeep !== itemIndex,
+      ),
       { shouldDirty: true, shouldValidate: true },
     );
   };
 
   const addChatOption = () => {
     if (currentQuestion.type !== "Chat Scenario") return;
-    setValue(`questions.${index}.options`, [...currentQuestion.options, ""], {
-      shouldDirty: true,
-    });
+    setValue(
+      `questions.${index}.options`,
+      [...currentQuestion.options, ""],
+      { shouldDirty: true },
+    );
   };
 
   const removeChatOption = (optionIndex: number) => {
@@ -179,7 +207,9 @@ export function QuestionBlock({
     const removed = currentQuestion.options?.[optionIndex];
     setValue(
       `questions.${index}.options`,
-      (currentQuestion.options || []).filter((_, index) => index !== optionIndex),
+      (currentQuestion.options || []).filter((_, itemIndex) =>
+        itemIndex !== optionIndex,
+      ),
       { shouldDirty: true, shouldValidate: true },
     );
     if (currentQuestion.correctAnswer === removed) {
@@ -187,15 +217,16 @@ export function QuestionBlock({
     }
   };
 
-  const bgColors = [
-    "bg-card",
-    "bg-primary/5",
-    "bg-secondary/10",
-  ];
+  const bgColors = ["bg-card", "bg-primary/5", "bg-secondary/10"];
   const bgColor = bgColors[index % bgColors.length];
 
   return (
-    <div className={cn("space-y-6 rounded-md border border-border p-6 shadow-sm transition-colors duration-300", bgColor)}>
+    <div
+      className={cn(
+        "space-y-6 rounded-md border border-border p-6 shadow-sm transition-colors duration-300",
+        bgColor,
+      )}
+    >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-center gap-3">
           <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
@@ -246,7 +277,11 @@ export function QuestionBlock({
             />
           </Field>
         )}
-        <Field className={currentQuestion.type === "Chat Scenario" ? "sm:max-w-50" : ""}>
+        <Field
+          className={
+            currentQuestion.type === "Chat Scenario" ? "sm:max-w-50" : ""
+          }
+        >
           <FieldLabel>Question Type</FieldLabel>
           <Select
             value={currentQuestion.type}
@@ -271,11 +306,17 @@ export function QuestionBlock({
         </Field>
       </div>
 
-      {(currentQuestion.type === "MCQ" || currentQuestion.type === "Video") && (
+      {(currentQuestion.type === "MCQ" ||
+        currentQuestion.type === "Video") && (
         <FieldGroup>
           <div className="flex items-center justify-between gap-3">
             <FieldLabel>Options</FieldLabel>
-            <Button type="button" variant="outline" size="sm" onClick={addOption}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addOption}
+            >
               <Plus /> Add Option
             </Button>
           </div>
@@ -318,7 +359,10 @@ export function QuestionBlock({
                     {(currentQuestion.options || [])
                       .filter(Boolean)
                       .map((option, selectIndex) => (
-                        <SelectItem key={`${option}-${selectIndex}`} value={option}>
+                        <SelectItem
+                          key={`${option}-${selectIndex}`}
+                          value={option}
+                        >
                           {option}
                         </SelectItem>
                       ))}
@@ -347,7 +391,9 @@ export function QuestionBlock({
               name={`questions.${index}.correctDirection`}
               render={({ field }) => (
                 <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="left">Left</SelectItem>
                     <SelectItem value="right">Right</SelectItem>
@@ -390,7 +436,9 @@ export function QuestionBlock({
                   </Button>
                 </div>
                 <Input
-                  {...register(`questions.${index}.items.${itemIndex}` as const)}
+                  {...register(
+                    `questions.${index}.items.${itemIndex}` as const,
+                  )}
                 />
               </Field>
             ))}
@@ -415,9 +463,7 @@ export function QuestionBlock({
             <Field>
               <FieldLabel>Message</FieldLabel>
               <Input
-                {...register(
-                  `questions.${index}.messages.0.text` as const,
-                )}
+                {...register(`questions.${index}.messages.0.text` as const)}
               />
             </Field>
           </div>
@@ -469,11 +515,16 @@ export function QuestionBlock({
                     <SelectValue placeholder="Select correct response" />
                   </SelectTrigger>
                   <SelectContent>
-                    {currentQuestion.options.filter(Boolean).map((option, selectIndex) => (
-                      <SelectItem key={`${option}-${selectIndex}`} value={option}>
-                        {option}
-                      </SelectItem>
-                    ))}
+                    {currentQuestion.options
+                      .filter(Boolean)
+                      .map((option, selectIndex) => (
+                        <SelectItem
+                          key={`${option}-${selectIndex}`}
+                          value={option}
+                        >
+                          {option}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               )}
@@ -482,7 +533,12 @@ export function QuestionBlock({
         </div>
       )}
 
-      {currentQuestion.type === "Video" && renderMediaInput({ field: "videoUrl", label: "Video", accept: "video/*" })}
+      {currentQuestion.type === "Video" &&
+        renderMediaInput({
+          field: "videoUrl",
+          label: "Video",
+          accept: "video/*",
+        })}
 
       {currentQuestion.type === "Simulated Call" && (
         <div className="grid gap-4 sm:grid-cols-2">
@@ -493,8 +549,18 @@ export function QuestionBlock({
               {...register(`questions.${index}.callerName`)}
             />
           </Field>
-          {renderMediaInput({ field: "callerPhoto", label: "Caller Photo", accept: "image/*" })}
-          {renderMediaInput({ field: "postCallVideoUrl", label: "Post-call Video", accept: "video/*" })}
+          {renderMediaInput({
+            field: "callerPhoto",
+            label: "Caller Photo",
+            accept: "image/*",
+            hint:
+              "Recommended: 512 × 512 px square, JPG or PNG. Use a clear, centred portrait.",
+          })}
+          {renderMediaInput({
+            field: "postCallVideoUrl",
+            label: "Post-call Video",
+            accept: "video/*",
+          })}
           <Field>
             <FieldLabel>Post-call Message</FieldLabel>
             <Input
@@ -504,6 +570,7 @@ export function QuestionBlock({
           </Field>
         </div>
       )}
+
       {currentQuestion.type === "Rating" && (
         <Field>
           <FieldLabel>Rating Scale</FieldLabel>
@@ -526,7 +593,15 @@ export function QuestionBlock({
         </Field>
       )}
 
-      {supportsQuestionImage && currentQuestion.image !== undefined && renderMediaInput({ field: "image", label: "Question Image", accept: "image/*" })}
+      {supportsQuestionImage &&
+        currentQuestion.image !== undefined &&
+        renderMediaInput({
+          field: "image",
+          label: "Question Image",
+          accept: "image/*",
+          hint:
+            "Recommended: 1280 × 720 px (16:9), JPG or PNG. Keep important content centred for mobile display.",
+        })}
 
       <div className="flex flex-col justify-between gap-4 border-t border-border pt-4 sm:flex-row sm:items-center">
         <div className="flex flex-wrap items-center gap-5">
@@ -579,20 +654,11 @@ export function QuestionBlock({
                   )
                 }
               />
-              <FieldLabel htmlFor={`image-${blockId}`}>
-                Add image
-              </FieldLabel>
+              <FieldLabel htmlFor={`image-${blockId}`}>Add image</FieldLabel>
             </Field>
           )}
         </div>
-
       </div>
     </div>
   );
 }
-
-
-
-
-
-

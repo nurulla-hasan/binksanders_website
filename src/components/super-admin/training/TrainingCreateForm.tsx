@@ -133,6 +133,10 @@ export function TrainingCreateForm() {
             accept="image/*"
             onChange={handleThumbnailChange}
           />
+          <p className="text-xs text-muted-foreground">
+            Recommended: 1280 × 720 px (16:9), JPG or PNG. Keep important
+            content near the centre because cards may crop the edges.
+          </p>
           {thumbnailPreview && (
             <div className="mt-3 overflow-hidden rounded-md border bg-background">
               {/* eslint-disable-next-line @next/next/no-img-element */}
