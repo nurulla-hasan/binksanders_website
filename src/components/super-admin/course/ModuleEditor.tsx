@@ -21,7 +21,6 @@ import { ModuleBasicInfo } from "./ModuleBasicInfo";
 import { QuestionnaireSection } from "./QuestionnaireSection";
 import { ModulePreview } from "./ModulePreview";
 
-
 const mediaFields = [
   "image",
   "videoUrl",
@@ -36,11 +35,23 @@ const prepareModulePayload = (values: CreateModuleFormValues) => {
   const questions = values.questions.map((question, index) => {
     const cleanQuestion = { ...question } as Record<string, unknown>;
 
-    if (["Free Input", "Rating", "Information", "Simulated Call"].includes(String(cleanQuestion.type))) {
+    if (
+      ["Free Input", "Rating", "Information", "Simulated Call"].includes(
+        String(cleanQuestion.type),
+      )
+    ) {
       delete cleanQuestion.correctAnswer;
     }
 
-    if (["Free Input", "Rating", "Information", "Simulated Call", "Swipe"].includes(String(cleanQuestion.type))) {
+    if (
+      [
+        "Free Input",
+        "Rating",
+        "Information",
+        "Simulated Call",
+        "Swipe",
+      ].includes(String(cleanQuestion.type))
+    ) {
       delete cleanQuestion.explanation;
     }
 
@@ -116,7 +127,11 @@ export function ModuleEditor({ module }: { module?: LearningModule }) {
   });
 
   const onSubmit = async (values: CreateModuleFormValues) => {
-    if (!isEditing && !values.thumbnail) {
+    const thumbnailImage = isFileValue(values.thumbnail)
+      ? values.thumbnail
+      : undefined;
+
+    if (!isEditing && !thumbnailImage) {
       ErrorToast("Thumbnail image is required");
       return;
     }
@@ -127,17 +142,23 @@ export function ModuleEditor({ module }: { module?: LearningModule }) {
 
     try {
       const response = module
-        ? await updateModule(module._id, { ...data, questionFiles })
+        ? await updateModule(module._id, {
+            ...data,
+            thumbnailImage,
+            questionFiles,
+          })
         : await createModule({
             data,
-            thumbnailImage: values.thumbnail as File,
+            thumbnailImage: thumbnailImage as File,
             questionFiles,
           });
 
       if (!response.success) throw new Error(response.message);
       SuccessToast(
         response.message ||
-          (isEditing ? "Module updated successfully" : "Module created successfully"),
+          (isEditing
+            ? "Module updated successfully"
+            : "Module created successfully"),
       );
       router.replace("/super-admin/course");
       router.refresh();
@@ -200,7 +221,6 @@ export function ModuleEditor({ module }: { module?: LearningModule }) {
               <div className="space-y-6 lg:col-span-7 xl:col-span-8">
                 <ModuleBasicInfo
                   existingThumbnail={module?.thumbnailImage}
-                  allowThumbnail={!isEditing}
                 />
                 <QuestionnaireSection />
               </div>
@@ -216,9 +236,3 @@ export function ModuleEditor({ module }: { module?: LearningModule }) {
     </div>
   );
 }
-
-
-
-
-
-
