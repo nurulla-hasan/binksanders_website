@@ -455,7 +455,10 @@ export function TrainingBuilder({ training, modules }: TrainingBuilderProps) {
               </Button>
             </DialogTrigger>
             <DialogContent>
-              <form onSubmit={handleAddTopic} className="space-y-5">
+              <form
+                onSubmit={handleAddTopic}
+                className="space-y-5 h-[60vh] overflow-y-auto md:h-auto"
+              >
                 <DialogHeader>
                   <DialogTitle>Add Topic</DialogTitle>
                   <DialogDescription>
@@ -611,7 +614,7 @@ export function TrainingBuilder({ training, modules }: TrainingBuilderProps) {
                           Select one or more modules to add under this topic.
                         </DialogDescription>
                       </DialogHeader>
-                      <div className="max-h-[55dvh] space-y-3 overflow-y-auto pr-1">
+                      <div className="h-[60vh] space-y-3 overflow-y-auto pr-1 md:h-auto">
                         {availableModules.map((module) => {
                           const checked = (selectedModules[topic._id] || []).includes(module._id);
                           return (

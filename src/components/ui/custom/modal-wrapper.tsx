@@ -55,7 +55,7 @@ export function ModalWrapper({
         )}
 
         {/* Content Body */}
-        <div className="p-6 flex-1 max-h-[70dvh] md:max-h-[80dvh] overflow-auto">
+        <div className="p-6 flex-1 h-[60vh] overflow-y-auto md:h-auto">
           {children}
         </div>
 

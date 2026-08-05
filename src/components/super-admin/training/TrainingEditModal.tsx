@@ -133,7 +133,7 @@ export function TrainingEditModal({ training }: { training: Training }) {
             stays separate.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5 h-[60vh] overflow-y-auto md:h-auto">
           <div className="grid gap-4">
             <Field>
               <FieldLabel htmlFor={`edit-training-title-${training._id}`}>
