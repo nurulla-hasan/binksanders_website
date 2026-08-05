@@ -6,14 +6,26 @@ import Image from "next/image";
 import { ArrowRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const getWelcomeSessionKey = (user: any) => {
-  const userId =
-    user?._id || user?.guestId || user?.employeeId || user?.companyId || "anonymous";
+const getWelcomeSessionKey = (loginSessionId: string, user: any) => {
+  const fallbackUserId =
+    user?._id ||
+    user?.guestId ||
+    user?.employeeId ||
+    user?.companyId ||
+    "anonymous";
 
-  return `welcome-video-shown:${userId}`;
+  return `welcome-video-shown:${loginSessionId || fallbackUserId}`;
 };
 
-export function WelcomeVideoOverlay({ branding, user }: { branding: any; user: any }) {
+export function WelcomeVideoOverlay({
+  branding,
+  user,
+  loginSessionId,
+}: {
+  branding: any;
+  user: any;
+  loginSessionId: string;
+}) {
   const [show, setShow] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -21,7 +33,7 @@ export function WelcomeVideoOverlay({ branding, user }: { branding: any; user: a
   useEffect(() => {
     if (!branding?.videoUrl) return;
 
-    const sessionKey = getWelcomeSessionKey(user);
+    const sessionKey = getWelcomeSessionKey(loginSessionId, user);
 
     try {
       if (sessionStorage.getItem(sessionKey) === "1") return;
@@ -34,6 +46,7 @@ export function WelcomeVideoOverlay({ branding, user }: { branding: any; user: a
     return () => clearTimeout(timer);
   }, [
     branding?.videoUrl,
+    loginSessionId,
     user?._id,
     user?.guestId,
     user?.employeeId,
