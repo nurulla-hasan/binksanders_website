@@ -8,10 +8,18 @@ import { getMyTrainings } from "@/services/training.service";
 import { getMyProfile } from "@/services/user.service";
 
 export default async function ModulesPage() {
-  const [response, profileResponse, featuredResponse] = await Promise.all([
+  const [response, profileResponse, featuredResult] = await Promise.all([
     getMyTrainings(),
     getMyProfile(),
-    getFeaturedTrainings().catch(() => null),
+    getFeaturedTrainings()
+      .then((value) => ({ value, errorMessage: undefined }))
+      .catch((error: unknown) => ({
+        value: null,
+        errorMessage:
+          error instanceof Error
+            ? error.message
+            : "Unable to load featured training.",
+      })),
   ]);
 
   if (!response.success) {
@@ -21,9 +29,15 @@ export default async function ModulesPage() {
   const trainings = response.data;
   const user = profileResponse.success ? profileResponse.data : null;
   const branding = user?.branding;
+  const featuredResponse = featuredResult.value;
   const featuredTrainings = featuredResponse?.success
     ? featuredResponse.data
     : [];
+  const featuredErrorMessage =
+    featuredResult.errorMessage ||
+    (featuredResponse && !featuredResponse.success
+      ? featuredResponse.message || "Unable to load featured training."
+      : undefined);
 
   const totalModules = trainings.reduce(
     (sum, training) => sum + (training.totalModules ?? 0),
@@ -63,7 +77,10 @@ export default async function ModulesPage() {
         </div>
       </section>
 
-      <FeaturedTrainingSection featuredTrainings={featuredTrainings} />
+      <FeaturedTrainingSection
+        featuredTrainings={featuredTrainings}
+        errorMessage={featuredErrorMessage}
+      />
 
       <section className="flex-1 space-y-4">
         <div>
