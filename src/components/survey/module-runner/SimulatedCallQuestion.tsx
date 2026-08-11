@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowUp, Phone, UserRound } from "lucide-react";
-// import { Button } from "@/components/ui/button";
 import type { ModuleQuestion } from "@/lib/types/module.type";
 import type { AnswerValue, MediaValue } from "./types";
 import { MediaImage, MediaVideo } from "./media";
@@ -21,14 +20,50 @@ export function SimulatedCallQuestion({
 }) {
   const [hasAnswered, setHasAnswered] = useState(answer === "completed");
   const [dragOffset, setDragOffset] = useState(0);
+  const completionRef = useRef(false);
   const isComplete = answer === "completed";
   const callerName = question.callerName || "Training caller";
+
+  const completeOnce = useCallback(() => {
+    if (disabled || isComplete || completionRef.current) return;
+    completionRef.current = true;
+    onComplete();
+  }, [disabled, isComplete, onComplete]);
+
+  useEffect(() => {
+    if (
+      !hasAnswered ||
+      disabled ||
+      isComplete ||
+      question.postCallVideoUrl
+    ) {
+      return;
+    }
+
+    const timer = window.setTimeout(
+      completeOnce,
+      question.callerPhoto ? 3000 : 2000,
+    );
+
+    return () => window.clearTimeout(timer);
+  }, [
+    completeOnce,
+    disabled,
+    hasAnswered,
+    isComplete,
+    question.callerPhoto,
+    question.postCallVideoUrl,
+  ]);
 
   if (!hasAnswered) {
     return (
       <div className="fixed inset-0 z-50 flex h-full w-full overflow-hidden bg-foreground text-background">
         {question.callerPhoto && (
-          <MediaImage value={question.callerPhoto as MediaValue} alt="" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-30" />
+          <MediaImage
+            value={question.callerPhoto as MediaValue}
+            alt=""
+            className="absolute inset-0 h-full w-full scale-110 object-cover opacity-30"
+          />
         )}
         <div className="absolute inset-0 bg-foreground/55" />
 
@@ -37,7 +72,11 @@ export function SimulatedCallQuestion({
             <p className="text-lg text-background/80">Incoming call...</p>
             <div className="mx-auto flex size-40 items-center justify-center overflow-hidden rounded-full border border-background/80 bg-background/15 shadow-sm">
               {question.callerPhoto ? (
-                <MediaImage value={question.callerPhoto as MediaValue} alt={callerName} className="size-full object-cover" />
+                <MediaImage
+                  value={question.callerPhoto as MediaValue}
+                  alt={callerName}
+                  className="size-full object-cover"
+                />
               ) : (
                 <UserRound className="size-16 text-background/80" />
               )}
@@ -51,13 +90,22 @@ export function SimulatedCallQuestion({
 
           <div className="flex flex-col items-center gap-6">
             <div className="flex flex-col items-center">
-              <motion.div animate={{ opacity: [0.3, 1, 0.3], y: [0, -4, 0] }} transition={{ repeat: Infinity, duration: 1.2, delay: 0.4 }}>
+              <motion.div
+                animate={{ opacity: [0.3, 1, 0.3], y: [0, -4, 0] }}
+                transition={{ repeat: Infinity, duration: 1.2, delay: 0.4 }}
+              >
                 <ArrowUp className="size-8 text-background/35" />
               </motion.div>
-              <motion.div animate={{ opacity: [0.3, 1, 0.3], y: [0, -4, 0] }} transition={{ repeat: Infinity, duration: 1.2, delay: 0.2 }}>
+              <motion.div
+                animate={{ opacity: [0.3, 1, 0.3], y: [0, -4, 0] }}
+                transition={{ repeat: Infinity, duration: 1.2, delay: 0.2 }}
+              >
                 <ArrowUp className="size-8 text-background/50" />
               </motion.div>
-              <motion.div animate={{ opacity: [0.3, 1, 0.3], y: [0, -4, 0] }} transition={{ repeat: Infinity, duration: 1.2, delay: 0 }}>
+              <motion.div
+                animate={{ opacity: [0.3, 1, 0.3], y: [0, -4, 0] }}
+                transition={{ repeat: Infinity, duration: 1.2, delay: 0 }}
+              >
                 <ArrowUp className="size-8 text-background/75" />
               </motion.div>
             </div>
@@ -96,35 +144,22 @@ export function SimulatedCallQuestion({
   return (
     <div className="fixed inset-0 z-50 flex h-full w-full flex-col overflow-hidden bg-black animate-fadeIn">
       {question.postCallVideoUrl ? (
-        <MediaVideo 
-          value={question.postCallVideoUrl as MediaValue} 
-          autoPlay 
+        <MediaVideo
+          value={question.postCallVideoUrl as MediaValue}
+          autoPlay
           className="absolute inset-0 h-full w-full object-cover"
-          onEnded={() => {
-            if (!disabled && !isComplete) onComplete();
-          }}
+          onEnded={completeOnce}
         />
       ) : question.callerPhoto ? (
-        <MediaImage 
-          value={question.callerPhoto as MediaValue} 
-          alt="" 
+        <MediaImage
+          value={question.callerPhoto as MediaValue}
+          alt=""
           className="absolute inset-0 h-full w-full object-cover"
-          onLoad={() => {
-            if (!disabled && !isComplete) {
-              window.setTimeout(() => onComplete(), 3000);
-            }
-          }}
         />
       ) : (
         <div className="flex h-full w-full flex-col items-center justify-center bg-foreground text-background">
           <p className="text-xl font-bold">Call completed</p>
           <p className="mt-2 text-sm text-background/60">Please wait...</p>
-          {(() => {
-            if (!disabled && !isComplete) {
-              window.setTimeout(() => onComplete(), 2000);
-            }
-            return null;
-          })()}
         </div>
       )}
     </div>

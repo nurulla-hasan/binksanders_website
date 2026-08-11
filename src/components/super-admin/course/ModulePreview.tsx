@@ -10,7 +10,11 @@ import { cn } from "@/lib/utils";
 import type { CreateModuleFormValues } from "@/lib/validations/course";
 import { SurveyIntro } from "@/components/survey/SurveyIntro";
 import { QuestionAnswer } from "@/components/survey/module-runner/QuestionAnswer";
-import { initialAnswer, hasAnswer } from "@/components/survey/module-runner/answer-utils";
+import { QuestionPromptCard } from "@/components/survey/module-runner/QuestionPromptCard";
+import {
+  initialAnswer,
+  hasAnswer,
+} from "@/components/survey/module-runner/answer-utils";
 
 type AnswerValue = string | number | string[];
 
@@ -35,8 +39,6 @@ export function ModulePreview({
   const [isCompleted, setIsCompleted] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answer, setAnswer] = useState<AnswerValue | null>(null);
-  
-  // result state mimics the API response after submitting an answer
   const [result, setResult] = useState<{
     isCorrect?: boolean;
     explanation?: string;
@@ -45,7 +47,7 @@ export function ModulePreview({
 
   useEffect(() => {
     let objectUrl: string | null = null;
-    
+
     const timeout = setTimeout(() => {
       if (thumbnail && thumbnail instanceof File) {
         objectUrl = URL.createObjectURL(thumbnail);
@@ -63,7 +65,6 @@ export function ModulePreview({
     };
   }, [thumbnail, existingThumbnail]);
 
-  // Reset local state if questions change in a way that breaks current index
   const safeQuestions = useMemo(() => questions || [], [questions]);
   const totalQuestions = safeQuestions.length;
   const question = safeQuestions[currentIndex];
@@ -86,17 +87,18 @@ export function ModulePreview({
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (question && answer === null && !result) {
-        // Need to cast the question to any to bypass the mismatch between
-        // CreateModuleFormValues['questions'][0] and ModuleQuestion
         setAnswer(initialAnswer(question as any));
       }
     }, 0);
     return () => clearTimeout(timeout);
   }, [question, answer, result]);
 
-  // Auto-advance for Swipe questions just like the real runner
   useEffect(() => {
-    if ((question?.type !== "Swipe" && question?.type !== "Simulated Call") || !result) return;
+    if (
+      (question?.type !== "Swipe" && question?.type !== "Simulated Call") ||
+      !result
+    )
+      return;
 
     const timer = window.setTimeout(() => {
       if (currentIndex >= totalQuestions - 1) {
@@ -112,11 +114,9 @@ export function ModulePreview({
     return () => window.clearTimeout(timer);
   }, [question?.type, result, currentIndex, totalQuestions, safeQuestions]);
 
-  // Handle local form submission (mock evaluation)
   const handleSubmit = (submittedAnswer: AnswerValue | null = answer) => {
     if (!question || !hasAnswer(submittedAnswer)) return;
 
-    // Simple local evaluation logic
     let isCorrect = true;
     let correctAnswer: AnswerValue | undefined = undefined;
 
@@ -142,7 +142,7 @@ export function ModulePreview({
         question.type === "Rating" ||
         question.type === "Simulated Call" ||
         (question.type === "Video" && !question.correctAnswer)
-          ? undefined // No strict right/wrong for these in the preview
+          ? undefined
           : isCorrect,
       correctAnswer,
       explanation: question.explanation,
@@ -179,11 +179,13 @@ export function ModulePreview({
 
     if (isCompleted) {
       return (
-        <div className="flex min-h-[50dvh] flex-1 flex-col justify-between animate-fadeIn p-4">
+        <div className="flex min-h-[50dvh] flex-1 flex-col justify-between p-4 animate-fadeIn">
           <div className="space-y-6">
             <div className="rounded-lg bg-primary p-7 text-center text-primary-foreground shadow-sm">
               <CheckCircle2 className="mx-auto mb-3 size-12" />
-              <h1 className="font-heading text-2xl font-bold">Module completed</h1>
+              <h1 className="font-heading text-2xl font-bold">
+                Module completed
+              </h1>
               <p className="mt-2 text-sm text-primary-foreground/85">
                 You completed all {totalQuestions} questions in {title}.
               </p>
@@ -228,9 +230,22 @@ export function ModulePreview({
 
     const displayedProgress =
       totalQuestions > 0 ? (currentIndex / totalQuestions) * 100 : 0;
-    const canShowCorrectAnswer = !["Information", "Rating", "Free Input", "Simulated Call"].includes(question.type);
-    const isOptionFeedback = ["MCQ", "Chat Scenario", "Video"].includes(question.type) && Boolean(result);
-  const hasFeedbackCorrectAnswer = result?.correctAnswer !== undefined && result?.correctAnswer !== null && !(typeof result.correctAnswer === "string" && result.correctAnswer.trim() === "");
+    const canShowCorrectAnswer = ![
+      "Information",
+      "Rating",
+      "Free Input",
+      "Simulated Call",
+    ].includes(question.type);
+    const isOptionFeedback =
+      ["MCQ", "Chat Scenario", "Video"].includes(question.type) &&
+      Boolean(result);
+    const hasFeedbackCorrectAnswer =
+      result?.correctAnswer !== undefined &&
+      result?.correctAnswer !== null &&
+      !(
+        typeof result.correctAnswer === "string" &&
+        result.correctAnswer.trim() === ""
+      );
     const feedbackTitle = canShowCorrectAnswer
       ? result?.isCorrect === false
         ? "Not quite right"
@@ -246,10 +261,8 @@ export function ModulePreview({
     return (
       <div
         className={cn(
-          "flex min-h-0 h-full flex-1 flex-col overflow-hidden animate-fadeIn",
-          isSimulatedCall
-            ? "bg-foreground"
-            : "bg-background",
+          "flex h-full min-h-0 flex-1 flex-col overflow-hidden animate-fadeIn",
+          isSimulatedCall ? "bg-foreground" : "bg-background",
         )}
       >
         {!isSimulatedCall && (
@@ -259,44 +272,34 @@ export function ModulePreview({
             </h2>
             <div className="flex flex-col gap-1.5">
               <div className="flex items-end justify-between">
-            <span className="rounded-sm bg-primary px-1.5 py-0.5 text-[10px] font-bold leading-none text-primary-foreground">
+                <span className="rounded-sm bg-primary px-1.5 py-0.5 text-[10px] font-bold leading-none text-primary-foreground">
                   Q{currentIndex + 1}/{totalQuestions}
                 </span>
                 <span className="text-[10px] font-bold leading-none text-foreground/80">
                   {currentIndex + 1}/{totalQuestions}
                 </span>
               </div>
-              <Progress value={displayedProgress} className="h-1.5 w-full rounded-full bg-background/50 [&>div]:bg-primary" />
+              <Progress
+                value={displayedProgress}
+                className="h-1.5 w-full rounded-full bg-background/50 [&>div]:bg-primary"
+              />
             </div>
           </div>
         )}
 
         <div
           className={cn(
-            "min-w-0 flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-thin flex flex-col",
+            "flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto scrollbar-thin",
             isSimulatedCall
               ? "overflow-hidden rounded-lg bg-foreground p-0"
-              : "space-y-4 pb-2",
+              : "space-y-4 px-3 pb-2",
           )}
         >
-          {question.type !== "Swipe" && question.type !== "Simulated Call" && question.type !== "Chat Scenario" && (
-            <div className="mb-4 rounded-lg border border-primary/40 bg-primary/5 p-3 shadow-sm">
-              <span className="mb-3 inline-block rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold uppercase text-primary-foreground shadow-sm">
-                {question.type}
-              </span>
-              <h1 className="font-heading text-md font-semibold leading-snug text-foreground wrap-break-word">
-                {question.content}
-              </h1>
-              {question.image && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={question.image as string}
-                  alt=""
-                  className="mt-4 max-h-48 w-full rounded-lg border bg-background object-contain"
-                />
-              )}
-            </div>
-          )}
+          {question.type !== "Swipe" &&
+            question.type !== "Simulated Call" &&
+            question.type !== "Chat Scenario" && (
+              <QuestionPromptCard question={question as any} />
+            )}
 
           <QuestionAnswer
             question={question as any}
@@ -321,42 +324,44 @@ export function ModulePreview({
                   className={cn(
                     "min-w-0 rounded-sm border bg-background p-3 text-sm font-medium wrap-break-word",
                     result.isCorrect === false
-                        ? "border-primary text-primary"
-                        : result.isCorrect === true
-                          ? "border-success text-success"
-                          : "border-border text-foreground",
+                      ? "border-primary text-primary"
+                      : result.isCorrect === true
+                        ? "border-success text-success"
+                        : "border-border text-foreground",
                   )}
                 >
                   {result.isCorrect === false
+                    ? hasFeedbackCorrectAnswer
+                      ? "Incorrect - correct answer is highlighted."
+                      : "Incorrect."
+                    : result.isCorrect === true
                       ? hasFeedbackCorrectAnswer
-                        ? "Incorrect - correct answer is highlighted."
-                        : "Incorrect."
-                      : result.isCorrect === true
-                        ? hasFeedbackCorrectAnswer
-                          ? "Correct - answer is highlighted."
-                          : "Correct."
-                        : "Answer submitted."}
+                        ? "Correct - answer is highlighted."
+                        : "Correct."
+                      : "Answer submitted."}
                 </div>
               ) : (
                 <div
                   className={cn(
                     "min-w-0 overflow-hidden rounded-sm border p-3 text-sm wrap-break-word",
                     result.isCorrect === false
-                        ? "border-destructive/30 bg-destructive/10 text-destructive-foreground"
-                        : result.isCorrect === true
-                          ? "border-2 border-success bg-background text-foreground"
-                          : "border-2 border-border bg-background text-foreground",
+                      ? "border-destructive/30 bg-destructive/10 text-destructive-foreground"
+                      : result.isCorrect === true
+                        ? "border-2 border-success bg-background text-foreground"
+                        : "border-2 border-border bg-background text-foreground",
                   )}
                 >
                   <p className="font-bold">{feedbackTitle}</p>
-                  {canShowCorrectAnswer && result.isCorrect === false && result.correctAnswer && (
-                    <p className="mt-2 wrap-break-word font-medium">
-                      Correct answer:{" "}
-                      {Array.isArray(result.correctAnswer)
-                        ? result.correctAnswer.join(" -> ")
-                        : result.correctAnswer}
-                    </p>
-                  )}
+                  {canShowCorrectAnswer &&
+                    result.isCorrect === false &&
+                    result.correctAnswer && (
+                      <p className="mt-2 wrap-break-word font-medium">
+                        Correct answer:{" "}
+                        {Array.isArray(result.correctAnswer)
+                          ? result.correctAnswer.join(" -> ")
+                          : result.correctAnswer}
+                      </p>
+                    )}
                 </div>
               )}
               {result.explanation && (
@@ -370,14 +375,21 @@ export function ModulePreview({
         </div>
 
         {!isSimulatedCall && (
-          <div className="mt-auto shrink-0 pt-4">
+          <div className="mt-auto shrink-0 px-3 pt-4 pb-1">
             {result && question.type === "Swipe" ? (
               <div className="py-2 text-center text-sm font-medium text-muted-foreground">
                 Loading next question...
               </div>
             ) : result ? (
-              <Button type="button" size="lg" className="w-full" onClick={handleContinue}>
-                {currentIndex === totalQuestions - 1 ? "View result" : "Continue"}
+              <Button
+                type="button"
+                size="lg"
+                className="w-full"
+                onClick={handleContinue}
+              >
+                {currentIndex === totalQuestions - 1
+                  ? "View result"
+                  : "Continue"}
                 <ArrowRight />
               </Button>
             ) : (
@@ -402,17 +414,18 @@ export function ModulePreview({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="font-heading text-lg font-bold">Interactive Preview</h3>
-        <span className="text-xs text-muted-foreground">Learner&apos;s View</span>
+        <span className="text-xs text-muted-foreground">
+          Learner&apos;s View
+        </span>
       </div>
 
       <div className="relative flex h-[80dvh] max-h-190 min-h-130 flex-col overflow-hidden rounded-xl border-4 border-muted bg-card shadow-lg">
-        {/* Fake mobile header/status bar for visual flair */}
         <div className="flex shrink-0 items-center justify-between bg-muted/50 px-4 py-1.5 text-[10px] font-medium text-muted-foreground">
           <span>9:41</span>
           <div className="flex gap-1.5">
-            <span className="block h-2 w-2 rounded-full bg-muted-foreground/40"></span>
-            <span className="block h-2 w-2 rounded-full bg-muted-foreground/40"></span>
-            <span className="block h-2 w-4 rounded-full bg-muted-foreground/40"></span>
+            <span className="block h-2 w-2 rounded-full bg-muted-foreground/40" />
+            <span className="block h-2 w-2 rounded-full bg-muted-foreground/40" />
+            <span className="block h-2 w-4 rounded-full bg-muted-foreground/40" />
           </div>
         </div>
 
@@ -421,20 +434,3 @@ export function ModulePreview({
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

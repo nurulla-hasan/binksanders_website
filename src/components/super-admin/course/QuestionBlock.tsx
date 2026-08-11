@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { RichTextEditor } from "@/components/ui/custom/RichTextEditor";
 import {
   Select,
   SelectContent,
@@ -155,8 +156,8 @@ export function QuestionBlock({
     const removed = currentQuestion.options?.[optionIndex];
     setValue(
       `questions.${index}.options`,
-      (currentQuestion.options || []).filter((_, itemIndex) =>
-        itemIndex !== optionIndex,
+      (currentQuestion.options || []).filter(
+        (_, itemIndex) => itemIndex !== optionIndex,
       ),
       { shouldDirty: true, shouldValidate: true },
     );
@@ -182,8 +183,8 @@ export function QuestionBlock({
       return;
     setValue(
       `questions.${index}.items`,
-      currentQuestion.items.filter((_, indexToKeep) =>
-        indexToKeep !== itemIndex,
+      currentQuestion.items.filter(
+        (_, indexToKeep) => indexToKeep !== itemIndex,
       ),
       { shouldDirty: true, shouldValidate: true },
     );
@@ -207,8 +208,8 @@ export function QuestionBlock({
     const removed = currentQuestion.options?.[optionIndex];
     setValue(
       `questions.${index}.options`,
-      (currentQuestion.options || []).filter((_, itemIndex) =>
-        itemIndex !== optionIndex,
+      (currentQuestion.options || []).filter(
+        (_, itemIndex) => itemIndex !== optionIndex,
       ),
       { shouldDirty: true, shouldValidate: true },
     );
@@ -266,15 +267,30 @@ export function QuestionBlock({
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-[1fr_200px]">
+      <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_200px] sm:items-start">
         {currentQuestion.type !== "Chat Scenario" && (
           <Field>
-            <FieldLabel htmlFor={`question-${blockId}`}>Content</FieldLabel>
-            <Input
-              id={`question-${blockId}`}
-              placeholder="Question or instruction"
-              {...register(`questions.${index}.content`)}
+            <FieldLabel>Content</FieldLabel>
+            <RichTextEditor
+              value={currentQuestion.content ?? ""}
+              placeholder={
+                currentQuestion.type === "Swipe"
+                  ? "Optional when the swipe uses only an image..."
+                  : "Question or instruction"
+              }
+              onChange={(value) =>
+                setValue(`questions.${index}.content`, value, {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                })
+              }
             />
+            {currentQuestion.type === "Swipe" && (
+              <p className="text-xs text-muted-foreground">
+                Swipe content is optional when an image is provided. Leave it
+                empty for an image-only swipe card.
+              </p>
+            )}
           </Field>
         )}
         <Field
@@ -600,7 +616,9 @@ export function QuestionBlock({
           label: "Question Image",
           accept: "image/*",
           hint:
-            "Recommended: 1280 × 720 px (16:9), JPG or PNG. Keep important content centred for mobile display.",
+            currentQuestion.type === "Swipe"
+              ? "Recommended for swipe: 1080 × 1440 px (3:4 portrait), JPG or PNG. The learner card fills the 3:4 frame; keep important content centred because other image ratios may be cropped."
+              : "Recommended: 1280 × 720 px (16:9), JPG or PNG. Images keep their natural ratio in the learner view.",
         })}
 
       <div className="flex flex-col justify-between gap-4 border-t border-border pt-4 sm:flex-row sm:items-center">
