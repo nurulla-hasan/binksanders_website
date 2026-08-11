@@ -103,11 +103,11 @@ export function ModuleSwipeQuestion({
 
         <div className="relative z-10 flex w-full flex-col">
           {question.image && (
-            <div className="w-full bg-muted/20">
+            <div className="aspect-[3/4] max-h-[calc(100dvh-18rem)] w-full overflow-hidden bg-muted/20">
               <MediaImage
                 value={question.image as MediaValue}
                 alt="Swipe question"
-                className="block h-auto w-full object-contain"
+                className="block h-full w-full object-cover object-center"
               />
             </div>
           )}
