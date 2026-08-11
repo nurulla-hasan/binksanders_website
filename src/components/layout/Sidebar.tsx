@@ -17,6 +17,7 @@ import {
   LayoutList,
   BookOpen,
   Sparkles,
+  MailCheck,
 } from "lucide-react";
 import { ScrollArea } from "../ui/scroll-area";
 import { logout } from "@/services/auth.service";
@@ -29,6 +30,7 @@ interface SidebarProps {
 const superAdminNavItems = [
   { name: "Dashboard", href: "/super-admin", icon: LayoutDashboard },
   { name: "Training Builder", href: "/super-admin/training", icon: BookOpen },
+  { name: "Email Invitations", href: "/super-admin/invitations", icon: MailCheck },
   {
     name: "Featured Training",
     href: "/super-admin/featured-training",

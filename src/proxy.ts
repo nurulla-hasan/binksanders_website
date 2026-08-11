@@ -10,6 +10,7 @@ interface TokenPayload {
 }
 
 const PUBLIC_ROUTES = [
+  "/auth/blocked",
   "/qr-login",
   "/training/join",
 ];

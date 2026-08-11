@@ -161,6 +161,20 @@ export type TrainingInviteLink = {
   trainingTitle?: string;
 };
 
+export type TrainingInvitation = {
+  _id: string;
+  token: string;
+  trainingId: string | Training;
+  companyId: string;
+  email: string;
+  expiresAt: string;
+  isUsed: boolean;
+  createdBy?: string;
+  createdAt: string;
+  updatedAt?: string;
+  __v?: number;
+};
+
 export type TrainingAuthData = {
   accessToken?: string;
   refreshToken?: string;

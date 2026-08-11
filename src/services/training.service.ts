@@ -20,6 +20,7 @@ import type {
   Training,
   TrainingAuthData,
   TrainingAuthenticatePayload,
+  TrainingInvitation,
   TrainingInviteLink,
   TrainingListResponse,
   UpdateTrainingPayload,
@@ -248,6 +249,18 @@ export const sendTrainingInvite = async (
   nextServerFetch<ApiResponse<TrainingInviteLink>>(
     `/training/${trainingId}/send-invite`,
     { method: "POST", body: payload },
+  );
+
+export const getTrainingInvitations = async (trainingId: string) =>
+  nextServerFetch<ApiResponse<TrainingInvitation[]>>(
+    `/training/${trainingId}/invitations`,
+    { cache: "no-store" },
+  );
+
+export const resendTrainingInvitation = async (invitationId: string) =>
+  nextServerFetch<ApiResponse<TrainingInvitation>>(
+    `/training/invitations/${invitationId}/resend`,
+    { method: "POST" },
   );
 
 export const joinTrainingByToken = async (inviteToken: string) =>

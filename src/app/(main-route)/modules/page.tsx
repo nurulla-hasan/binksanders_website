@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { ArrowRight, BookOpen, CheckCircle2, Layers3 } from "lucide-react";
+import { BlockedSessionRedirect } from "@/components/auth/BlockedSessionRedirect";
 import { Badge } from "@/components/ui/badge";
 import { FeaturedTrainingSection } from "@/components/survey/FeaturedTrainingSection";
 import { WelcomeVideoOverlay } from "@/components/survey/WelcomeVideoOverlay";
@@ -23,6 +24,14 @@ export default async function ModulesPage() {
             : "Unable to load featured training.",
       })),
   ]);
+
+  const blockedResponse = [response, profileResponse].find(
+    (result) => !result.success && /blocked/i.test(result.message || ""),
+  );
+
+  if (blockedResponse) {
+    return <BlockedSessionRedirect />;
+  }
 
   if (!response.success) {
     throw new Error(response.message || "Unable to load your trainings");
