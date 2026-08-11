@@ -11,6 +11,7 @@ import {
 import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RichQuestionContent } from "@/components/ui/custom/RichQuestionContent";
+import { cn } from "@/lib/utils";
 import { hasQuestionContent } from "@/lib/question-content";
 import type { ModuleQuestion } from "@/lib/types/module.type";
 import { MediaImage } from "../module-runner/media";
@@ -30,6 +31,7 @@ export function ModuleSwipeQuestion({
   const [hasSwiped, setHasSwiped] = useState(false);
   const isDisabled = disabled || hasSwiped;
   const hasContent = hasQuestionContent(question.content);
+  const isImageOnly = Boolean(question.image) && !hasContent;
   const rotate = useTransform(x, [-220, 220], [-8, 8]);
   const overlayColor = useTransform(
     x,
@@ -94,15 +96,33 @@ export function ModuleSwipeQuestion({
 
         <div className="relative z-10 flex w-full flex-col">
           {question.image && (
-            <MediaImage
-              value={question.image as MediaValue}
-              alt="Swipe question"
-              className="block h-auto w-full bg-muted/20 object-contain"
-            />
+            <div
+              className={cn(
+                "w-full bg-muted/20",
+                isImageOnly && "flex items-center justify-center p-2",
+              )}
+            >
+              <MediaImage
+                value={question.image as MediaValue}
+                alt="Swipe question"
+                className={cn(
+                  "block object-contain",
+                  isImageOnly
+                    ? "h-auto max-h-[52dvh] w-auto max-w-full"
+                    : "h-auto w-full",
+                )}
+              />
+            </div>
           )}
 
           {hasContent && (
-            <div className={question.image ? "border-t border-border/60 px-5 py-5" : "px-5 py-7"}>
+            <div
+              className={
+                question.image
+                  ? "border-t border-border/60 px-5 py-5"
+                  : "px-5 py-7"
+              }
+            >
               <RichQuestionContent
                 value={question.content}
                 className="text-center text-lg font-semibold leading-relaxed"
@@ -128,7 +148,7 @@ export function ModuleSwipeQuestion({
           onClick={() => void submitSwipe("left")}
         >
           <X className="mr-1.5 size-4 stroke-3" />
-          {question.leftLabel || "Disagree"}
+          <span className="min-w-0 truncate">{question.leftLabel || "Disagree"}</span>
         </Button>
         <Button
           type="button"
@@ -139,7 +159,7 @@ export function ModuleSwipeQuestion({
           onClick={() => void submitSwipe("right")}
         >
           <Check className="mr-1.5 size-4 stroke-3" />
-          {question.rightLabel || "Agree"}
+          <span className="min-w-0 truncate">{question.rightLabel || "Agree"}</span>
         </Button>
       </div>
     </div>
