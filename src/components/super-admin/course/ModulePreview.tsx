@@ -292,7 +292,7 @@ export function ModulePreview({
             "flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto scrollbar-thin",
             isSimulatedCall
               ? "overflow-hidden rounded-lg bg-foreground p-0"
-              : "space-y-4 pb-2",
+              : "space-y-4 px-3 pb-2",
           )}
         >
           {question.type !== "Swipe" &&
@@ -375,7 +375,7 @@ export function ModulePreview({
         </div>
 
         {!isSimulatedCall && (
-          <div className="mt-auto shrink-0 pt-4">
+          <div className="mt-auto shrink-0 px-3 pt-4 pb-1">
             {result && question.type === "Swipe" ? (
               <div className="py-2 text-center text-sm font-medium text-muted-foreground">
                 Loading next question...
