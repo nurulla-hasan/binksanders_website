@@ -32,7 +32,6 @@ export function ModuleSwipeQuestion({
   const [isDismissed, setIsDismissed] = useState(false);
   const isDisabled = disabled || hasSwiped;
   const hasContent = hasQuestionContent(question.content);
-  const isImageOnly = Boolean(question.image) && !hasContent;
   const rotate = useTransform(x, [-220, 220], [-8, 8]);
   const overlayColor = useTransform(
     x,
@@ -82,7 +81,7 @@ export function ModuleSwipeQuestion({
   return (
     <div
       className={cn(
-        "w-full min-w-0 max-w-full overflow-x-hidden",
+        "w-full min-w-0 max-w-full shrink-0 overflow-x-hidden",
         isDismissed && "invisible pointer-events-none",
       )}
       aria-hidden={isDismissed || undefined}
@@ -104,21 +103,11 @@ export function ModuleSwipeQuestion({
 
         <div className="relative z-10 flex w-full flex-col">
           {question.image && (
-            <div
-              className={cn(
-                "w-full bg-muted/20",
-                isImageOnly && "flex items-center justify-center p-2",
-              )}
-            >
+            <div className="w-full bg-muted/20">
               <MediaImage
                 value={question.image as MediaValue}
                 alt="Swipe question"
-                className={cn(
-                  "block object-contain",
-                  isImageOnly
-                    ? "h-auto max-h-[52dvh] w-auto max-w-full"
-                    : "h-auto w-full",
-                )}
+                className="block h-auto w-full object-contain"
               />
             </div>
           )}
