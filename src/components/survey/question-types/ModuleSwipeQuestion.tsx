@@ -29,6 +29,7 @@ export function ModuleSwipeQuestion({
   const x = useMotionValue(0);
   const controls = useAnimation();
   const [hasSwiped, setHasSwiped] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
   const isDisabled = disabled || hasSwiped;
   const hasContent = hasQuestionContent(question.content);
   const isImageOnly = Boolean(question.image) && !hasContent;
@@ -55,6 +56,7 @@ export function ModuleSwipeQuestion({
       transition: { duration: 0.22, ease: "easeOut" },
     });
 
+    setIsDismissed(true);
     onSwipe(direction);
   };
 
@@ -76,6 +78,8 @@ export function ModuleSwipeQuestion({
       });
     }
   };
+
+  if (isDismissed) return null;
 
   return (
     <div className="w-full min-w-0 max-w-full overflow-x-hidden">
@@ -148,7 +152,9 @@ export function ModuleSwipeQuestion({
           onClick={() => void submitSwipe("left")}
         >
           <X className="mr-1.5 size-4 stroke-3" />
-          <span className="min-w-0 truncate">{question.leftLabel || "Disagree"}</span>
+          <span className="min-w-0 truncate">
+            {question.leftLabel || "Disagree"}
+          </span>
         </Button>
         <Button
           type="button"
@@ -159,7 +165,9 @@ export function ModuleSwipeQuestion({
           onClick={() => void submitSwipe("right")}
         >
           <Check className="mr-1.5 size-4 stroke-3" />
-          <span className="min-w-0 truncate">{question.rightLabel || "Agree"}</span>
+          <span className="min-w-0 truncate">
+            {question.rightLabel || "Agree"}
+          </span>
         </Button>
       </div>
     </div>
