@@ -40,8 +40,8 @@ const mcqSchema = baseQuestionSchema.extend({
 const swipeSchema = baseQuestionSchema.omit({ content: true }).extend({
   type: z.literal("Swipe"),
   content: z.string().optional().default(""),
-  leftLabel: z.string().min(1),
-  rightLabel: z.string().min(1),
+  leftLabel: z.string().trim().min(1, "Left label is required"),
+  rightLabel: z.string().trim().min(1, "Right label is required"),
   correctDirection: z.enum(["left", "right"]),
 });
 
