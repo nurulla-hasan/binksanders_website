@@ -464,7 +464,7 @@ export function QuestionBlock({
 
       {currentQuestion.type === "Chat Scenario" && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center justify-between gap-3 pt-2">
             <FieldLabel>Message</FieldLabel>
           </div>
           <div className="grid gap-4 rounded-md border p-3 sm:grid-cols-[1fr_2fr]">
@@ -617,7 +617,7 @@ export function QuestionBlock({
           accept: "image/*",
           hint:
             currentQuestion.type === "Swipe"
-              ? "Recommended for swipe: portrait image around 1080 × 1920 px (9:16). The learner view keeps the natural image ratio instead of forcing landscape."
+              ? "Recommended for swipe: 1080 × 1440 px (3:4 portrait), JPG or PNG. The learner card fills the 3:4 frame; keep important content centred because other image ratios may be cropped."
               : "Recommended: 1280 × 720 px (16:9), JPG or PNG. Images keep their natural ratio in the learner view.",
         })}
 
