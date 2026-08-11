@@ -118,14 +118,16 @@ export function ModuleSurveyRunner({
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (result && bottomRef.current && question?.type !== "Swipe") {
-      setTimeout(() => {
-        bottomRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "nearest",
-        });
-      }, 100);
-    }
+    if (!result || !bottomRef.current) return;
+
+    const timer = window.setTimeout(() => {
+      bottomRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: question?.type === "Swipe" ? "end" : "nearest",
+      });
+    }, 100);
+
+    return () => window.clearTimeout(timer);
   }, [question?.type, result]);
 
   useEffect(() => {
