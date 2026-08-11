@@ -79,17 +79,14 @@ export function ModuleSwipeQuestion({
     }
   };
 
-  if (isDismissed) {
-    return (
-      <div
-        className="h-[clamp(5rem,18dvh,8rem)] w-full shrink-0"
-        aria-hidden="true"
-      />
-    );
-  }
-
   return (
-    <div className="w-full min-w-0 max-w-full overflow-x-hidden">
+    <div
+      className={cn(
+        "w-full min-w-0 max-w-full overflow-x-hidden",
+        isDismissed && "invisible pointer-events-none",
+      )}
+      aria-hidden={isDismissed || undefined}
+    >
       <motion.div
         drag={isDisabled ? false : "x"}
         dragConstraints={{ left: 0, right: 0 }}
