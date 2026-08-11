@@ -270,18 +270,11 @@ export const getUserTrainingView = async (trainingId: string) =>
     { cache: "no-store" },
   );
 
-
 export const authenticateTraining = async (
   trainingId: string,
   payload: TrainingAuthenticatePayload,
 ): Promise<ApiResponse<TrainingAuthData | null>> => {
   const endpoint = `/training/${trainingId}/authenticate`;
-
-  console.log("[training-auth:server] request", {
-    endpoint,
-    trainingId,
-    payload,
-  });
 
   try {
     const response = await nextServerFetch<ApiResponse<TrainingAuthData>>(
@@ -291,11 +284,8 @@ export const authenticateTraining = async (
 
     if (response.success) await setTrainingSessionCookies(response.data);
 
-    console.log("[training-auth:server] response", response);
-
     return response;
   } catch (error: unknown) {
-    console.error("[training-auth:server] error", error);
 
     return {
       success: false,
@@ -304,8 +294,4 @@ export const authenticateTraining = async (
     };
   }
 };
-
-
-
-
 

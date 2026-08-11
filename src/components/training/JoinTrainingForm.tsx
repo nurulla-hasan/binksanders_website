@@ -54,7 +54,6 @@ const isTrainingAuthType = (value?: string): value is TrainingAuthType => {
 export function JoinTrainingForm({
   trainingId,
   authType,
-  inviteToken,
 }: JoinTrainingFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -87,17 +86,8 @@ export function JoinTrainingForm({
           ? { authType: selectedAuthType, name: value }
           : { authType: selectedAuthType, identifier: value };
 
-      console.log("[training-auth] request", {
-        endpoint: `/training/${trainingId}/authenticate`,
-        trainingId,
-        authType: selectedAuthType,
-        inviteToken,
-        payload,
-      });
-
       const response = await authenticateTraining(trainingId, payload);
 
-      console.log("[training-auth] response", response);
       if (!response.success) throw new Error(response.message);
 
       SuccessToast(response.message || "Training login successful");
@@ -156,5 +146,4 @@ export function JoinTrainingForm({
     </form>
   );
 }
-
 

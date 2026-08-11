@@ -10,7 +10,6 @@ export function useCopyToClipboard() {
 
   const copyToClipboard = async (text: string) => {
     if (!navigator?.clipboard) {
-      console.warn("Clipboard not supported");
       return false;
     }
 
@@ -23,8 +22,7 @@ export function useCopyToClipboard() {
       }, 2000);
 
       return true;
-    } catch (error) {
-      console.warn("Copy failed", error);
+    } catch {
       setIsCopied(false);
       return false;
     }
@@ -122,8 +120,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
     try {
       const item = window.localStorage.getItem(key);
       return item ? (JSON.parse(item) as T) : initialValue;
-    } catch (error) {
-      console.error(error);
+    } catch {
       return initialValue;
     }
   });
@@ -138,9 +135,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
       if (typeof window !== "undefined") {
         window.localStorage.setItem(key, JSON.stringify(valueToStore));
       }
-    } catch (error) {
-      console.error(error);
-    }
+    } catch {}
   };
 
   return [storedValue, setValue] as const;

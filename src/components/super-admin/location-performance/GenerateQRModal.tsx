@@ -83,8 +83,7 @@ export function GenerateQRModal() {
     }
   };
 
-  const onSubmit = (data: GenerateQrFormValues) => {
-    console.log("Form Submitted:", data);
+  const onSubmit = () => {
     // Add logic here to save data
     handleOpenChange(false);
   };
@@ -97,7 +96,7 @@ export function GenerateQRModal() {
           Generate New QR
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] p-6">
+      <DialogContent className="sm:max-w-125 p-6">
         <DialogHeader className="mb-4">
           <DialogTitle className="text-xl font-bold uppercase tracking-wide text-foreground">
             Generate Access QR

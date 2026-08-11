@@ -34,8 +34,7 @@ export function FooterActions({ companyId, companyName }: { companyId: string; c
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
       SuccessToast("Report downloaded successfully");
-    } catch (error) {
-      console.error("Download error:", error);
+    } catch {
       ErrorToast("Failed to download report");
     } finally {
       setIsDownloading(false);

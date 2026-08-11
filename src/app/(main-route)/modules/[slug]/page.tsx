@@ -14,8 +14,6 @@ export default async function UserModulePage({
     getMyProfile(),
   ]);
 
-  console.log('module',moduleResponse)
-
   if (!moduleResponse.success) {
     throw new Error(moduleResponse.message || "Unable to load this module");
   }
