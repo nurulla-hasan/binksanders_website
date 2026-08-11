@@ -30,10 +30,21 @@ export function QuestionAnswer({
       <div className="space-y-3">
         {(question.options ?? []).map((option, optionIndex) => {
           const selected = answer === option;
-          const hasCorrectAnswer = correctAnswer !== undefined && correctAnswer !== null && !(typeof correctAnswer === "string" && correctAnswer.trim() === "");
-          const isCorrectOption = isSubmitted && hasCorrectAnswer && correctAnswer === option;
-          const isWrongSelection = isSubmitted && hasCorrectAnswer && selected && correctAnswer !== option;
-          const isDimmed = isSubmitted && hasCorrectAnswer && !isCorrectOption && !isWrongSelection;
+          const hasCorrectAnswer =
+            correctAnswer !== undefined &&
+            correctAnswer !== null &&
+            !(
+              typeof correctAnswer === "string" && correctAnswer.trim() === ""
+            );
+          const isCorrectOption =
+            isSubmitted && hasCorrectAnswer && correctAnswer === option;
+          const isWrongSelection =
+            isSubmitted && hasCorrectAnswer && selected && correctAnswer !== option;
+          const isDimmed =
+            isSubmitted &&
+            hasCorrectAnswer &&
+            !isCorrectOption &&
+            !isWrongSelection;
 
           return (
             <button
@@ -43,24 +54,32 @@ export function QuestionAnswer({
               onClick={() => onAnswer(option)}
               className={cn(
                 "group flex w-full min-w-0 items-center gap-3 rounded-sm border p-3 text-left text-sm transition-colors",
-                isCorrectOption && "border-2 border-success bg-background font-semibold text-foreground",
-                isWrongSelection && "border-2 border-primary bg-background font-semibold text-foreground",
-                !isSubmitted && selected && "border-2 border-success bg-background font-semibold",
-                !isSubmitted && !selected && "border-border bg-background hover:border-primary/50",
-                isDimmed && "border-transparent bg-black/5 text-muted-foreground opacity-60",
+                isCorrectOption &&
+                  "border-2 border-success bg-background font-semibold text-foreground",
+                isWrongSelection &&
+                  "border-2 border-primary bg-background font-semibold text-foreground",
+                !isSubmitted &&
+                  selected &&
+                  "border-2 border-success bg-background font-semibold",
+                !isSubmitted &&
+                  !selected &&
+                  "border-border bg-background hover:border-primary/50",
+                isDimmed &&
+                  "border-transparent bg-black/5 text-muted-foreground opacity-60",
               )}
             >
               <span
                 className={cn(
                   "flex size-8 shrink-0 items-center justify-center rounded-sm bg-muted text-xs font-bold text-muted-foreground transition-colors",
-                  (isCorrectOption || (!isSubmitted && selected)) && "bg-success text-white",
+                  (isCorrectOption || (!isSubmitted && selected)) &&
+                    "bg-success text-white",
                   isWrongSelection && "bg-primary text-primary-foreground",
-                  isDimmed && "bg-black/10 text-muted-foreground"
+                  isDimmed && "bg-black/10 text-muted-foreground",
                 )}
               >
                 {optionLabel(optionIndex)}
               </span>
-              <span className="min-w-0 flex-1 wrap-break-word">
+              <span className="min-w-0 flex-1 whitespace-pre-wrap wrap-break-word">
                 {option}
               </span>
             </button>
@@ -108,12 +127,26 @@ export function QuestionAnswer({
             <span className="flex size-8 shrink-0 items-center justify-center rounded bg-muted text-sm font-bold">
               {index + 1}
             </span>
-            <span className="min-w-0 flex-1 wrap-break-word text-sm">{item}</span>
+            <span className="min-w-0 flex-1 whitespace-pre-wrap wrap-break-word text-sm">
+              {item}
+            </span>
             <div className="flex gap-1">
-              <Button type="button" size="icon" variant="ghost" disabled={disabled || index === 0} onClick={() => move(index, -1)}>
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                disabled={disabled || index === 0}
+                onClick={() => move(index, -1)}
+              >
                 <ArrowUp />
               </Button>
-              <Button type="button" size="icon" variant="ghost" disabled={disabled || index === items.length - 1} onClick={() => move(index, 1)}>
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                disabled={disabled || index === items.length - 1}
+                onClick={() => move(index, 1)}
+              >
                 <ArrowDown />
               </Button>
             </div>
@@ -127,22 +160,29 @@ export function QuestionAnswer({
     const options = question.options ?? [];
 
     return (
-      <div className="flex flex-1 flex-col min-h-0 pt-2 w-full">
-        <div className="space-y-4 px-2 mb-6 overflow-y-auto min-h-0">
-          {(question.messages ?? []).filter((msg) => msg.sender || msg.text).map((message, index) => (
-            <div key={`${message.sender}-${index}`} className="flex items-start gap-2.5">
-              <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm mt-0.5">
-                <MessageCircle className="size-3.5" />
+      <div className="flex min-h-0 w-full flex-1 flex-col pt-2">
+        <div className="mb-6 min-h-0 space-y-4 overflow-y-auto px-2">
+          {(question.messages ?? [])
+            .filter((msg) => msg.sender || msg.text)
+            .map((message, index) => (
+              <div
+                key={`${message.sender}-${index}`}
+                className="flex items-start gap-2.5"
+              >
+                <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
+                  <MessageCircle className="size-3.5" />
+                </div>
+                <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-secondary px-3.5 py-2 text-sm text-secondary-foreground shadow-sm">
+                  <p className="whitespace-pre-wrap wrap-break-word">
+                    {message.text}
+                  </p>
+                </div>
               </div>
-              <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-secondary px-3.5 py-2 text-sm text-secondary-foreground shadow-sm">
-                <p className="wrap-break-word">{message.text}</p>
-              </div>
-            </div>
-          ))}
+            ))}
           {typeof answer === "string" && answer !== "completed" && (
-            <div className="flex justify-end mt-3">
+            <div className="mt-3 flex justify-end">
               <div className="max-w-[85%] rounded-2xl rounded-tr-sm bg-muted px-3.5 py-2 text-sm text-foreground shadow-sm">
-                <p className="wrap-break-word">{answer}</p>
+                <p className="whitespace-pre-wrap wrap-break-word">{answer}</p>
               </div>
             </div>
           )}
@@ -155,10 +195,25 @@ export function QuestionAnswer({
             </p>
             {options.map((option, optionIndex) => {
               const selected = answer === option;
-          const hasCorrectAnswer = correctAnswer !== undefined && correctAnswer !== null && !(typeof correctAnswer === "string" && correctAnswer.trim() === "");
-          const isCorrectOption = isSubmitted && hasCorrectAnswer && correctAnswer === option;
-          const isWrongSelection = isSubmitted && hasCorrectAnswer && selected && correctAnswer !== option;
-          const isDimmed = isSubmitted && hasCorrectAnswer && !isCorrectOption && !isWrongSelection;
+              const hasCorrectAnswer =
+                correctAnswer !== undefined &&
+                correctAnswer !== null &&
+                !(
+                  typeof correctAnswer === "string" &&
+                  correctAnswer.trim() === ""
+                );
+              const isCorrectOption =
+                isSubmitted && hasCorrectAnswer && correctAnswer === option;
+              const isWrongSelection =
+                isSubmitted &&
+                hasCorrectAnswer &&
+                selected &&
+                correctAnswer !== option;
+              const isDimmed =
+                isSubmitted &&
+                hasCorrectAnswer &&
+                !isCorrectOption &&
+                !isWrongSelection;
 
               return (
                 <button
@@ -167,12 +222,19 @@ export function QuestionAnswer({
                   disabled={disabled}
                   onClick={() => onAnswer(option)}
                   className={cn(
-                    "w-full min-w-0 rounded-sm border p-2 text-left text-sm transition-colors wrap-break-word",
-                    isCorrectOption && "border-2 border-success bg-background font-semibold text-foreground",
-                    isWrongSelection && "border-2 border-primary bg-background font-semibold text-foreground",
-                    !isSubmitted && selected && "border-2 border-primary bg-background font-semibold",
-                    !isSubmitted && !selected && "border-border bg-background hover:border-primary/50",
-                    isDimmed && "border-transparent bg-black/5 text-muted-foreground opacity-60",
+                    "w-full min-w-0 whitespace-pre-wrap rounded-sm border p-2 text-left text-sm transition-colors wrap-break-word",
+                    isCorrectOption &&
+                      "border-2 border-success bg-background font-semibold text-foreground",
+                    isWrongSelection &&
+                      "border-2 border-primary bg-background font-semibold text-foreground",
+                    !isSubmitted &&
+                      selected &&
+                      "border-2 border-primary bg-background font-semibold",
+                    !isSubmitted &&
+                      !selected &&
+                      "border-border bg-background hover:border-primary/50",
+                    isDimmed &&
+                      "border-transparent bg-black/5 text-muted-foreground opacity-60",
                   )}
                 >
                   {option}
@@ -181,7 +243,13 @@ export function QuestionAnswer({
             })}
           </div>
         ) : (
-          <Button type="button" variant={answer === "completed" ? "default" : "outline"} disabled={disabled} onClick={() => onAnswer("completed")} className="w-full">
+          <Button
+            type="button"
+            variant={answer === "completed" ? "default" : "outline"}
+            disabled={disabled}
+            onClick={() => onAnswer("completed")}
+            className="w-full"
+          >
             <MessageCircle /> I reviewed this conversation
           </Button>
         )}
@@ -212,7 +280,8 @@ export function QuestionAnswer({
       typeof videoUrl === "string"
         ? videoUrl.match(/(?:youtu\.be\/|v=)([\w-]{11})/)?.[1] ?? undefined
         : undefined;
-    const hasOptions = Array.isArray(question.options) && question.options.length > 0;
+    const hasOptions =
+      Array.isArray(question.options) && question.options.length > 0;
 
     return (
       <div className="space-y-4">
@@ -233,10 +302,25 @@ export function QuestionAnswer({
           <div className="space-y-3 pt-2">
             {question.options?.map((option, optionIndex) => {
               const selected = answer === option;
-          const hasCorrectAnswer = correctAnswer !== undefined && correctAnswer !== null && !(typeof correctAnswer === "string" && correctAnswer.trim() === "");
-          const isCorrectOption = isSubmitted && hasCorrectAnswer && correctAnswer === option;
-          const isWrongSelection = isSubmitted && hasCorrectAnswer && selected && correctAnswer !== option;
-          const isDimmed = isSubmitted && hasCorrectAnswer && !isCorrectOption && !isWrongSelection;
+              const hasCorrectAnswer =
+                correctAnswer !== undefined &&
+                correctAnswer !== null &&
+                !(
+                  typeof correctAnswer === "string" &&
+                  correctAnswer.trim() === ""
+                );
+              const isCorrectOption =
+                isSubmitted && hasCorrectAnswer && correctAnswer === option;
+              const isWrongSelection =
+                isSubmitted &&
+                hasCorrectAnswer &&
+                selected &&
+                correctAnswer !== option;
+              const isDimmed =
+                isSubmitted &&
+                hasCorrectAnswer &&
+                !isCorrectOption &&
+                !isWrongSelection;
 
               return (
                 <button
@@ -245,12 +329,19 @@ export function QuestionAnswer({
                   disabled={disabled}
                   onClick={() => onAnswer(option)}
                   className={cn(
-                    "w-full min-w-0 rounded-sm border p-3 text-left text-sm transition-colors wrap-break-word",
-                    isCorrectOption && "border-2 border-success bg-background font-semibold text-foreground",
-                    isWrongSelection && "border-2 border-primary bg-background font-semibold text-foreground",
-                    !isSubmitted && selected && "border-2 border-primary bg-background font-semibold",
-                    !isSubmitted && !selected && "border-border bg-background hover:border-primary/50",
-                    isDimmed && "border-transparent bg-black/5 text-muted-foreground opacity-60",
+                    "w-full min-w-0 whitespace-pre-wrap rounded-sm border p-3 text-left text-sm transition-colors wrap-break-word",
+                    isCorrectOption &&
+                      "border-2 border-success bg-background font-semibold text-foreground",
+                    isWrongSelection &&
+                      "border-2 border-primary bg-background font-semibold text-foreground",
+                    !isSubmitted &&
+                      selected &&
+                      "border-2 border-primary bg-background font-semibold",
+                    !isSubmitted &&
+                      !selected &&
+                      "border-border bg-background hover:border-primary/50",
+                    isDimmed &&
+                      "border-transparent bg-black/5 text-muted-foreground opacity-60",
                   )}
                 >
                   {option}
@@ -259,7 +350,13 @@ export function QuestionAnswer({
             })}
           </div>
         ) : (
-          <Button type="button" variant={answer === "watched" ? "default" : "outline"} disabled={disabled} onClick={() => onAnswer("watched")} className="w-full">
+          <Button
+            type="button"
+            variant={answer === "watched" ? "default" : "outline"}
+            disabled={disabled}
+            onClick={() => onAnswer("watched")}
+            className="w-full"
+          >
             <Play /> Mark as watched
           </Button>
         )}
@@ -269,9 +366,18 @@ export function QuestionAnswer({
 
   if (question.type === "Rating") {
     return (
-      <div className="mt-auto grid grid-cols-5 gap-2 pt-3">
-        {Array.from({ length: question.scale ?? 5 }, (_, index) => index + 1).map((rating) => (
-          <Button key={rating} type="button" variant={answer === rating ? "default" : "outline"} disabled={disabled} onClick={() => onAnswer(rating)}>
+      <div className="grid grid-cols-5 gap-2 pt-1">
+        {Array.from(
+          { length: question.scale ?? 5 },
+          (_, index) => index + 1,
+        ).map((rating) => (
+          <Button
+            key={rating}
+            type="button"
+            variant={answer === rating ? "default" : "outline"}
+            disabled={disabled}
+            onClick={() => onAnswer(rating)}
+          >
             {rating}
           </Button>
         ))}
@@ -289,9 +395,3 @@ export function QuestionAnswer({
     />
   );
 }
-
-
-
-
-
-

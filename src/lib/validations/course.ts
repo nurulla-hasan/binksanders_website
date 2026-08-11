@@ -1,4 +1,5 @@
 import * as z from "zod";
+import { hasQuestionContent } from "@/lib/question-content";
 
 const optionalMedia = z
   .union([
@@ -8,9 +9,13 @@ const optionalMedia = z
   ])
   .optional();
 
+const requiredQuestionContent = z
+  .string()
+  .refine(hasQuestionContent, "Question content is required");
+
 const baseQuestionSchema = z.object({
   id: z.string(),
-  content: z.string().min(1, "Question content is required"),
+  content: requiredQuestionContent,
   isScored: z.boolean(),
   explanation: z.string().trim().optional(),
   image: optionalMedia,
@@ -32,8 +37,9 @@ const mcqSchema = baseQuestionSchema.extend({
   correctAnswer: z.string().optional().default(""),
 });
 
-const swipeSchema = baseQuestionSchema.extend({
+const swipeSchema = baseQuestionSchema.omit({ content: true }).extend({
   type: z.literal("Swipe"),
+  content: z.string().optional().default(""),
   leftLabel: z.string().min(1),
   rightLabel: z.string().min(1),
   correctDirection: z.enum(["left", "right"]),
@@ -111,6 +117,18 @@ const questionUnionSchema = z.discriminatedUnion("type", [
 ]);
 
 export const questionSchema = questionUnionSchema.superRefine((question, context) => {
+  if (
+    question.type === "Swipe" &&
+    !hasQuestionContent(question.content) &&
+    !question.image
+  ) {
+    context.addIssue({
+      code: "custom",
+      path: ["content"],
+      message: "Add question content or an image for swipe questions",
+    });
+  }
+
   if (!question.isScored) return;
 
   if (

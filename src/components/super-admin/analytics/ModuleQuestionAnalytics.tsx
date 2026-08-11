@@ -5,6 +5,8 @@ import {
   Users,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { RichQuestionContent } from "@/components/ui/custom/RichQuestionContent";
+import { hasQuestionContent } from "@/lib/question-content";
 import type {
   ModuleAnalyticsAnswer,
   ModuleQuestionAnalyticsData,
@@ -131,6 +133,7 @@ export function ModuleQuestionAnalytics({
             const responses = [...statistic.responses].sort(
               (first, second) => second.count - first.count,
             );
+            const displayContent = statistic.content || question?.content || "";
 
             return (
               <article
@@ -146,11 +149,16 @@ export function ModuleQuestionAnalytics({
                         <Badge variant="active">Scored</Badge>
                       )}
                     </div>
-                    <h2 className="font-heading text-base font-bold leading-snug sm:text-lg">
-                      {statistic.content ||
-                        question?.content ||
-                        `${statistic.type} response`}
-                    </h2>
+                    {hasQuestionContent(displayContent) ? (
+                      <RichQuestionContent
+                        value={displayContent}
+                        className="font-heading text-base font-bold leading-snug sm:text-lg"
+                      />
+                    ) : (
+                      <h2 className="font-heading text-base font-bold leading-snug sm:text-lg">
+                        {statistic.type} response
+                      </h2>
+                    )}
                   </div>
 
                   <div className="shrink-0 rounded-md bg-secondary/40 px-3 py-2 text-center">

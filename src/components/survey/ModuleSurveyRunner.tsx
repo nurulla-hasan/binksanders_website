@@ -14,9 +14,9 @@ import { submitModuleAnswer } from "@/services/user-progress.service";
 import AnimationWrapper from "@/components/ui/custom/animation-wrapper";
 import { SurveyIntro } from "./SurveyIntro";
 import { QuestionAnswer } from "./module-runner/QuestionAnswer";
+import { QuestionPromptCard } from "./module-runner/QuestionPromptCard";
 import { initialAnswer, hasAnswer } from "./module-runner/answer-utils";
-import { MediaImage } from "./module-runner/media";
-import type { AnswerValue, MediaValue } from "./module-runner/types";
+import type { AnswerValue } from "./module-runner/types";
 
 export function ModuleSurveyRunner({
   details,
@@ -120,7 +120,10 @@ export function ModuleSurveyRunner({
   useEffect(() => {
     if (result && bottomRef.current && question?.type !== "Swipe") {
       setTimeout(() => {
-        bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        bottomRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+        });
       }, 100);
     }
   }, [question?.type, result]);
@@ -163,7 +166,11 @@ export function ModuleSurveyRunner({
 
   if (isCompleted) {
     return (
-      <AnimationWrapper direction="up" duration={0.4} className="flex h-full flex-col">
+      <AnimationWrapper
+        direction="up"
+        duration={0.4}
+        className="flex h-full flex-col"
+      >
         <div className="flex h-full flex-1 flex-col justify-between">
           <div className="space-y-4">
             <div className="rounded-lg bg-primary p-3 text-center text-primary-foreground shadow-sm">
@@ -196,7 +203,11 @@ export function ModuleSurveyRunner({
           </div>
 
           <div className="mt-auto pt-6">
-            <Button size="lg" className="w-full" onClick={() => router.push("/modules")}>
+            <Button
+              size="lg"
+              className="w-full"
+              onClick={() => router.push("/modules")}
+            >
               Back to learning path <ArrowRight />
             </Button>
           </div>
@@ -251,25 +262,28 @@ export function ModuleSurveyRunner({
   return (
     <div
       className={cn(
-        "flex flex-1 min-h-0 h-full flex-col overflow-hidden animate-fadeIn",
+        "flex h-full min-h-0 flex-1 flex-col overflow-hidden animate-fadeIn",
         isSimulatedCall ? "bg-foreground" : "bg-background",
       )}
     >
       {!isSimulatedCall && (
-        <div className="bg-secondary px-4 py-3 rounded-b-xl mb-4 shadow-sm">
-          <h2 className="font-heading text-lg font-bold text-foreground mb-2 leading-tight">
+        <div className="mb-4 rounded-b-xl bg-secondary px-4 py-3 shadow-sm">
+          <h2 className="mb-2 font-heading text-lg font-bold leading-tight text-foreground">
             {module.title}
           </h2>
           <div className="flex flex-col gap-1.5">
             <div className="flex items-end justify-between">
-              <span className="bg-primary text-primary-foreground px-1.5 py-0.5 rounded-sm text-[10px] font-bold leading-none">
+              <span className="rounded-sm bg-primary px-1.5 py-0.5 text-[10px] font-bold leading-none text-primary-foreground">
                 Q{currentIndex + 1}/{totalQuestions}
               </span>
-              <span className="text-[10px] font-bold text-foreground/80 leading-none">
+              <span className="text-[10px] font-bold leading-none text-foreground/80">
                 {currentIndex + 1}/{totalQuestions}
               </span>
             </div>
-            <Progress value={displayedProgress} className="h-1.5 w-full bg-background/50 [&>div]:bg-primary rounded-full" />
+            <Progress
+              value={displayedProgress}
+              className="h-1.5 w-full rounded-full bg-background/50 [&>div]:bg-primary"
+            />
           </div>
         </div>
       )}
@@ -278,11 +292,11 @@ export function ModuleSurveyRunner({
         key={currentIndex}
         direction="left"
         duration={0.4}
-        className="flex-1 min-h-0 flex flex-col overflow-hidden"
+        className="flex min-h-0 flex-1 flex-col overflow-hidden"
       >
         <div
           className={cn(
-            "flex-1 min-h-0 overflow-y-auto scrollbar-thin flex flex-col",
+            "flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto scrollbar-thin",
             isSimulatedCall
               ? "overflow-hidden rounded-lg bg-foreground p-0"
               : "space-y-4 pb-2",
@@ -291,21 +305,7 @@ export function ModuleSurveyRunner({
           {question.type !== "Swipe" &&
             question.type !== "Simulated Call" &&
             question.type !== "Chat Scenario" && (
-              <div className="border border-primary/40 bg-primary/5 rounded-lg p-3 shadow-sm mb-4">
-                <span className="inline-block bg-primary text-primary-foreground px-1.5 py-0.5 rounded text-[10px] font-bold uppercase mb-3 shadow-sm">
-                  {question.type}
-                </span>
-                <h1 className="font-heading text-md font-semibold leading-snug wrap-break-word text-foreground">
-                  {question.content}
-                </h1>
-                {question.image && (
-                  <MediaImage
-                    value={question.image as MediaValue}
-                    alt=""
-                    className="mt-4 max-h-48 w-full rounded-lg border bg-background object-contain"
-                  />
-                )}
-              </div>
+              <QuestionPromptCard question={question} />
             )}
 
           <QuestionAnswer
@@ -394,7 +394,7 @@ export function ModuleSurveyRunner({
       </AnimationWrapper>
 
       {!isSimulatedCall && (
-        <div className="shrink-0 pt-4 mt-auto">
+        <div className="mt-auto shrink-0 pt-4">
           {result ? (
             isOrderingRetry ? (
               <Button

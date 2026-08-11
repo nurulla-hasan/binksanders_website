@@ -10,7 +10,11 @@ import {
 } from "framer-motion";
 import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { RichQuestionContent } from "@/components/ui/custom/RichQuestionContent";
+import { hasQuestionContent } from "@/lib/question-content";
 import type { ModuleQuestion } from "@/lib/types/module.type";
+import { MediaImage } from "../module-runner/media";
+import type { MediaValue } from "../module-runner/types";
 
 export function ModuleSwipeQuestion({
   question,
@@ -25,6 +29,7 @@ export function ModuleSwipeQuestion({
   const controls = useAnimation();
   const [hasSwiped, setHasSwiped] = useState(false);
   const isDisabled = disabled || hasSwiped;
+  const hasContent = hasQuestionContent(question.content);
   const rotate = useTransform(x, [-220, 220], [-8, 8]);
   const overlayColor = useTransform(
     x,
@@ -71,7 +76,7 @@ export function ModuleSwipeQuestion({
   };
 
   return (
-    <div className="flex min-h-0 w-full max-w-full flex-1 flex-col overflow-x-hidden">
+    <div className="w-full min-w-0 max-w-full overflow-x-hidden">
       <motion.div
         drag={isDisabled ? false : "x"}
         dragConstraints={{ left: 0, right: 0 }}
@@ -80,28 +85,32 @@ export function ModuleSwipeQuestion({
         onDragEnd={handleDragEnd}
         style={{ x, rotate, touchAction: "pan-y" }}
         animate={controls}
-        className="relative z-10 flex min-h-0 w-full max-w-full flex-1 cursor-grab flex-col justify-center overflow-hidden rounded-lg border border-primary/20 bg-card shadow-sm will-change-transform active:cursor-grabbing"
+        className="relative z-10 w-full max-w-full cursor-grab overflow-hidden rounded-lg border border-primary/20 bg-card shadow-sm will-change-transform active:cursor-grabbing"
       >
         <motion.div
-          className="pointer-events-none absolute inset-0 z-0"
+          className="pointer-events-none absolute inset-0 z-20"
           style={{ backgroundColor: overlayColor }}
         />
 
-        <div className="relative z-10 flex h-full min-h-0 flex-col p-6">
-          <div className="flex min-h-0 w-full flex-1 flex-col items-center justify-center">
-            {question.image && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={question.image}
-                alt=""
-                className="mb-4 max-h-40 w-full shrink-0 rounded-md object-contain"
+        <div className="relative z-10 flex w-full flex-col">
+          {question.image && (
+            <MediaImage
+              value={question.image as MediaValue}
+              alt="Swipe question"
+              className="block h-auto w-full bg-muted/20 object-contain"
+            />
+          )}
+
+          {hasContent && (
+            <div className={question.image ? "border-t border-border/60 px-5 py-5" : "px-5 py-7"}>
+              <RichQuestionContent
+                value={question.content}
+                className="text-center text-lg font-semibold leading-relaxed"
               />
-            )}
-            <h2 className="my-auto w-full py-4 text-center font-heading text-lg font-semibold leading-tight text-foreground">
-              {question.content}
-            </h2>
-          </div>
-          <div className="mt-2 flex shrink-0 items-center justify-center gap-2 text-xs font-medium text-muted-foreground">
+            </div>
+          )}
+
+          <div className="flex items-center justify-center gap-2 px-5 pb-4 pt-3 text-xs font-medium text-muted-foreground">
             <ArrowLeft className="size-4" />
             <span>Swipe to respond</span>
             <ArrowRight className="size-4" />
@@ -109,7 +118,7 @@ export function ModuleSwipeQuestion({
         </div>
       </motion.div>
 
-      <div className="mt-4 flex w-full max-w-full shrink-0 gap-3">
+      <div className="mt-4 flex w-full max-w-full gap-3">
         <Button
           type="button"
           variant="disagree"
