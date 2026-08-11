@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import type {
@@ -420,11 +420,21 @@ export function ModuleSurveyRunner({
             <Button
               size="lg"
               className="w-full"
+              aria-busy={isSubmitting}
               disabled={!hasAnswer(answer) || isSubmitting}
               onClick={() => void handleSubmit()}
             >
-              {isSubmitting ? "Loading..." : "Next"}
-              {!isSubmitting && <ArrowRight />}
+              {isSubmitting ? (
+                <>
+                  <LoaderCircle className="size-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                <>
+                  Next
+                  <ArrowRight />
+                </>
+              )}
             </Button>
           )}
         </div>
