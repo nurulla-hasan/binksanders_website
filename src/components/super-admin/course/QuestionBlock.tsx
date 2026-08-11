@@ -464,7 +464,7 @@ export function QuestionBlock({
 
       {currentQuestion.type === "Chat Scenario" && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between gap-3 pt-2">
+          <div className="flex items-center justify-between gap-3">
             <FieldLabel>Message</FieldLabel>
           </div>
           <div className="grid gap-4 rounded-md border p-3 sm:grid-cols-[1fr_2fr]">
