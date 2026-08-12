@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useWatch } from "react-hook-form";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import type { CreateModuleFormValues } from "@/lib/validations/course";
 import { SurveyIntro } from "@/components/survey/SurveyIntro";
+import AnimationWrapper from "@/components/ui/custom/animation-wrapper";
 import { QuestionAnswer } from "@/components/survey/module-runner/QuestionAnswer";
 import { QuestionPromptCard } from "@/components/survey/module-runner/QuestionPromptCard";
 import {
@@ -39,6 +40,7 @@ export function ModulePreview({
   const [isCompleted, setIsCompleted] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answer, setAnswer] = useState<AnswerValue | null>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
   const [result, setResult] = useState<{
     isCorrect?: boolean;
     explanation?: string;
@@ -95,7 +97,7 @@ export function ModulePreview({
 
   useEffect(() => {
     if (
-      (question?.type !== "Swipe" && question?.type !== "Simulated Call") ||
+      question?.type !== "Simulated Call" ||
       !result
     )
       return;
@@ -113,6 +115,19 @@ export function ModulePreview({
 
     return () => window.clearTimeout(timer);
   }, [question?.type, result, currentIndex, totalQuestions, safeQuestions]);
+
+  useEffect(() => {
+    if (!result || !bottomRef.current) return;
+
+    const timer = window.setTimeout(() => {
+      bottomRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: question?.type === "Swipe" ? "end" : "nearest",
+      });
+    }, 100);
+
+    return () => window.clearTimeout(timer);
+  }, [question?.type, result]);
 
   const handleSubmit = (submittedAnswer: AnswerValue | null = answer) => {
     if (!question || !hasAnswer(submittedAnswer)) return;
@@ -149,6 +164,10 @@ export function ModulePreview({
     });
   };
 
+  const handleRetryOrdering = () => {
+    setResult(null);
+  };
+
   const handleContinue = () => {
     if (currentIndex >= totalQuestions - 1) {
       setIsCompleted(true);
@@ -179,25 +198,30 @@ export function ModulePreview({
 
     if (isCompleted) {
       return (
-        <div className="flex min-h-[50dvh] flex-1 flex-col justify-between p-4 animate-fadeIn">
-          <div className="space-y-6">
-            <div className="rounded-lg bg-primary p-7 text-center text-primary-foreground shadow-sm">
-              <CheckCircle2 className="mx-auto mb-3 size-12" />
-              <h1 className="font-heading text-2xl font-bold">
+        <AnimationWrapper
+          direction="up"
+          duration={0.4}
+          className="flex h-full flex-col"
+        >
+          <div className="flex h-full flex-1 flex-col justify-between">
+          <div className="space-y-4">
+            <div className="rounded-lg bg-primary p-3 text-center text-primary-foreground shadow-sm">
+              <CheckCircle2 className="mx-auto mb-2.5 size-10" />
+              <h1 className="font-heading text-xl font-bold">
                 Module completed
               </h1>
-              <p className="mt-2 text-sm text-primary-foreground/85">
+              <p className="mt-1.5 text-xs text-primary-foreground/85">
                 You completed all {totalQuestions} questions in {title}.
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 rounded-lg border bg-card p-5 text-center">
+            <div className="grid grid-cols-2 gap-3 rounded-lg border border-secondary-foreground/10 bg-secondary/30 p-3 text-center">
               <div>
-                <p className="text-2xl font-bold text-primary">100</p>
+                <p className="text-xl font-bold text-primary">100</p>
                 <p className="text-xs text-muted-foreground">Module score</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-primary">100%</p>
+                <p className="text-xl font-bold text-primary">100%</p>
                 <p className="text-xs text-muted-foreground">Progress</p>
               </div>
             </div>
@@ -206,7 +230,7 @@ export function ModulePreview({
           <Button
             type="button"
             size="lg"
-            className="mt-6 w-full"
+            className="mt-auto w-full"
             onClick={() => {
               setIsStarted(false);
               setIsCompleted(false);
@@ -216,7 +240,8 @@ export function ModulePreview({
           >
             Restart Preview
           </Button>
-        </div>
+          </div>
+        </AnimationWrapper>
       );
     }
 
@@ -229,7 +254,9 @@ export function ModulePreview({
     }
 
     const displayedProgress =
-      totalQuestions > 0 ? (currentIndex / totalQuestions) * 100 : 0;
+      totalQuestions > 0
+        ? ((result ? currentIndex + 1 : currentIndex) / totalQuestions) * 100
+        : 0;
     const canShowCorrectAnswer = ![
       "Information",
       "Rating",
@@ -246,6 +273,8 @@ export function ModulePreview({
         typeof result.correctAnswer === "string" &&
         result.correctAnswer.trim() === ""
       );
+    const isOrderingRetry =
+      question.type === "Ordering" && result?.isCorrect === false;
     const feedbackTitle = canShowCorrectAnswer
       ? result?.isCorrect === false
         ? "Not quite right"
@@ -257,17 +286,22 @@ export function ModulePreview({
         : "Answer submitted";
 
     const isSimulatedCall = question?.type === "Simulated Call";
+    const questionBackgroundColor = /^#[0-9A-Fa-f]{6}$/.test(
+      question.colorCode || "",
+    )
+      ? question.colorCode
+      : undefined;
 
     return (
       <div
         className={cn(
-          "flex h-full min-h-0 flex-1 flex-col overflow-hidden animate-fadeIn",
-          isSimulatedCall ? "bg-foreground" : "bg-background",
+          "flex h-full min-h-0 w-full flex-col overflow-hidden bg-secondary p-3 text-foreground animate-fadeIn sm:p-5",
         )}
+        style={{ backgroundColor: questionBackgroundColor }}
       >
         {!isSimulatedCall && (
-          <div className="mb-4 rounded-b-xl bg-secondary px-4 py-3 shadow-sm">
-            <h2 className="mb-2 font-heading text-lg font-bold leading-tight text-foreground">
+          <div className="mb-4 shrink-0 px-1 py-2">
+            <h2 className="mb-2 font-heading text-lg font-bold leading-tight text-secondary-foreground">
               {title || "Course Title"}
             </h2>
             <div className="flex flex-col gap-1.5">
@@ -275,33 +309,39 @@ export function ModulePreview({
                 <span className="rounded-sm bg-primary px-1.5 py-0.5 text-[10px] font-bold leading-none text-primary-foreground">
                   Q{currentIndex + 1}/{totalQuestions}
                 </span>
-                <span className="text-[10px] font-bold leading-none text-foreground/80">
+                <span className="text-[10px] font-bold leading-none text-secondary-foreground/80">
                   {currentIndex + 1}/{totalQuestions}
                 </span>
               </div>
               <Progress
                 value={displayedProgress}
-                className="h-1.5 w-full rounded-full bg-background/50 [&>div]:bg-primary"
+                className="h-1.5 w-full rounded-full bg-secondary-foreground/25 [&>div]:bg-secondary-foreground"
               />
             </div>
           </div>
         )}
 
-        <div
-          className={cn(
-            "flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto scrollbar-thin",
-            isSimulatedCall
-              ? "overflow-hidden rounded-lg bg-foreground p-0"
-              : "space-y-4 px-3 pb-2",
-          )}
+        <AnimationWrapper
+          key={currentIndex}
+          direction="left"
+          duration={0.4}
+          className="flex min-h-0 flex-1 flex-col overflow-hidden"
         >
-          {question.type !== "Swipe" &&
+          <div
+            className={cn(
+              "flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden",
+              isSimulatedCall
+                ? "overflow-hidden rounded-lg bg-foreground p-0"
+                : "space-y-4 pb-2",
+            )}
+          >
+            {question.type !== "Swipe" &&
             question.type !== "Simulated Call" &&
             question.type !== "Chat Scenario" && (
               <QuestionPromptCard question={question as any} />
             )}
 
-          <QuestionAnswer
+            <QuestionAnswer
             question={question as any}
             answer={answer}
             disabled={Boolean(result)}
@@ -317,7 +357,7 @@ export function ModulePreview({
             isSubmitted={Boolean(result)}
           />
 
-          {result && !isSimulatedCall && (
+            {result && question.type !== "Simulated Call" && (
             <div className="space-y-3">
               {isOptionFeedback ? (
                 <div
@@ -351,8 +391,14 @@ export function ModulePreview({
                         : "border-2 border-border bg-background text-foreground",
                   )}
                 >
-                  <p className="font-bold">{feedbackTitle}</p>
+                  <p className="font-medium">{feedbackTitle}</p>
+                  {isOrderingRetry && (
+                    <p className="mt-2 wrap-break-word font-medium">
+                      Rearrange the items and try again.
+                    </p>
+                  )}
                   {canShowCorrectAnswer &&
+                    !isOrderingRetry &&
                     result.isCorrect === false &&
                     result.correctAnswer && (
                       <p className="mt-2 wrap-break-word font-medium">
@@ -364,7 +410,7 @@ export function ModulePreview({
                     )}
                 </div>
               )}
-              {result.explanation && (
+              {result.explanation && !isOrderingRetry && (
                 <div className="min-w-0 rounded-sm border border-border bg-background p-3 text-sm wrap-break-word">
                   <span className="font-bold text-primary">Explanation: </span>
                   <span>{result.explanation}</span>
@@ -372,16 +418,25 @@ export function ModulePreview({
               )}
             </div>
           )}
-        </div>
+            <div ref={bottomRef} />
+          </div>
+        </AnimationWrapper>
 
         {!isSimulatedCall && (
-          <div className="mt-auto shrink-0 px-3 pt-4 pb-1">
-            {result && question.type === "Swipe" ? (
-              <div className="py-2 text-center text-sm font-medium text-muted-foreground">
-                Loading next question...
-              </div>
-            ) : result ? (
-              <Button
+          <div className="mt-auto shrink-0 pt-4 [&_button]:bg-background [&_button]:text-foreground [&_button]:hover:bg-background/90">
+            {result ? (
+              isOrderingRetry ? (
+                <Button
+                  type="button"
+                  size="lg"
+                  className="w-full"
+                  onClick={handleRetryOrdering}
+                >
+                  Try again
+                  <ArrowRight />
+                  </Button>
+              ) : (
+                <Button
                 type="button"
                 size="lg"
                 className="w-full"
@@ -391,7 +446,8 @@ export function ModulePreview({
                   ? "View result"
                   : "Continue"}
                 <ArrowRight />
-              </Button>
+                </Button>
+              )
             ) : (
               <Button
                 type="button"
@@ -419,16 +475,7 @@ export function ModulePreview({
         </span>
       </div>
 
-      <div className="relative flex h-[80dvh] max-h-190 min-h-130 flex-col overflow-hidden rounded-xl border-4 border-muted bg-card shadow-lg">
-        <div className="flex shrink-0 items-center justify-between bg-muted/50 px-4 py-1.5 text-[10px] font-medium text-muted-foreground">
-          <span>9:41</span>
-          <div className="flex gap-1.5">
-            <span className="block h-2 w-2 rounded-full bg-muted-foreground/40" />
-            <span className="block h-2 w-2 rounded-full bg-muted-foreground/40" />
-            <span className="block h-2 w-4 rounded-full bg-muted-foreground/40" />
-          </div>
-        </div>
-
+      <div className="relative flex h-[80dvh] max-h-190 min-h-130 flex-col overflow-hidden rounded-lg border bg-card shadow-lg">
         {renderContent()}
       </div>
     </div>

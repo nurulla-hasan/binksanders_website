@@ -65,7 +65,7 @@ export function QuestionAnswer({
                   !selected &&
                   "border-border bg-background hover:border-primary/50",
                 isDimmed &&
-                  "border-transparent bg-black/5 text-muted-foreground opacity-60",
+                  "border-border bg-background text-muted-foreground opacity-60",
               )}
             >
               <span
@@ -234,7 +234,7 @@ export function QuestionAnswer({
                       !selected &&
                       "border-border bg-background hover:border-primary/50",
                     isDimmed &&
-                      "border-transparent bg-black/5 text-muted-foreground opacity-60",
+                      "border-border bg-background text-muted-foreground opacity-60",
                   )}
                 >
                   {option}
@@ -341,7 +341,7 @@ export function QuestionAnswer({
                       !selected &&
                       "border-border bg-background hover:border-primary/50",
                     isDimmed &&
-                      "border-transparent bg-black/5 text-muted-foreground opacity-60",
+                      "border-border bg-background text-muted-foreground opacity-60",
                   )}
                 >
                   {option}

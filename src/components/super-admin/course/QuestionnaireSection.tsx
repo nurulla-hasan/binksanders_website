@@ -10,7 +10,7 @@ import { AnimatePresence } from "framer-motion";
 import AnimationWrapper from "@/components/ui/custom/animation-wrapper";
 
 export function QuestionnaireSection() {
-  const { control } = useFormContext<CreateModuleFormValues>();
+  const { control, getValues } = useFormContext<CreateModuleFormValues>();
   
   const { fields, append, remove, update, move } = useFieldArray({
     control,
@@ -27,7 +27,11 @@ export function QuestionnaireSection() {
     id: string,
     newType: QuestionDataSchemaType["type"],
   ) => {
-    update(index, getDefaultQuestionValues(newType, id));
+    const currentColor = getValues(`questions.${index}.colorCode`);
+    update(index, {
+      ...getDefaultQuestionValues(newType, id),
+      colorCode: currentColor || "#E9308F",
+    });
   };
 
   const deleteQuestion = (index: number) => {

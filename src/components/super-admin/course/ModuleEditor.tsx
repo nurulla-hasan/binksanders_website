@@ -87,10 +87,14 @@ export function ModuleEditor({ module }: { module?: LearningModule }) {
       description: module?.description || "",
       questions:
         (module?.questions.map((question) => {
+          const questionWithColor = {
+            ...question,
+            colorCode: question.colorCode || "#E9308F",
+          };
           if (question.type === "MCQ") {
             const options = question.options || [];
             return {
-              ...question,
+              ...questionWithColor,
               options:
                 options.length >= 4
                   ? options
@@ -101,7 +105,7 @@ export function ModuleEditor({ module }: { module?: LearningModule }) {
           if (question.type === "Ordering") {
             const items = question.items || [];
             return {
-              ...question,
+              ...questionWithColor,
               items:
                 items.length >= 4
                   ? items
@@ -112,7 +116,7 @@ export function ModuleEditor({ module }: { module?: LearningModule }) {
           if (question.type === "Chat Scenario") {
             const options = question.options || [];
             return {
-              ...question,
+              ...questionWithColor,
               options:
                 options.length >= 2
                   ? options
@@ -121,7 +125,7 @@ export function ModuleEditor({ module }: { module?: LearningModule }) {
             };
           }
 
-          return question;
+          return questionWithColor;
         }) as CreateModuleFormValues["questions"]) || [],
     },
   });

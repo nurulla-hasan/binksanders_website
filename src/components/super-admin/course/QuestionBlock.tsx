@@ -293,33 +293,68 @@ export function QuestionBlock({
             )}
           </Field>
         )}
-        <Field
-          className={
-            currentQuestion.type === "Chat Scenario" ? "sm:max-w-50" : ""
-          }
+        <div
+          className={cn(
+            "space-y-4",
+            currentQuestion.type === "Chat Scenario" && "sm:col-start-2",
+          )}
         >
-          <FieldLabel>Question Type</FieldLabel>
-          <Select
-            value={currentQuestion.type}
-            onValueChange={(value) =>
-              onChangeType(
-                question.id,
-                value as QuestionDataSchemaType["type"],
-              )
-            }
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {questionTypes.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {type}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
+          <Field>
+            <FieldLabel>Question Type</FieldLabel>
+            <Select
+              value={currentQuestion.type}
+              onValueChange={(value) =>
+                onChangeType(
+                  question.id,
+                  value as QuestionDataSchemaType["type"],
+                )
+              }
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {questionTypes.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor={`question-color-${blockId}`}>
+              Background Color
+            </FieldLabel>
+            <div className="flex gap-2">
+              <Input
+                id={`question-color-${blockId}`}
+                type="color"
+                value={
+                  /^#[0-9A-Fa-f]{6}$/.test(currentQuestion.colorCode || "")
+                    ? currentQuestion.colorCode
+                    : "#E9308F"
+                }
+                className="size-9 shrink-0 cursor-pointer p-1"
+                onChange={(event) =>
+                  setValue(
+                    `questions.${index}.colorCode`,
+                    event.target.value.toUpperCase(),
+                    { shouldDirty: true, shouldValidate: true },
+                  )
+                }
+              />
+              <Input
+                aria-label="Question background hex color"
+                maxLength={7}
+                placeholder="#E9308F"
+                className="font-mono uppercase"
+                {...register(`questions.${index}.colorCode`)}
+              />
+            </div>
+          </Field>
+        </div>
       </div>
 
       {(currentQuestion.type === "MCQ" ||

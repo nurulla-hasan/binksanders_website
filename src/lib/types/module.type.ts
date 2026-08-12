@@ -22,6 +22,7 @@ export type ModuleQuestion = {
   type: ModuleQuestionType;
   content?: string;
   isScored: boolean;
+  colorCode?: string;
   explanation?: string;
   image?: string;
   options?: string[];

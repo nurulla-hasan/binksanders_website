@@ -118,6 +118,17 @@ export function ModuleSurveyRunner({
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!isStarted || isCompleted) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isCompleted, isStarted]);
+
+  useEffect(() => {
     if (!result || !bottomRef.current) return;
 
     const timer = window.setTimeout(() => {
@@ -233,6 +244,11 @@ export function ModuleSurveyRunner({
         (currentIndex / Math.max(totalQuestions, 1)) * 100,
       );
   const isSimulatedCall = question.type === "Simulated Call";
+  const questionBackgroundColor = /^#[0-9A-Fa-f]{6}$/.test(
+    question.colorCode || "",
+  )
+    ? question.colorCode
+    : undefined;
   const canShowCorrectAnswer = ![
     "Information",
     "Rating",
@@ -264,13 +280,13 @@ export function ModuleSurveyRunner({
   return (
     <div
       className={cn(
-        "flex h-full min-h-0 flex-1 flex-col overflow-hidden animate-fadeIn",
-        isSimulatedCall ? "bg-foreground" : "bg-background",
+        "fixed inset-0 z-100 flex h-dvh min-h-0 w-full flex-col overflow-hidden bg-secondary p-3 text-foreground animate-fadeIn sm:p-5",
       )}
+      style={{ backgroundColor: questionBackgroundColor }}
     >
       {!isSimulatedCall && (
-        <div className="mb-4 rounded-b-xl bg-secondary px-4 py-3 shadow-sm">
-          <h2 className="mb-2 font-heading text-lg font-bold leading-tight text-foreground">
+        <div className="mb-4 shrink-0 px-1 py-2">
+          <h2 className="mb-2 font-heading text-lg font-bold leading-tight text-secondary-foreground">
             {module.title}
           </h2>
           <div className="flex flex-col gap-1.5">
@@ -278,13 +294,13 @@ export function ModuleSurveyRunner({
               <span className="rounded-sm bg-primary px-1.5 py-0.5 text-[10px] font-bold leading-none text-primary-foreground">
                 Q{currentIndex + 1}/{totalQuestions}
               </span>
-              <span className="text-[10px] font-bold leading-none text-foreground/80">
+              <span className="text-[10px] font-bold leading-none text-secondary-foreground/80">
                 {currentIndex + 1}/{totalQuestions}
               </span>
             </div>
             <Progress
               value={displayedProgress}
-              className="h-1.5 w-full rounded-full bg-background/50 [&>div]:bg-primary"
+              className="h-1.5 w-full rounded-full bg-secondary-foreground/25 [&>div]:bg-secondary-foreground"
             />
           </div>
         </div>
@@ -298,7 +314,7 @@ export function ModuleSurveyRunner({
       >
         <div
           className={cn(
-            "flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto scrollbar-thin",
+            "flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden",
             isSimulatedCall
               ? "overflow-hidden rounded-lg bg-foreground p-0"
               : "space-y-4 pb-2",
@@ -396,7 +412,7 @@ export function ModuleSurveyRunner({
       </AnimationWrapper>
 
       {!isSimulatedCall && (
-        <div className="mt-auto shrink-0 pt-4">
+        <div className="mt-auto shrink-0 pt-4 [&_button]:bg-background [&_button]:text-foreground [&_button]:hover:bg-background/90">
           {result ? (
             isOrderingRetry ? (
               <Button

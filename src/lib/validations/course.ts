@@ -17,6 +17,9 @@ const baseQuestionSchema = z.object({
   id: z.string(),
   content: requiredQuestionContent,
   isScored: z.boolean(),
+  colorCode: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/, "Enter a valid 6-digit hex color"),
   explanation: z.string().trim().optional(),
   image: optionalMedia,
 });
@@ -157,7 +160,12 @@ export const getDefaultQuestionValues = (
   type: QuestionDataSchemaType["type"],
   id: string,
 ): QuestionDataSchemaType => {
-  const base = { id, content: "", isScored: true };
+  const base = {
+    id,
+    content: "",
+    isScored: true,
+    colorCode: "#E9308F",
+  };
 
   switch (type) {
     case "Information":
