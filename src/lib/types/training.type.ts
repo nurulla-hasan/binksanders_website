@@ -173,6 +173,14 @@ export type TrainingInvitation = {
   createdAt: string;
   updatedAt?: string;
   __v?: number;
+  progress?: {
+    status: "not_started" | "in_progress" | "completed" | string;
+    progressPercentage: number;
+    totalModules: number;
+    completedModules: number;
+    inProgressModules: number;
+    notStartedModules: number;
+  };
 };
 
 export type TrainingAuthData = {

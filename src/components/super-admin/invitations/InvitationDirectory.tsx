@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { LoaderCircle, MailCheck, RefreshCcw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { DataErrorBlock } from "@/components/ui/custom/data-error-block";
 import {
   Select,
@@ -38,6 +39,20 @@ const getTrainingTitle = (
 ) => {
   if (typeof training === "object") return training.title;
   return fallback || training;
+};
+
+const formatProgressStatus = (status?: string) =>
+  status
+    ? status
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ")
+    : "Not started";
+
+const getProgressVariant = (status?: string) => {
+  if (status === "completed") return "completed" as const;
+  if (status === "in_progress") return "progress" as const;
+  return "outline" as const;
 };
 
 const getInvitationStatus = (invitation: TrainingInvitation) => {
@@ -134,6 +149,8 @@ export function InvitationDirectory({
               <TableRow>
                 <TableHead className="bg-secondary px-4">Email</TableHead>
                 <TableHead className="bg-secondary px-4">Training</TableHead>
+                <TableHead className="bg-secondary px-4">Progress</TableHead>
+                <TableHead className="bg-secondary px-4">Modules</TableHead>
                 <TableHead className="bg-secondary px-4">Sent</TableHead>
                 <TableHead className="bg-secondary px-4">Expires</TableHead>
                 <TableHead className="bg-secondary px-4">Status</TableHead>
@@ -145,7 +162,7 @@ export function InvitationDirectory({
             <TableBody>
               {invitations.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-28 text-center">
+                  <TableCell colSpan={8} className="h-28 text-center">
                     No email invitations found for this training.
                   </TableCell>
                 </TableRow>
@@ -164,6 +181,41 @@ export function InvitationDirectory({
                           invitation.trainingId,
                           selectedTraining?.title,
                         )}
+                      </TableCell>
+                      <TableCell className="min-w-48 px-4">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between gap-3">
+                            <Badge
+                              variant={getProgressVariant(
+                                invitation.progress?.status,
+                              )}
+                            >
+                              {formatProgressStatus(
+                                invitation.progress?.status,
+                              )}
+                            </Badge>
+                            <span className="text-xs font-medium text-muted-foreground">
+                              {invitation.progress?.progressPercentage ?? 0}%
+                            </span>
+                          </div>
+                          <Progress
+                            value={
+                              invitation.progress?.progressPercentage ?? 0
+                            }
+                            className="h-1.5"
+                          />
+                        </div>
+                      </TableCell>
+                      <TableCell className="min-w-44 px-4">
+                        <p className="font-medium">
+                          {invitation.progress?.completedModules ?? 0} /{" "}
+                          {invitation.progress?.totalModules ?? 0} completed
+                        </p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {invitation.progress?.inProgressModules ?? 0} in progress
+                          {" · "}
+                          {invitation.progress?.notStartedModules ?? 0} not started
+                        </p>
                       </TableCell>
                       <TableCell className="px-4 text-muted-foreground">
                         {formatDate(invitation.createdAt)}
