@@ -53,10 +53,10 @@ export const updateModule = async <T = unknown>(
   moduleId: string,
   { thumbnailImage, questionFiles = {}, ...data }: UpdateModulePayload,
 ) => {
-  const body =
-    thumbnailImage || Object.keys(questionFiles).length > 0
-      ? createMultipartBody(data, { thumbnailImage, ...questionFiles })
-      : data;
+  const body = createMultipartBody(data, {
+    thumbnailImage,
+    ...questionFiles,
+  });
 
   const response = await nextServerFetch<ApiResponse<T>>(
     `/module/${moduleId}`,

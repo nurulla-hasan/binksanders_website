@@ -268,7 +268,8 @@ export function QuestionBlock({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_200px] sm:items-start">
-        {currentQuestion.type !== "Chat Scenario" && (
+        {currentQuestion.type !== "Chat Scenario" &&
+          currentQuestion.type !== "Simulated Call" && (
           <Field>
             <FieldLabel>Content</FieldLabel>
             <RichTextEditor
@@ -276,9 +277,7 @@ export function QuestionBlock({
               placeholder={
                 currentQuestion.type === "Swipe"
                   ? "Optional when the swipe uses only an image..."
-                  : currentQuestion.type === "Simulated Call"
-                    ? "Optional call instruction..."
-                    : "Question or instruction"
+                  : "Question or instruction"
               }
               onChange={(value) =>
                 setValue(`questions.${index}.content`, value, {
@@ -298,7 +297,8 @@ export function QuestionBlock({
         <div
           className={cn(
             "space-y-4",
-            currentQuestion.type === "Chat Scenario" && "sm:col-start-2",
+            ["Chat Scenario", "Simulated Call"].includes(currentQuestion.type) &&
+              "sm:col-start-2",
           )}
         >
           <Field>
