@@ -107,9 +107,9 @@ export function InvitationDirectory({
     return (
       <div className="flex min-h-64 flex-col items-center justify-center rounded-md border bg-card px-6 text-center">
         <MailCheck className="mb-4 size-10 text-muted-foreground" />
-        <h2 className="font-heading text-lg font-semibold">No trainings found</h2>
+        <h2 className="font-heading text-lg font-semibold">No email trainings found</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Create a training before reviewing email invitations.
+          Create an email-auth training before reviewing invitations.
         </p>
       </div>
     );

@@ -19,11 +19,13 @@ export function QuestionPromptCard({ question }: { question: ModuleQuestion }) {
       </div>
 
       {question.image && (
-        <MediaImage
-          value={question.image as MediaValue}
-          alt="Question visual"
-          className="block h-auto w-full border-t border-primary/20 bg-background object-contain"
-        />
+        <div className="aspect-3/4 w-full overflow-hidden border-t border-primary/20 bg-muted/20">
+          <MediaImage
+            value={question.image as MediaValue}
+            alt="Question visual"
+            className="block h-full w-full object-cover object-center"
+          />
+        </div>
       )}
     </div>
   );

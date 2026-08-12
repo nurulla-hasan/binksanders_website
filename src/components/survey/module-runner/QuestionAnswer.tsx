@@ -160,8 +160,8 @@ export function QuestionAnswer({
     const options = question.options ?? [];
 
     return (
-      <div className="flex min-h-0 w-full flex-1 flex-col pt-2">
-        <div className="mb-6 min-h-0 space-y-4 overflow-y-auto px-2">
+      <div className="flex w-full shrink-0 flex-col pt-2">
+        <div className="mb-6 space-y-4 px-2">
           {(question.messages ?? [])
             .filter((msg) => msg.sender || msg.text)
             .map((message, index) => (

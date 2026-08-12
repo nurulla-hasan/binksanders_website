@@ -276,7 +276,9 @@ export function QuestionBlock({
               placeholder={
                 currentQuestion.type === "Swipe"
                   ? "Optional when the swipe uses only an image..."
-                  : "Question or instruction"
+                  : currentQuestion.type === "Simulated Call"
+                    ? "Optional call instruction..."
+                    : "Question or instruction"
               }
               onChange={(value) =>
                 setValue(`questions.${index}.content`, value, {
@@ -651,9 +653,7 @@ export function QuestionBlock({
           label: "Question Image",
           accept: "image/*",
           hint:
-            currentQuestion.type === "Swipe"
-              ? "Recommended for swipe: 1080 × 1440 px (3:4 portrait), JPG or PNG. The learner card fills the 3:4 frame; keep important content centred because other image ratios may be cropped."
-              : "Recommended: 1280 × 720 px (16:9), JPG or PNG. Images keep their natural ratio in the learner view.",
+            "Recommended: 1080 x 1440 px (3:4 portrait), JPG or PNG. Other ratios fill the frame and may be cropped.",
         })}
 
       <div className="flex flex-col justify-between gap-4 border-t border-border pt-4 sm:flex-row sm:items-center">

@@ -315,7 +315,7 @@ export function ModulePreview({
               </div>
               <Progress
                 value={displayedProgress}
-                className="h-1.5 w-full rounded-full bg-secondary-foreground/25 [&>div]:bg-secondary-foreground"
+                className="h-1.5 w-full rounded-full bg-primary/25 [&>div]:bg-primary"
               />
             </div>
           </div>

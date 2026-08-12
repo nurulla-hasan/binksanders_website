@@ -68,13 +68,14 @@ const parseJsonResponse = async (response: Response): Promise<unknown> => {
   try {
     return JSON.parse(responseText);
   } catch {
-    throw new ApiError(
-      "API returned an invalid JSON response",
-      response.status,
-      {
-        rawResponse: responseText.slice(0, 500),
-      },
-    );
+    const message =
+      response.status === 413
+        ? "Upload exceeds the backend request-size limit. Upload a smaller file or increase the API multipart limit."
+        : "API returned an invalid JSON response";
+
+    throw new ApiError(message, response.status, {
+      rawResponse: responseText.slice(0, 500),
+    });
   }
 };
 

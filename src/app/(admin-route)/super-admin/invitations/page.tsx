@@ -30,7 +30,9 @@ export default async function InvitationsPage({
     );
   }
 
-  const trainings = trainingsResponse.data || [];
+  const trainings = (trainingsResponse.data || []).filter(
+    (training) => training.authType === "email",
+  );
   const requestedTrainingId =
     typeof params.trainingId === "string" ? params.trainingId : undefined;
   const selectedTrainingId = trainings.some(

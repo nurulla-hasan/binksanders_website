@@ -178,6 +178,7 @@ export function ModuleEditor({ module }: { module?: LearningModule }) {
   };
 
   const onInvalid = (errors: FieldErrors<CreateModuleFormValues>) => {
+    console.error("[module-save] validation failed", errors);
     const findMessage = (value: unknown): string | undefined => {
       if (!value || typeof value !== "object") return undefined;
       if (

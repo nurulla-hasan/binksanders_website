@@ -89,7 +89,8 @@ const videoSchema = baseQuestionSchema.extend({
   correctAnswer: z.string().optional(),
 });
 
-const simulatedCallSchema = baseQuestionSchema.extend({
+const simulatedCallSchema = baseQuestionSchema.omit({ content: true }).extend({
+  content: z.string().optional().default(""),
   type: z.literal("Simulated Call"),
   callerName: z.string().trim().min(1, "Caller name is required"),
   callerPhoto: optionalMedia,
