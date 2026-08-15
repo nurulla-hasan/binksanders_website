@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, CheckCircle2, LoaderCircle } from "lucide-react";
+import { ArrowRight, CheckCircle2, LoaderCircle, PartyPopper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import type {
@@ -142,7 +142,14 @@ export function ModuleSurveyRunner({
   }, [question?.type, result]);
 
   useEffect(() => {
-    if (question?.type !== "Simulated Call" || !result) return;
+    if (!result) return;
+
+    let delay: number | null = null;
+    if (question?.type === "Simulated Call") delay = 650;
+    else if (question?.type === "Information") delay = 300;
+    else if (question?.type === "Swipe" && !question.isScored) delay = 2500;
+
+    if (delay === null) return;
 
     const timer = window.setTimeout(() => {
       if (
@@ -157,10 +164,10 @@ export function ModuleSurveyRunner({
       setCurrentIndex(nextIndex);
       setAnswer(initialAnswer(module.questions[nextIndex]));
       setResult(undefined);
-    }, 650);
+    }, delay);
 
     return () => window.clearTimeout(timer);
-  }, [currentIndex, module.questions, question?.type, result, totalQuestions]);
+  }, [currentIndex, module.questions, question?.type, question?.isScored, result, totalQuestions]);
 
   if (!isStarted && !isCompleted) {
     return (
@@ -212,6 +219,18 @@ export function ModuleSurveyRunner({
                 <p className="text-xl font-bold text-primary">100%</p>
                 <p className="text-xs text-muted-foreground">Progress</p>
               </div>
+            </div>
+
+            <div className="flex flex-col items-center px-4 pt-8 text-center">
+              <div className="mb-4 flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <PartyPopper className="size-8" />
+              </div>
+              <p className="font-heading text-xl font-bold text-foreground">
+                Thank you for completing this module!
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Your feedback and participation are greatly appreciated.
+              </p>
             </div>
           </div>
 
@@ -342,7 +361,9 @@ export function ModuleSurveyRunner({
             isSubmitted={Boolean(result)}
           />
 
-          {result && question.type !== "Simulated Call" && (
+          {result &&
+            question.type !== "Simulated Call" &&
+            question.type !== "Information" && (
             <AnimationWrapper direction="up" duration={0.3} delay={0.1}>
               <div className="space-y-3">
                 {isOptionFeedback ? (

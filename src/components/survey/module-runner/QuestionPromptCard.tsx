@@ -7,9 +7,9 @@ import type { MediaValue } from "./types";
 
 export function QuestionPromptCard({ question }: { question: ModuleQuestion }) {
   return (
-    <div className="mb-4 shrink-0 overflow-hidden rounded-lg border border-primary/40 bg-primary/5 shadow-sm">
+    <div className="mb-4 shrink-0 overflow-hidden bg-transparent">
       <div className="p-3">
-        <span className="mb-3 inline-block rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold uppercase text-primary-foreground shadow-sm">
+        <span className="mb-3 inline-block rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold uppercase text-primary-foreground">
           {question.type}
         </span>
         <RichQuestionContent
@@ -19,7 +19,7 @@ export function QuestionPromptCard({ question }: { question: ModuleQuestion }) {
       </div>
 
       {question.image && (
-        <div className="aspect-3/4 w-full overflow-hidden border-t border-primary/20 bg-muted/20">
+        <div className="aspect-3/4 w-full overflow-hidden bg-muted/20">
           <MediaImage
             value={question.image as MediaValue}
             alt="Question visual"

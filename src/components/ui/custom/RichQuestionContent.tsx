@@ -55,7 +55,12 @@ const renderMarks = (text: ReactNode, marks: JSONContent["marks"] = []) =>
     return child;
   }, text);
 
-const renderNode = (node: JSONContent, key: string): ReactNode => {
+const renderNode = (
+  node: JSONContent,
+  key: string,
+  prevNode: JSONContent | null = null,
+  nextNode: JSONContent | null = null,
+): ReactNode => {
   if (node.type === "text") {
     return <span key={key}>{renderMarks(node.text ?? "", node.marks)}</span>;
   }
@@ -65,6 +70,7 @@ const renderNode = (node: JSONContent, key: string): ReactNode => {
   const children = (node.content ?? []).map((child, index) =>
     renderNode(child, `${key}-${index}`),
   );
+  
   const blockStyle: CSSProperties = {
     textAlign:
       typeof node.attrs?.textAlign === "string"
@@ -75,7 +81,21 @@ const renderNode = (node: JSONContent, key: string): ReactNode => {
         ? node.attrs.blockBackground
         : undefined,
   };
+
   const hasBlockBackground = Boolean(blockStyle.backgroundColor);
+  const isPrevSameBlock = prevNode?.attrs?.blockBackground === blockStyle.backgroundColor;
+  const isNextSameBlock = nextNode?.attrs?.blockBackground === blockStyle.backgroundColor;
+
+  let blockClasses = "";
+  if (hasBlockBackground) {
+    blockClasses = "px-3 py-2";
+    if (!isPrevSameBlock && !isNextSameBlock) blockClasses += " rounded-md my-1";
+    else if (!isPrevSameBlock && isNextSameBlock) blockClasses += " rounded-t-md mt-1";
+    else if (isPrevSameBlock && !isNextSameBlock) blockClasses += " rounded-b-md mb-1";
+    else blockClasses += " rounded-none";
+  } else {
+    blockClasses = "my-1";
+  }
 
   if (node.type === "paragraph") {
     return (
@@ -84,7 +104,7 @@ const renderNode = (node: JSONContent, key: string): ReactNode => {
         style={blockStyle}
         className={cn(
           "min-h-[1.4em] whitespace-pre-wrap leading-relaxed",
-          hasBlockBackground && "rounded-md px-3 py-2",
+          blockClasses,
         )}
       >
         {children}
@@ -96,7 +116,7 @@ const renderNode = (node: JSONContent, key: string): ReactNode => {
     const className = cn(
       "font-heading font-bold leading-tight",
       level === 1 ? "text-2xl" : level === 2 ? "text-xl" : "text-lg",
-      hasBlockBackground && "rounded-md px-3 py-2",
+      blockClasses,
     );
     if (level === 1)
       return (
@@ -150,10 +170,15 @@ export function RichQuestionContent({
   className?: string;
 }) {
   const doc = parseQuestionContent(value);
+  const nodes = doc.content ?? [];
 
   return (
-    <div className={cn("space-y-2 wrap-break-word", className)}>
-      {(doc.content ?? []).map((node, index) => renderNode(node, `node-${index}`))}
+    <div className={cn("flex flex-col wrap-break-word", className)}>
+      {nodes.map((node, index) => {
+        const prevNode = index > 0 ? nodes[index - 1] : null;
+        const nextNode = index < nodes.length - 1 ? nodes[index + 1] : null;
+        return renderNode(node, `node-${index}`, prevNode, nextNode);
+      })}
     </div>
   );
 }

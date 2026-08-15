@@ -81,7 +81,7 @@ export function ModuleSwipeQuestion({
   return (
     <div
       className={cn(
-        "w-full min-w-0 max-w-full shrink-0 overflow-x-hidden",
+        "flex w-full min-w-0 max-w-full grow shrink-0 flex-col overflow-x-hidden",
         isDismissed && "invisible pointer-events-none",
       )}
       aria-hidden={isDismissed || undefined}
@@ -94,13 +94,12 @@ export function ModuleSwipeQuestion({
         onDragEnd={handleDragEnd}
         style={{ x, rotate, touchAction: "pan-y" }}
         animate={controls}
-        className="relative z-10 w-full max-w-full cursor-grab overflow-hidden rounded-lg border border-primary/20 bg-card shadow-sm will-change-transform active:cursor-grabbing"
+        className="relative z-10 w-full max-w-full cursor-grab overflow-hidden rounded-lg bg-transparent will-change-transform active:cursor-grabbing"
       >
         <motion.div
           className="pointer-events-none absolute inset-0 z-20"
           style={{ backgroundColor: overlayColor }}
         />
-
         <div className="relative z-10 flex w-full flex-col">
           {question.image && (
             <div className="aspect-3/4 w-full overflow-hidden bg-muted/20">
@@ -116,8 +115,8 @@ export function ModuleSwipeQuestion({
             <div
               className={
                 question.image
-                  ? "border-t border-border/60 px-5 py-5"
-                  : "px-5 py-7"
+                  ? "border-t border-border/60 p-2"
+                  : "p-2"
               }
             >
               <RichQuestionContent
@@ -127,41 +126,43 @@ export function ModuleSwipeQuestion({
             </div>
           )}
 
-          <div className="flex items-center justify-center gap-2 px-5 pb-4 pt-3 text-xs font-medium text-muted-foreground">
-            <ArrowLeft className="size-4" />
-            <span>Swipe to respond</span>
-            <ArrowRight className="size-4" />
-          </div>
         </div>
       </motion.div>
 
-      <div className="mt-4 flex w-full max-w-full gap-3">
-        <Button
-          type="button"
-          variant="disagree"
-          size="default"
-          disabled={isDisabled}
-          className="min-w-0 flex-1 text-sm font-bold shadow-sm"
-          onClick={() => void submitSwipe("left")}
-        >
-          <X className="mr-1.5 size-4 stroke-3" />
-          <span className="min-w-0 truncate">
-            {question.leftLabel || "Disagree"}
-          </span>
-        </Button>
-        <Button
-          type="button"
-          variant="agree"
-          size="default"
-          disabled={isDisabled}
-          className="min-w-0 flex-1 text-sm font-bold shadow-sm"
-          onClick={() => void submitSwipe("right")}
-        >
-          <Check className="mr-1.5 size-4 stroke-3" />
-          <span className="min-w-0 truncate">
-            {question.rightLabel || "Agree"}
-          </span>
-        </Button>
+      <div className="mt-auto flex w-full max-w-full flex-col gap-3 pt-4">
+        <div className="flex items-center justify-center gap-2 px-5 text-xs font-medium text-foreground">
+          <ArrowLeft className="size-4" />
+          <span>Swipe to respond</span>
+          <ArrowRight className="size-4" />
+        </div>
+        <div className="flex w-full gap-3">
+          <Button
+            type="button"
+            variant="disagree"
+            size="default"
+            disabled={isDisabled}
+            className="h-auto min-h-10 min-w-0 flex-1 whitespace-normal wrap-break-word py-2 text-sm font-bold shadow-sm"
+            onClick={() => void submitSwipe("left")}
+          >
+            <X className="mr-1.5 size-4 shrink-0 stroke-3" />
+            <span className="min-w-0 break-all text-left leading-tight">
+              {question.leftLabel || "Disagree"}
+            </span>
+          </Button>
+          <Button
+            type="button"
+            variant="agree"
+            size="default"
+            disabled={isDisabled}
+            className="h-auto min-h-10 min-w-0 flex-1 whitespace-normal wrap-break-word py-2 text-sm font-bold shadow-sm"
+            onClick={() => void submitSwipe("right")}
+          >
+            <Check className="mr-1.5 size-4 shrink-0 stroke-3" />
+            <span className="min-w-0 break-all text-left leading-tight">
+              {question.rightLabel || "Agree"}
+            </span>
+          </Button>
+        </div>
       </div>
     </div>
   );

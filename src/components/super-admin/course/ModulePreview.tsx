@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useMemo, useRef } from "react";
 import { useWatch } from "react-hook-form";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, PartyPopper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
@@ -96,11 +96,14 @@ export function ModulePreview({
   }, [question, answer, result]);
 
   useEffect(() => {
-    if (
-      question?.type !== "Simulated Call" ||
-      !result
-    )
-      return;
+    if (!result) return;
+
+    let delay: number | null = null;
+    if (question?.type === "Simulated Call") delay = 650;
+    else if (question?.type === "Information") delay = 300;
+    else if (question?.type === "Swipe" && !question.isScored) delay = 2500;
+
+    if (delay === null) return;
 
     const timer = window.setTimeout(() => {
       if (currentIndex >= totalQuestions - 1) {
@@ -111,10 +114,10 @@ export function ModulePreview({
       setCurrentIndex(nextIndex);
       setAnswer(initialAnswer(safeQuestions[nextIndex] as any));
       setResult(null);
-    }, 650);
+    }, delay);
 
     return () => window.clearTimeout(timer);
-  }, [question?.type, result, currentIndex, totalQuestions, safeQuestions]);
+  }, [question?.type, question?.isScored, result, currentIndex, totalQuestions, safeQuestions]);
 
   useEffect(() => {
     if (!result || !bottomRef.current) return;
@@ -224,6 +227,18 @@ export function ModulePreview({
                 <p className="text-xl font-bold text-primary">100%</p>
                 <p className="text-xs text-muted-foreground">Progress</p>
               </div>
+            </div>
+
+            <div className="flex flex-col items-center px-4 pt-8 text-center">
+              <div className="mb-4 flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <PartyPopper className="size-8" />
+              </div>
+              <p className="font-heading text-xl font-bold text-foreground">
+                Thank you for completing this module!
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Your feedback and participation are greatly appreciated.
+              </p>
             </div>
           </div>
 
@@ -357,7 +372,9 @@ export function ModulePreview({
             isSubmitted={Boolean(result)}
           />
 
-            {result && question.type !== "Simulated Call" && (
+            {result &&
+            question.type !== "Simulated Call" &&
+            question.type !== "Information" && (
             <div className="space-y-3">
               {isOptionFeedback ? (
                 <div
