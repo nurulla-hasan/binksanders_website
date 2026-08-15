@@ -148,11 +148,14 @@ export function QuestionBlock({
   };
 
   const removeOption = (optionIndex: number) => {
+    if (currentQuestion.type !== "MCQ" && currentQuestion.type !== "Video") return;
+    
     if (
-      (currentQuestion.type !== "MCQ" && currentQuestion.type !== "Video") ||
+      currentQuestion.type === "MCQ" &&
       (currentQuestion.options || []).length <= 2
-    )
+    ) {
       return;
+    }
     const removed = currentQuestion.options?.[optionIndex];
     setValue(
       `questions.${index}.options`,
@@ -384,7 +387,11 @@ export function QuestionBlock({
                     size="icon-xs"
                     className="text-destructive"
                     onClick={() => removeOption(optionIndex)}
-                    disabled={(currentQuestion.options || []).length <= 2}
+                    disabled={
+                      currentQuestion.type === "Video"
+                        ? false
+                        : (currentQuestion.options || []).length <= 2
+                    }
                     aria-label={`Remove option ${optionIndex + 1}`}
                   >
                     <X />

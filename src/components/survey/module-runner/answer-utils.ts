@@ -54,6 +54,7 @@ const shuffleOrderingItems = (question: ModuleQuestion) => {
 export const initialAnswer = (question?: ModuleQuestion): AnswerValue | null => {
   if (question?.type === "Ordering") return shuffleOrderingItems(question);
   if (question?.type === "Information") return "reviewed";
+  if (question?.type === "Video" && (!question.options || question.options.length === 0)) return "watched";
   return null;
 };
 

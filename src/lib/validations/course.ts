@@ -85,7 +85,13 @@ const videoSchema = baseQuestionSchema.extend({
     z.string().url("Enter a valid video URL"),
     z.instanceof(File),
   ]),
-  options: requiredStringList(2, "Add at least two options").optional(),
+  options: z
+    .array(z.string().trim())
+    .transform((values) => values.filter(Boolean))
+    .refine((values) => values.length === 0 || values.length >= 2, {
+      message: "Add at least two options or remove all options",
+    })
+    .optional(),
   correctAnswer: z.string().optional(),
 });
 

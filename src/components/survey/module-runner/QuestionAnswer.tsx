@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowDown, ArrowUp, MessageCircle, Play } from "lucide-react";
+import { ArrowDown, ArrowUp, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -349,17 +349,7 @@ export function QuestionAnswer({
               );
             })}
           </div>
-        ) : (
-          <Button
-            type="button"
-            variant={answer === "watched" ? "default" : "outline"}
-            disabled={disabled}
-            onClick={() => onAnswer("watched")}
-            className="w-full"
-          >
-            <Play /> Mark as watched
-          </Button>
-        )}
+        ) : null}
       </div>
     );
   }

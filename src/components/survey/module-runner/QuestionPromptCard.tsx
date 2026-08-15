@@ -8,7 +8,7 @@ import type { MediaValue } from "./types";
 export function QuestionPromptCard({ question }: { question: ModuleQuestion }) {
   return (
     <div className="mb-4 shrink-0 overflow-hidden bg-transparent">
-      <div className="p-3">
+      <div>
         <span className="mb-3 inline-block rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold uppercase text-primary-foreground">
           {question.type}
         </span>

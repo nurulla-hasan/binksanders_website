@@ -115,8 +115,8 @@ export function ModuleSwipeQuestion({
             <div
               className={
                 question.image
-                  ? "border-t border-border/60 p-2"
-                  : "p-2"
+                  ? "border-t border-border/60"
+                  : ""
               }
             >
               <RichQuestionContent
