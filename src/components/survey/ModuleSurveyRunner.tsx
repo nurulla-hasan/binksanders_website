@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, CheckCircle2, LoaderCircle, PartyPopper } from "lucide-react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import type {
@@ -134,20 +135,22 @@ export function ModuleSurveyRunner({
     const timer = window.setTimeout(() => {
       bottomRef.current?.scrollIntoView({
         behavior: "smooth",
-        block: question?.type === "Swipe" ? "end" : "nearest",
+        block: "end",
       });
-    }, 100);
+    }, 350);
 
     return () => window.clearTimeout(timer);
   }, [question?.type, result]);
 
   useEffect(() => {
-    if (!result) return;
+    if (!result || result.explanation) return;
 
     let delay: number | null = null;
     if (question?.type === "Simulated Call") delay = 650;
     else if (question?.type === "Information") delay = 300;
-    else if (question?.type === "Swipe" && !question.isScored) delay = 2500;
+    else if (question?.type === "Swipe") delay = 1200;
+    else if (question?.type === "Rating") delay = 800;
+    else if (question?.type === "Free Input") delay = 800;
 
     if (delay === null) return;
 
@@ -333,10 +336,10 @@ export function ModuleSurveyRunner({
       >
         <div
           className={cn(
-            "flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden",
+            "flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden",
             isSimulatedCall
               ? "overflow-hidden rounded-lg bg-foreground p-0"
-              : "space-y-4 pb-2",
+              : "space-y-4",
           )}
         >
           {question.type !== "Swipe" &&
@@ -363,13 +366,18 @@ export function ModuleSurveyRunner({
 
           {result &&
             question.type !== "Simulated Call" &&
-            question.type !== "Information" && (
-            <AnimationWrapper direction="up" duration={0.3} delay={0.1}>
+            (question.type !== "Information" || result.explanation) && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+              className="mt-auto!"
+            >
               <div className="space-y-3">
                 {isOptionFeedback ? (
                   <div
                     className={cn(
-                      "min-w-0 rounded-sm border bg-background p-3 text-sm font-medium wrap-break-word",
+                      "min-w-0 rounded-sm border bg-background px-3 py-2 text-sm font-medium wrap-break-word",
                       result.isCorrect === false
                         ? "border-primary text-primary"
                         : result.isCorrect === true
@@ -387,12 +395,12 @@ export function ModuleSurveyRunner({
                           : "Correct."
                         : "Answer submitted."}
                   </div>
-                ) : (
+                ) : !["Rating", "Free Input", "Information"].includes(question.type) ? (
                   <div
                     className={cn(
-                      "min-w-0 overflow-hidden rounded-sm border p-3 text-sm wrap-break-word",
+                      "min-w-0 overflow-hidden rounded-sm border px-3 py-2 text-sm wrap-break-word",
                       result.isCorrect === false
-                        ? "border-destructive/30 bg-destructive/10 text-destructive-foreground"
+                        ? "border-destructive/50 text-destructive-foreground bg-background text-red-500"
                         : result.isCorrect === true
                           ? "border-2 border-success bg-background text-foreground"
                           : "border-2 border-border bg-background text-foreground",
@@ -416,24 +424,22 @@ export function ModuleSurveyRunner({
                         </p>
                       )}
                   </div>
-                )}
+                ) : null}
                 {result.explanation && !isOrderingRetry && (
-                  <div className="min-w-0 rounded-sm border border-border bg-background p-3 text-sm wrap-break-word">
-                    <span className="font-medium text-primary">
-                      Explanation:{" "}
-                    </span>
+                  <div className="min-w-0 rounded-sm border border-border bg-background px-3 py-2 text-sm wrap-break-word">
+                    <span className="font-bold text-primary">Feedback: </span>
                     <span>{result.explanation}</span>
                   </div>
                 )}
               </div>
-            </AnimationWrapper>
+            </motion.div>
           )}
           <div ref={bottomRef} />
         </div>
       </AnimationWrapper>
 
       {!isSimulatedCall && (
-        <div className="mt-auto shrink-0 pt-4 [&_button]:bg-background [&_button]:text-foreground [&_button]:hover:bg-background/90">
+        <div className="mt-auto shrink-0 pt-0 [&_button]:bg-background [&_button]:text-foreground [&_button]:hover:bg-background/90">
           {result ? (
             isOrderingRetry ? (
               <Button

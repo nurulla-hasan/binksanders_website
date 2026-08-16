@@ -18,6 +18,7 @@ import type {
   QuestionDataSchemaType,
 } from "@/lib/validations/course";
 import { useId } from "react";
+import { Textarea } from "@/components/ui/textarea";
 
 interface QuestionBlockProps {
   question: QuestionDataSchemaType;
@@ -62,13 +63,13 @@ export function QuestionBlock({
     control,
     name: `questions.${index}`,
   }) as QuestionDataSchemaType;
-  const supportsCorrectAnswer = ![
-    "Free Input",
-    "Rating",
-    "Information",
-    "Simulated Call",
-    "Swipe",
-  ].includes(currentQuestion.type);
+  // const supportsCorrectAnswer = ![
+  //   "Free Input",
+  //   "Rating",
+  //   "Information",
+  //   "Simulated Call",
+  //   "Swipe",
+  // ].includes(currentQuestion.type);
   const supportsQuestionImage =
     currentQuestion.type !== "Video" &&
     currentQuestion.type !== "Simulated Call";
@@ -643,10 +644,10 @@ export function QuestionBlock({
         </Field>
       )}
 
-      {supportsCorrectAnswer && currentQuestion.explanation !== undefined && (
-        <Field>
-          <FieldLabel>Explanation</FieldLabel>
-          <Input
+      {currentQuestion.explanation !== undefined && (
+        <Field className="rounded-md border border-border bg-muted/30 p-4">
+          <FieldLabel>Feedback</FieldLabel>
+          <Textarea
             placeholder="Explain the correct answer or add feedback"
             {...register(`questions.${index}.explanation`)}
           />
@@ -682,24 +683,22 @@ export function QuestionBlock({
             </FieldLabel>
           </Field>
 
-          {supportsCorrectAnswer && (
-            <Field orientation="horizontal">
-              <Checkbox
-                id={`explanation-${blockId}`}
-                checked={currentQuestion.explanation !== undefined}
-                onCheckedChange={(checked) =>
-                  setValue(
-                    `questions.${index}.explanation`,
-                    checked === true ? "" : undefined,
-                    { shouldDirty: true },
-                  )
-                }
-              />
-              <FieldLabel htmlFor={`explanation-${blockId}`}>
-                Add explanation
-              </FieldLabel>
-            </Field>
-          )}
+          <Field orientation="horizontal">
+            <Checkbox
+              id={`explanation-${blockId}`}
+              checked={currentQuestion.explanation !== undefined}
+              onCheckedChange={(checked) =>
+                setValue(
+                  `questions.${index}.explanation`,
+                  checked === true ? "" : undefined,
+                  { shouldDirty: true },
+                )
+              }
+            />
+            <FieldLabel htmlFor={`explanation-${blockId}`}>
+              Add feedback
+            </FieldLabel>
+          </Field>
 
           {supportsQuestionImage && (
             <Field orientation="horizontal">

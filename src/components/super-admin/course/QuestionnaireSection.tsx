@@ -40,9 +40,9 @@ export function QuestionnaireSection() {
 
   return (
     <div className="mt-8">
-      <div className="sticky top-0 z-20 -mt-4 bg-background/95 px-4 py-4 backdrop-blur-sm sm:flex sm:items-center sm:justify-between border-b shadow-sm mb-6">
-        <h2 className="text-xl font-bold text-foreground">Create Questionnaire</h2>
-        <Button type="button" onClick={addQuestion} className="mt-3 flex w-full items-center gap-2 sm:mt-0 sm:w-auto shadow-md hover:shadow-lg transition-all">
+      <div className="sticky -top-5 z-20 bg-secondary/30 p-3 backdrop-blur-sm sm:flex sm:items-center sm:justify-between border-b shadow-sm mb-6">
+        <h2 className="hidden sm:block text-xl font-semibold text-foreground">Create Questionnaire</h2>
+        <Button type="button" onClick={addQuestion} className="flex w-full items-center gap-2 sm:mt-0 sm:w-auto shadow-md hover:shadow-lg transition-all">
           <Plus className="h-4 w-4" />
           Add New Question
         </Button>

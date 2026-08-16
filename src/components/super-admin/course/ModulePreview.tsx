@@ -5,6 +5,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { useWatch } from "react-hook-form";
 import { ArrowRight, CheckCircle2, PartyPopper } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import type { CreateModuleFormValues } from "@/lib/validations/course";
@@ -96,12 +97,14 @@ export function ModulePreview({
   }, [question, answer, result]);
 
   useEffect(() => {
-    if (!result) return;
+    if (!result || result.explanation) return;
 
     let delay: number | null = null;
     if (question?.type === "Simulated Call") delay = 650;
     else if (question?.type === "Information") delay = 300;
-    else if (question?.type === "Swipe" && !question.isScored) delay = 2500;
+    else if (question?.type === "Swipe") delay = 1500;
+    else if (question?.type === "Rating") delay = 800;
+    else if (question?.type === "Free Input") delay = 800;
 
     if (delay === null) return;
 
@@ -125,9 +128,9 @@ export function ModulePreview({
     const timer = window.setTimeout(() => {
       bottomRef.current?.scrollIntoView({
         behavior: "smooth",
-        block: question?.type === "Swipe" ? "end" : "nearest",
+        block: "end",
       });
-    }, 100);
+    }, 350);
 
     return () => window.clearTimeout(timer);
   }, [question?.type, result]);
@@ -347,7 +350,7 @@ export function ModulePreview({
               "flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden",
               isSimulatedCall
                 ? "overflow-hidden rounded-lg bg-foreground p-0"
-                : "space-y-4 pb-2",
+                : "space-y-4",
             )}
           >
             {question.type !== "Swipe" &&
@@ -374,73 +377,80 @@ export function ModulePreview({
 
             {result &&
             question.type !== "Simulated Call" &&
-            question.type !== "Information" && (
-            <div className="space-y-3">
-              {isOptionFeedback ? (
-                <div
-                  className={cn(
-                    "min-w-0 rounded-sm border bg-background p-3 text-sm font-medium wrap-break-word",
-                    result.isCorrect === false
-                      ? "border-primary text-primary"
-                      : result.isCorrect === true
-                        ? "border-success text-success"
-                        : "border-border text-foreground",
-                  )}
-                >
-                  {result.isCorrect === false
-                    ? hasFeedbackCorrectAnswer
-                      ? "Incorrect - correct answer is highlighted."
-                      : "Incorrect."
-                    : result.isCorrect === true
+            (question.type !== "Information" || result.explanation) && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+              className="mt-auto!"
+            >
+              <div className="space-y-3">
+                {isOptionFeedback ? (
+                  <div
+                    className={cn(
+                      "min-w-0 rounded-sm border bg-background px-3 py-2 text-sm font-medium wrap-break-word",
+                      result.isCorrect === false
+                        ? "border-primary text-primary"
+                        : result.isCorrect === true
+                          ? "border-success text-success"
+                          : "border-border text-foreground",
+                    )}
+                  >
+                    {result.isCorrect === false
                       ? hasFeedbackCorrectAnswer
-                        ? "Correct - answer is highlighted."
-                        : "Correct."
-                      : "Answer submitted."}
-                </div>
-              ) : (
-                <div
-                  className={cn(
-                    "min-w-0 overflow-hidden rounded-sm border p-3 text-sm wrap-break-word",
-                    result.isCorrect === false
-                      ? "border-destructive/30 bg-destructive/10 text-destructive-foreground"
+                        ? "Incorrect - correct answer is highlighted."
+                        : "Incorrect."
                       : result.isCorrect === true
-                        ? "border-2 border-success bg-background text-foreground"
-                        : "border-2 border-border bg-background text-foreground",
-                  )}
-                >
-                  <p className="font-medium">{feedbackTitle}</p>
-                  {isOrderingRetry && (
-                    <p className="mt-2 wrap-break-word font-medium">
-                      Rearrange the items and try again.
-                    </p>
-                  )}
-                  {canShowCorrectAnswer &&
-                    !isOrderingRetry &&
-                    result.isCorrect === false &&
-                    result.correctAnswer && (
+                        ? hasFeedbackCorrectAnswer
+                          ? "Correct - answer is highlighted."
+                          : "Correct."
+                        : "Answer submitted."}
+                  </div>
+                ) : !["Rating", "Free Input", "Information"].includes(question.type) ? (
+                  <div
+                    className={cn(
+                      "min-w-0 overflow-hidden rounded-sm border px-3 py-2 text-sm wrap-break-word",
+                      result.isCorrect === false
+                        ? "border-destructive/50 text-destructive-foreground bg-background text-red-500"
+                        : result.isCorrect === true
+                          ? "border-2 border-success bg-background text-foreground"
+                          : "border-2 border-border bg-background text-foreground",
+                    )}
+                  >
+                    <p className="font-medium">{feedbackTitle}</p>
+                    {isOrderingRetry && (
                       <p className="mt-2 wrap-break-word font-medium">
-                        Correct answer:{" "}
-                        {Array.isArray(result.correctAnswer)
-                          ? result.correctAnswer.join(" -> ")
-                          : result.correctAnswer}
+                        Rearrange the items and try again.
                       </p>
                     )}
-                </div>
-              )}
-              {result.explanation && !isOrderingRetry && (
-                <div className="min-w-0 rounded-sm border border-border bg-background p-3 text-sm wrap-break-word">
-                  <span className="font-bold text-primary">Explanation: </span>
-                  <span>{result.explanation}</span>
-                </div>
-              )}
-            </div>
+                    {canShowCorrectAnswer &&
+                      !isOrderingRetry &&
+                      result.isCorrect === false &&
+                      result.correctAnswer && (
+                        <p className="mt-2 wrap-break-word font-medium">
+                          Correct answer:{" "}
+                          {Array.isArray(result.correctAnswer)
+                            ? result.correctAnswer.join(" -> ")
+                            : result.correctAnswer}
+                        </p>
+                      )}
+                  </div>
+                ) : null}
+                {result.explanation && !isOrderingRetry && (
+                  <div className="min-w-0 rounded-sm border border-border bg-background px-3 py-2 text-sm wrap-break-word">
+                    <span className="font-bold text-primary">Feedback: </span>
+                    <span>{result.explanation}</span>
+                  </div>
+                )}
+              </div>
+            </motion.div>
           )}
             <div ref={bottomRef} />
           </div>
         </AnimationWrapper>
 
         {!isSimulatedCall && (
-          <div className="mt-auto shrink-0 pt-4 [&_button]:bg-background [&_button]:text-foreground [&_button]:hover:bg-background/90">
+          <div className="mt-auto shrink-0 pt-0 [&_button]:bg-background [&_button]:text-foreground [&_button]:hover:bg-background/90">
             {result ? (
               isOrderingRetry ? (
                 <Button
@@ -485,15 +495,41 @@ export function ModulePreview({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      {/* <div className="flex items-center justify-between">
         <h3 className="font-heading text-lg font-bold">Interactive Preview</h3>
         <span className="text-xs text-muted-foreground">
           Learner&apos;s View
         </span>
-      </div>
+      </div> */}
 
-      <div className="relative flex h-[80dvh] max-h-190 min-h-130 flex-col overflow-hidden rounded-lg border bg-card shadow-lg">
-        {renderContent()}
+      <div className="mx-auto flex w-full max-w-95 justify-center pt-2 pb-8">
+        {/* Outer Device Frame (Titanium look) */}
+        <div className="relative flex h-200 max-h-[82dvh] min-h-150 w-full flex-col overflow-visible rounded-[3.5rem] bg-linear-to-br from-zinc-700 via-zinc-900 to-zinc-700 p-0.75 shadow-2xl ring-1 ring-zinc-800/50">
+          
+          {/* Hardware Buttons */}
+          <div className="absolute -left-1 top-27.5 h-8 w-1 rounded-l-md bg-zinc-600 shadow-[inset_1px_0_1px_rgba(255,255,255,0.2)]" />
+          <div className="absolute -left-1 top-40 h-14 w-1 rounded-l-md bg-zinc-600 shadow-[inset_1px_0_1px_rgba(255,255,255,0.2)]" />
+          <div className="absolute -left-1 top-58 h-14 w-1 rounded-l-md bg-zinc-600 shadow-[inset_1px_0_1px_rgba(255,255,255,0.2)]" />
+          <div className="absolute -right-1 top-47 h-20 w-1 rounded-r-md bg-zinc-600 shadow-[inset_-1px_0_1px_rgba(255,255,255,0.2)]" />
+
+          {/* Inner Black Bezel */}
+          <div className="relative flex h-full w-full flex-col overflow-hidden rounded-[3.35rem] bg-black p-2 sm:p-3 shadow-[inset_0_0_12px_rgba(0,0,0,1)]">
+            
+            {/* Screen */}
+            <div className="relative flex h-full w-full flex-col overflow-hidden rounded-[2.8rem] bg-card ring-1 ring-white/10">
+              
+              {/* Front Camera Cutout */}
+              <div className="absolute inset-x-0 top-3 z-50 flex justify-center drop-shadow-md">
+                <div className="h-5 w-5 rounded-full bg-black ring-1 ring-white/5" />
+              </div>
+
+              {/* Glossy Screen Reflection Overlay */}
+              <div className="pointer-events-none absolute inset-0 z-40 bg-linear-to-tr from-transparent via-transparent to-white/3" />
+              
+              {renderContent()}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -43,18 +43,6 @@ const prepareModulePayload = (values: CreateModuleFormValues) => {
       delete cleanQuestion.correctAnswer;
     }
 
-    if (
-      [
-        "Free Input",
-        "Rating",
-        "Information",
-        "Simulated Call",
-        "Swipe",
-      ].includes(String(cleanQuestion.type))
-    ) {
-      delete cleanQuestion.explanation;
-    }
-
     mediaFields.forEach((field) => {
       const value = cleanQuestion[field];
       if (isFileValue(value)) {
@@ -80,6 +68,7 @@ export function ModuleEditor({ module }: { module?: LearningModule }) {
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
   const isEditing = Boolean(module);
+
   const methods = useForm<CreateModuleFormValues>({
     resolver: zodResolver(createModuleSchema as any),
     defaultValues: {
@@ -206,31 +195,39 @@ export function ModuleEditor({ module }: { module?: LearningModule }) {
       <DashboardPageLayout>
         <FormProvider {...methods}>
           <form onSubmit={methods.handleSubmit(onSubmit, onInvalid)}>
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <Button asChild variant="ghost">
-                <Link href="/super-admin/course">
-                  <ArrowLeft /> Back to Directory
-                </Link>
-              </Button>
-              <Button type="submit" disabled={isPending}>
-                {isEditing ? <Save /> : <Upload />}
-                {isPending
-                  ? "Saving..."
-                  : isEditing
-                    ? "Save Module"
-                    : "Create Module"}
-              </Button>
-            </div>
+            <Button asChild variant="outline" className="mb-4">
+              <Link href="/super-admin/course">
+                <ArrowLeft /> Back to Directory
+              </Link>
+            </Button>
 
-            <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-12">
-              <div className="space-y-6 lg:col-span-7 xl:col-span-8">
-                <ModuleBasicInfo
-                  existingThumbnail={module?.thumbnailImage}
-                />
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+              <div className="space-y-6 lg:col-span-7 xl:col-span-8 pb-10">
+                <ModuleBasicInfo existingThumbnail={module?.thumbnailImage} />
                 <QuestionnaireSection />
+
+                <div className="pt-8 border-t">
+                  <Button
+                    type="submit"
+                    disabled={isPending}
+                    size="lg"
+                    className="w-full sm:w-auto font-bold text-md shadow-md px-10"
+                  >
+                    {isEditing ? (
+                      <Save className="mr-2" />
+                    ) : (
+                      <Upload className="mr-2" />
+                    )}
+                    {isPending
+                      ? "Saving..."
+                      : isEditing
+                        ? "Save Module"
+                        : "Create Module"}
+                  </Button>
+                </div>
               </div>
               <div className="lg:col-span-5 xl:col-span-4">
-                <div className="sticky top-6">
+                <div className="lg:sticky lg:top-6">
                   <ModulePreview existingThumbnail={module?.thumbnailImage} />
                 </div>
               </div>

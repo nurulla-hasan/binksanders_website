@@ -360,17 +360,24 @@ export function QuestionAnswer({
         {Array.from(
           { length: question.scale ?? 5 },
           (_, index) => index + 1,
-        ).map((rating) => (
-          <Button
-            key={rating}
-            type="button"
-            variant={answer === rating ? "default" : "outline"}
-            disabled={disabled}
-            onClick={() => onAnswer(rating)}
-          >
-            {rating}
-          </Button>
-        ))}
+        ).map((rating) => {
+          const isSelected = answer === rating;
+          return (
+            <Button
+              key={rating}
+              type="button"
+              variant={isSelected ? "default" : "outline"}
+              disabled={disabled}
+              onClick={() => onAnswer(rating)}
+              className={cn(
+                "transition-all font-bold",
+                isSelected && "border-2 border-background shadow-md scale-105"
+              )}
+            >
+              {rating}
+            </Button>
+          );
+        })}
       </div>
     );
   }
