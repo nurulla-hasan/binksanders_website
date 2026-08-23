@@ -45,7 +45,7 @@ export const adminLogin = async (
     if (response.data.accessToken) {
       cookieStore.set("accessToken", response.data.accessToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: false,
         sameSite: "lax",
         path: "/",
       });

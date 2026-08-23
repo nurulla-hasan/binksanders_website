@@ -35,7 +35,7 @@ const setTrainingSessionCookies = async (data: TrainingAuthData | null) => {
   const cookieStore = await cookies();
   const options = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: false,
     sameSite: "lax" as const,
     path: "/",
   };
