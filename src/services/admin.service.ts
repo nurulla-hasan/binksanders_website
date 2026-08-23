@@ -44,9 +44,6 @@ export const adminLogin = async (
     const cookieStore = await cookies();
     if (response.data.accessToken) {
       cookieStore.set("accessToken", response.data.accessToken, {
-        httpOnly: true,
-        secure: false,
-        sameSite: "lax",
         path: "/",
       });
     }

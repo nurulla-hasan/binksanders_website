@@ -29,9 +29,6 @@ const setSessionCookies = async (data: any) => {
   if (!data) return;
   const cookieStore = await cookies();
   const options = {
-    httpOnly: true,
-    secure: false,
-    sameSite: "lax" as const,
     path: "/",
   };
 
