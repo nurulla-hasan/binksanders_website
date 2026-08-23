@@ -21,10 +21,21 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            cd /var/www/binksanders_website || cd ~/binksanders_website
-            git fetch origin main
-            git reset --hard origin/main
-            yarn install --frozen-lockfile
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            export PATH=$PATH:/usr/local/bin:$HOME/.nvm/versions/node/$(ls $HOME/.nvm/versions/node 2>/dev/null | tail -n 1)/bin:$HOME/.yarn/bin
+
+            mkdir -p ~/binksanders_website
+            cd ~/binksanders_website
+
+            if [ ! -d ".git" ]; then
+              git clone https://github.com/sparktechagency/binksanders_website.git .
+            else
+              git fetch origin main
+              git reset --hard origin/main
+            fi
+
+            yarn install --frozen-lockfile || yarn install
             yarn build
-            pm2 restart frontend || pm2 restart all
+            pm2 restart frontend || pm2 start build --name frontend || pm2 restart all
  
