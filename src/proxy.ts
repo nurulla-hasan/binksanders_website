@@ -89,12 +89,18 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   // Redirect unauthenticated users to login for protected pages
   if (!isPublic && !isAuthRoute) {
     if (!accessToken || isExpired(accessToken)) {
+      // Admin and company logins land on their fixed home dashboards,
+      // so they don't need a callback URL back to the previous page.
+      const isAdminArea = pathname.startsWith("/super-admin");
+      const isCompanyArea = pathname.startsWith("/company");
       const loginUrl = new URL(
-        pathname.startsWith("/super-admin") ? "/auth/admin-login" : "/auth/login",
+        isAdminArea ? "/auth/admin-login" : "/auth/login",
         request.url
       );
 
-      loginUrl.searchParams.set("callbackUrl", `${pathname}${request.nextUrl.search}`);
+      if (!isAdminArea && !isCompanyArea) {
+        loginUrl.searchParams.set("callbackUrl", `${pathname}${request.nextUrl.search}`);
+      }
 
       return NextResponse.redirect(loginUrl);
     }
@@ -124,7 +130,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|assets|.*\\..*).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|assets|.*\\..*$).*)",
   ],
 };
 
