@@ -1,6 +1,7 @@
 "use server";
 
 import { nextServerFetch } from "@/lib/nextServerFetch";
+import { getSessionCookieOptions } from "@/lib/sessionCookieOptions";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type {
@@ -28,9 +29,7 @@ import type {
 const setSessionCookies = async (data: any) => {
   if (!data) return;
   const cookieStore = await cookies();
-  const options = {
-    path: "/",
-  };
+  const options = await getSessionCookieOptions();
 
   if (data.accessToken) cookieStore.set("accessToken", data.accessToken, options);
   if (data.refreshToken) cookieStore.set("refreshToken", data.refreshToken, options);

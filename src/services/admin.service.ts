@@ -3,6 +3,7 @@
 import { buildQueryString } from "@/lib/buildQueryString";
 import { createMultipartBody } from "@/lib/createMultipartBody";
 import { nextServerFetch } from "@/lib/nextServerFetch";
+import { getSessionCookieOptions } from "@/lib/sessionCookieOptions";
 import { updateTag } from "next/cache";
 import type {
   AdminLoginData,
@@ -43,9 +44,7 @@ export const adminLogin = async (
     const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
     if (response.data.accessToken) {
-      cookieStore.set("accessToken", response.data.accessToken, {
-        path: "/",
-      });
+      cookieStore.set("accessToken", response.data.accessToken, await getSessionCookieOptions());
     }
 
     return {

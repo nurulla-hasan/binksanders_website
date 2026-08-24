@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { buildQueryString } from "@/lib/buildQueryString";
 import { createMultipartBody } from "@/lib/createMultipartBody";
 import { nextServerFetch } from "@/lib/nextServerFetch";
+import { getSessionCookieOptions } from "@/lib/sessionCookieOptions";
 import type { ApiResponse } from "@/lib/types/api.type";
 import type { TQuery } from "@/lib/types/global.type";
 import type {
@@ -33,9 +34,7 @@ const setTrainingSessionCookies = async (data: TrainingAuthData | null) => {
   if (!data) return;
 
   const cookieStore = await cookies();
-  const options = {
-    path: "/",
-  };
+  const options = await getSessionCookieOptions();
 
   if (data.accessToken) cookieStore.set("accessToken", data.accessToken, options);
   if (data.refreshToken) cookieStore.set("refreshToken", data.refreshToken, options);
